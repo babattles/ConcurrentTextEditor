@@ -1,0 +1,8 @@
+{
+  "name": "ConcurrentTextEditor",
+  "version": "0.0.1",
+  "main": "index.js",
+  "devDependencies": {
+    "electron": "^1.7.10"
+  }
+}

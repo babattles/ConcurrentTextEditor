@@ -1,0 +1,73 @@
+HiveText
+Product Backlog
+Team 25
+George Albrecht, Arun Arjunakani, Bryan Battles, Alexander Geier, Paramesh Pradeep, Guangqi Sun
+
+
+Problem Statement
+In certain collaborative situations, software developers may wish to work concurrently on various types of simple text files. These situations involve multiple users making numerous edits to the same file, that are visible to everyone. We will develop a desktop application, HiveText, that allows users to work simultaneously on any simple text file. It will be similar to existing text editors such as Sublime Text or Notepad++, and similar to other collaborative tools like git and Google Docs, but will improve upon these existing tools by allowing users to work concurrently on files while providing visual tracking of changes. A configurable consensus will be required to permanently save user changes. In addition, our application will provide users with a chat box with several channels for communication between collaborators working on the same file.
+
+
+Background Info
+Concurrent editing of files between multiple users is a domain with a multitude of approaches and several marketed solutions. There fails to exist a method of source control that allows coders to visually manage edits from  many users. HiveText aims to allow software developers, programmers, and coders alike to visually collaborate and decide upon changes made to shared files.
+Current popular text editors such as Sublime Text and Atom exist, but do not include functionality for concurrent editing between multiple users. There are; however, existing platforms that allow separate users to work concurrently on files and chat with their collaborators. Some existing examples include Google Docs, Etherpad, and Gobby, but these hold their own drawbacks. Google Docs lets users concurrently edit rich text files, but has no support for plain-text files or offline editing. In addition, Google Docs forces user edits, allowing users to make unwanted changes and save them. Etherpad and Gobby allow for concurrent editing of plain-text files and support unicode. An additional drawback to Gobby is that usability is hindered by a difficult setup process. The major drawback of these concurrent editors is that they have no mechanism to accept or reject changes to the file made by users. HiveText strives to give users the ability to concurrently edit text files among multiple users with support for offline editing. In addition, HiveText will include functionality for a group to arrive at consensus, which will allow changes made to the file to be agreed upon by users before they are saved permanently. 
+
+
+Functional Requirements
+1. As a user, I would like to edit plain-text files.
+2. As a user, I would like to concurrently edit text files with peers.
+3. As a user, I would like to interact with a desktop user interface
+4. As a user I would like a cross-platform application.
+5. As a user, I would like to have a personal user account.
+6. As a user, I would like my Google account linked to my user account.
+7. As a user, I would like to be able to view all staged changes made by a single user in a unique highlighted color.
+8. As a user, I would like to see which other users are currently online.
+9. As a user, I would like to edit the same file with other users.
+10. As a user, I would like to view the file in read-only mode without an account.
+11. As a user, I would like to have up to 30 other users editing the same file as me.
+12. As a user, I would like to review all changes made to a file by all users.
+13. As a user, I would like to be able to accept or reject changes made to a file.
+14. As a user, I would like to be able to block somebody from editing a document.
+15. As a user, I would like to be able to access a file via a link.
+16. As a user, I would like to be able to invite other users to collaborate on a file.
+17. As a user, I would like to be able to edit files offline.
+18. As a user, I would like my offline edits to be staged upon reconnecting to the shared version of the file.
+19. As a user, I would like to be able to upload a file to my user account.
+20. As a user, I would like to be able to drag a file on top of the window to upload it.
+21. As a user, I would like to be able to download a file to my local computer.
+22. As a user, I would like to be able to change the font size of the text.
+23. As a user, I would like to have automatic code indenting.
+24. As a user, I would like to turn line numbers on and off.
+25. As a user, I would like to be able to find and replace text.
+26. As a user, I would like to be able to cut/paste text via cursor or keyboard shortcuts.
+27. As a user, I would like to be able to view the base file without pending changes.
+28. As users, we would like to come to a full consensus about staged changes before saving.
+29. As a user, I would like to be able to write a short comment about what my staged change contains.
+30. As a user, I would like the ability to stage multiple edits at one time.
+31. As a user, I would like to be able to change my password.
+32. As a user, I would like to be able to undo any changes I personally have made.
+33. As a user, I don’t want other people to change my editions.
+34. (If time allows) As a user, I would like to be able to change my profile settings.
+35. (If time allows) As a user, I would like configurable consensus options. (e.g. majority vote or quota)
+36. (If time allows) As a user, I would like to change the visual theme of the editor (e.g. dark or light theme).
+37. (If time allows) As a user, I would like to be able to install plugins.
+38. (If time allows) As a user, I would like to chat with other online users collaborating on the same file.
+39. (If time allows) As a user, I would like to have separate communication channels in the chat box.
+40. (If time allows) As a user, I would like to see how the file looked at any point in time, as a slider.
+41. (If time allows) As a user, I would like to have a visual file tree for shared directory access.
+42. (If time allows) As a team leader, I would like to be able to assign an administrator who can veto any commits in whichever favor he/she choose. 
+43. (If time allows) As a user, I would like to have a small group of people who can force a pending change to be accepted.
+44. (If time allows) As a user, I would like to be able to have multiple tabs of open files.
+45. (If time allows) As a user, I would like to be able to hover over a pending change in the right panel and have the file scroll to the location of that change.
+46. (If time allows) As a user, I would like to be optionally notified when somebody makes a change.
+
+
+Non-Functional Requirements
+1. As a user, I would like the text editor to be user-friendly.
+2. As a user, I would like to have a acceptable server response time for my edits, five seconds or less.
+3. As a user, I would like only people with the required permissions to be able to access the file.
+4. As developers, we want one saved file and one staged file stored in the database per shared file.
+5. As a user, I would like a secure user account.
+6. As a user, I would like my files to be stored securely.
+7. As a developer, I would like the program to be cross-platform compatible.
+8. (If time allows) As a developer, I would like to provide scalable support for many type of files.

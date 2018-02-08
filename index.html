@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Hello World!</title>
+    <title>HiveText</title>
     <script src="https://www.gstatic.com/firebasejs/4.8.2/firebase.js"></script>
     <script>
     // Initialize Firebase
@@ -17,7 +17,9 @@
     };
     firebase.initializeApp(config);
     </script>
-    <style type="text/css" media="screen">
+    <link rel="stylesheet" href="styles.css">
+    <!-- TODO Uncomment following block to embed ace editor -->
+    <!-- <style type="text/css" media="screen">
     #editor {
         position: absolute;
         top: 50px;
@@ -25,26 +27,59 @@
         bottom: 0;
         left: 200px;
     }
-    </style>
+    </style> -->
 </head>
 
 <body>
-    <div id="editor">function foo(items) { var x = "All this is syntax highlighted"; return x; }
-    </div>
+    <!-- TODO Uncomment following block to embed ace editor -->
+    <!-- <div id="editor">
+        function foo(items) { var x = "\nAll this is syntax highlighted"; return x; }
+    </div> -->
     <div id="file-options">
         <input id="file" type="file" multiple onchange="startRead()">
-        <!-- <input id="file" type="file"> -->
-        <!-- <button id="upload_file">Upload File</button> -->
     </div>
-    <script src="ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+    <div id="user-settings-wrapper">
+        <button id="toggle-user-settings">|||</button>
+        <div id="user-settings" class=". hidden">
+            <form onsubmit="return false" id="change-name-form">
+                <span>Change Name</span>
+                <br>
+                <input type="text" placeholder="New Name:" name="name-field" id="change-name-input">
+                <br>
+                <input type="submit" name="summit-name" id="change-name-submit">
+            </form>
+            <form onsubmit="return false" id="change-username-form">
+                <span>Change Username</span>
+                <br>
+                <input type="text" placeholder="New Username:" name="username-field" id="change-username-input">
+                <br>
+                <input type="submit" name="summit-username" id="change-username-submit">
+            </form>
+            <form onsubmit="return false" id="change-password-form">
+                <span>Change Password</span>
+                <br>
+                <input type="password" placeholder="Old Password" name="old-password-field" id="old-password-input">
+                <br>
+                <input type="password" placeholder="New Password" name="new-password-field" id="change-password-input">
+                <br>
+                <input type="password" placeholder="Confirm New Password" name="new-password-field2" id="change-password-input2">
+                <br>
+                <input type="submit" name="summit-password" id="change-password-submit">
+            </form>
+            <button id="logout-button">Logout</button>
+        </div>
+    </div>
+    <!-- TODO Uncomment following block to use ace editor -->
+    <!--     <script src="ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
     <script>
     var editor = ace.edit("editor");
     editor.setTheme("ace/theme/monokai");
     editor.session.setMode("ace/mode/javascript");
-    </script>
+    </script> -->
 </body>
 <script>
 require('file-operations.js')
+require('user-settings.js')
 </script>
 
 </html>

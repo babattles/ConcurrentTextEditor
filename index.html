@@ -19,7 +19,7 @@
     </script>
     <link rel="stylesheet" href="styles.css">
     <!-- TODO Uncomment following block to embed ace editor -->
-    <!-- <style type="text/css" media="screen">
+    <style type="text/css" media="screen">
     #editor {
         position: absolute;
         top: 50px;
@@ -27,14 +27,14 @@
         bottom: 0;
         left: 200px;
     }
-    </style> -->
+    </style>
 </head>
 
 <body>
     <!-- TODO Uncomment following block to embed ace editor -->
-    <!-- <div id="editor">
-        function foo(items) { var x = "\nAll this is syntax highlighted"; return x; }
-    </div> -->
+    <div id="editor">
+        <!--function foo(items) { var x = "\nAll this is syntax highlighted"; return x; } -->
+    </div>
     <div id="file-options">
         <input id="file" type="file" multiple onchange="startRead()">
     </div>
@@ -70,12 +70,13 @@
         </div>
     </div>
     <!-- TODO Uncomment following block to use ace editor -->
-    <!--     <script src="ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
     <script>
     var editor = ace.edit("editor");
     editor.setTheme("ace/theme/monokai");
     editor.session.setMode("ace/mode/javascript");
-    </script> -->
+    editor.setShowPrintMargin(false);
+    </script>
 </body>
 <script>
 require('file-operations.js')

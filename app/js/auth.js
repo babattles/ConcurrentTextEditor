@@ -29,7 +29,6 @@ loginBtn.addEventListener('click', function(e) {
     firebase.auth().signInWithEmailAndPassword(loginEmail, loginPassword).then(function() {
         // Close auth window
         ipcRenderer.send('close-auth-window', 'logged');
-        document.querySelector('#toggle-user-settings').classList.toggle("hidden");
     }).catch(function(error) {
         if (error != null) {
             alert("ERROR LOGGING IN: Please Enter Correct Credentials");

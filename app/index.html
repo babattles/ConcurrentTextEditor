@@ -22,51 +22,44 @@
 </head>
 
 <body>
-    <div id="user-settings-wrapper">
-        <!-- When user logs in, this button will be shown.  If user was logged in when opening page, need to hidden this off. -->
-        <!-- <button id="toggle-user-settings" class=". hidden">|||</button> -->
-        <button id="toggle-user-settings" class="btn">|||</button>
-        <div id="user-settings" class=". hidden" style="position: absolute; background-color: white;">
-            <!-- TODO put into css file -->
-            <form onsubmit="return false" id="change-name-form">
-                <span>Change Name:</span>
-                <br>
-                <input type="text" placeholder="New Name:" name="name-field" id="change-name-input">
-                <br>
-                <input type="submit" name="summit-name" id="change-name-submit" class="btn">
-            </form>
-            <form onsubmit="return false" id="change-email-form">
-                <span>Change Email:</span>
-                <br>
-                <input type="text" placeholder="New Email:" name="email-field" id="change-email-input">
-                <br>
-                <input type="submit" name="summit-email" id="change-email-submit" class="btn">
-            </form>
-            <form onsubmit="return false" id="change-password-form">
-                <span>Change Password:</span>
-                <br>
-                <input type="password" placeholder="Old Password" name="old-password-field" id="old-password-input">
-                <br>
-                <input type="password" placeholder="New Password" name="new-password-field" id="change-password-input">
-                <br>
-                <input type="password" placeholder="Confirm New Password" name="new-password-field2" id="change-password-input2">
-                <br>
-                <input type="submit" name="summit-password" id="change-password-submit" class="btn">
-                <button id="reset-password" class="btn">Reset Password</button>
-            </form>
-        </div>
+    <label id="openFileBtn" class='btn btn-success' for="openedFile">Open File</label>
+    <input id="openedFile" type="file" style="position: fixed; top: -100em">
+    <button id="saveFileBtn" class="btn btn-success">Save</button>
+    
+
+    <!-- TODO insert electron here. Will have to change any instances of "temptextarea"
+        in localFile.js to whatever id is used for the electron editor -->
+    <textarea id="temptextarea" style="width: 100%; height: 500px"></textarea>
+
+
+    <div id="userSettings" class=". hidden">
+        <span>Change Name:</span>
+        <br>
+        <input type="text" placeholder="New Name:" name="name_field" id="change-name-input">
+        <br>
+        <button id="changeNameBtn" class="btn">Change name</button>
+        <br>
+        <span>Change Email:</span>
+        <br>
+        <input type="text" placeholder="New Email:" name="email_field" id="change-email-input">
+        <br>
+        <button id="changeEmailBtn" class="btn">Change Email</button>
+        <br>
+        <span>Change Password:</span>
+        <br>
+        <input type="password" placeholder="Old Password" name="old_password_input" id="old-password-input">
+        <br>
+        <input type="password" placeholder="New Password" name="new_password_input" id="change-password-input">
+        <br>
+        <input type="password" placeholder="Confirm New Password" name="new_password_input2" id="change-password-input2">
+        <br>
+        <button id="changePasswordBtn" class="btn">Change Password</button>
+        <button id="resetPasswordBtn" class="btn">Reset Password</button>
     </div>
-    <textarea id="temptextarea" style="width: 100%; height: 800px">Placeholder text breaks my file opening... :( but this would be the ace editor.</textarea>
-    <footer role="auth_footer">
-        <!-- TODO Change this footer into a bottom-right corner box -->
+    <footer id="auth_footer" role="auth_footer">
         <button class='btn btn-success' id='authBtn'>Authenticate</button>
         <button class='btn btn-danger' id='logoutBtn'>Logout</button>
-        <!-- <button class='btn btn-success' id='openFileBtn'>Open File</button> -->
-        <label class='btn btn-success' for="openedFile">Open File</label>
-        <!-- TODO need to figure out how to lign up properly -->
-        <input id="openedFile" type="file" style="position: fixed; top: -100em">
-        <!-- TODO put into css file -->
-        <button id="saveOpenedFile" class="btn btn-success">Save</button>
+        <button class="btn" id="userSettingsBtn">YOURNAME</button>
     </footer>
     <script src="js/index.js"></script>
     <script src="js/localFile.js"></script>

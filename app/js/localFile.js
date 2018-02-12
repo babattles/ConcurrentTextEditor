@@ -12,15 +12,15 @@ document.querySelector('#openedFile').onchange = function() {
         fileReader.readAsText(file, "UTF-8");
         fileReader.onload = function loaded(evt) {
             var fileString = evt.target.result;
+            // File contents shown in ace editor. (Right now, it's the temporary text area.)
             document.getElementById('temptextarea').textContent = fileString;
-            // TODO, for now logs file contents to console, but can easily update ace with following line
-            // document.getElementById('ace-editor').textContent = fileString;
         }
     }
 };
 
-document.querySelector('#saveOpenedFile').onclick = function() {
-    var textToSave = document.getElementById("temptextarea").value; //TODO would be ace value
+// TODO it looks like I can use node to call some sort of local script which may be able to save the file in its original location.
+document.querySelector('#saveFileBtn').onclick = function() {
+    var textToSave = document.getElementById("temptextarea").value; //TODO change to id of ace editor
     var textToSaveAsBlob = new Blob([textToSave], {type:"text/plain"});
     var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
     var fileNameToSaveAs = currentFileName + currentFileType;

@@ -1,10 +1,3 @@
-// TODO right now, I am just alerting when functions are successful or not, should show a temporary field instead.
-
-document.querySelector('#toggle-user-settings').onclick = function() {
-    document.querySelector('#user-settings').classList.toggle("hidden");
-    clearUserSettings();
-};
-
 changeName = function() {
     var newName = document.querySelector("#change-name-input").value;
     if (newName === '') {
@@ -40,15 +33,17 @@ changeEmail = function() {
 changePassword = function() {
     if (document.querySelector("#change-password-input").value === document.querySelector("#change-password-input2").value) {
         var user = firebase.auth().currentUser;
-        var password = document.querySelector('#old-password-input').value;
+        var oldPassword = document.querySelector('#old-password-input').value;
+        var newPassword = document.querySelector('#change-password-input').value;
+        alert(newPassword);
         var credentials = firebase.auth.EmailAuthProvider.credential(
             user.email,
-            password
+            oldPassword
         );
         user.reauthenticateWithCredential(credentials).then(function() {
-            user.updatePassword(document.querySelector('#change-password-input').value).then(function() {
+            user.updatePassword(newPassword).then(function() {
                 alert('Password change successful');
-            }, function(error) {
+            }).catch(function(error) {
                 alert("Password change unsuccessful");
             });
         }).catch(function(error) {
@@ -91,18 +86,23 @@ clearUserSettings = function() {
     clearChangePassword();
 }
 
-document.querySelector('#change-name-submit').onclick = function() {
+document.querySelector('#userSettingsBtn').onclick = function() {
+    document.querySelector('#userSettings').classList.toggle("hidden");
+    clearUserSettings();
+};
+
+document.querySelector('#changeNameBtn').onclick = function() {
     changeName();
 };
 
-document.querySelector('#change-email-submit').onclick = function() {
+document.querySelector('#changeEmailBtn').onclick = function() {
     changeEmail();
 };
 
-document.querySelector('#change-password-submit').onclick = function() {
+document.querySelector('#changePasswordBtn').onclick = function() {
     changePassword();
 };
 
-document.querySelector('#reset-password').onclick = function() {
+document.querySelector('#resetPasswordBtn').onclick = function() {
     sendPasswordResetEmail();
 };

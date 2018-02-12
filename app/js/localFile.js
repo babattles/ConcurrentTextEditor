@@ -23,7 +23,6 @@ document.querySelector('#saveOpenedFile').onclick = function() {
     var textToSave = document.getElementById("temptextarea").value; //TODO would be ace value
     var textToSaveAsBlob = new Blob([textToSave], {type:"text/plain"});
     var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
-    // var fileNameToSaveAs = document.getElementById("inputFileNameToSaveAs").value;
     var fileNameToSaveAs = currentFileName + currentFileType;
     var downloadLink = document.createElement("a");
     downloadLink.download = fileNameToSaveAs;

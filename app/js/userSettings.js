@@ -1,75 +1,82 @@
+// TODO right now, I am just alerting when functions are successful or not, should show a temporary field instead.
+
 document.querySelector('#toggle-user-settings').onclick = function() {
-    console.log("Toggle user settings");
     document.querySelector('#user-settings').classList.toggle("hidden");
+    clearUserSettings();
 };
 
-changeName = function(name) {
-    // console.log(name);
-    alert("(TEMP)Changed name to " + name);
-    // var user = firebase.auth().currentUser;
-
-    // user.updateProfile({
-    //     displayName: "Jane Q. User",
-    //     photoURL: "https://example.com/jane-q-user/profile.jpg"
-    // }).then(function() {
-    //     // Update successful.
-    // }).catch(function(error) {
-    //     // An error happened.
-    // });
+changeName = function() {
+    var newName = document.querySelector("#change-name-input").value;
+    if (newName === '') {
+        alert("NAME CANNOT BE BLANK");
+        return;
+    }
+    var user = firebase.auth().currentUser;
+    user.updateProfile({
+        displayName: newName
+    }).then(function() {
+        alert("SUCCESS");
+    }).catch(function(error) {
+        alert("FAIL");
+    });
     clearChangeName();
 }
 
-changeUsername = function(username) {
-    // console.log(username);
-    alert("(TEMP)Changed username to " + username);
-    // var user = firebase.auth().currentUser;
-
-    // user.updateEmail("user@example.com").then(function() {
-    //     // Update successful.
-    // }).catch(function(error) {
-    //     // An error happened.
-    // });
-    clearChangeUsername();
+changeEmail = function() {
+    var newEmail = document.querySelector("#change-email-input").value;
+    if (newEmail === '') {
+        alert("EMAIL CANNOT BE BLANK");
+        return;
+    }
+    var user = firebase.auth().currentUser;
+    user.updateEmail(newEmail).then(function() {
+        alert("SUCCESS");
+    }).catch(function(error) {
+        alert("FAIL");
+    });
+    clearchangeEmail();
 }
 
-changePassword = function(password) {
-    // console.log(password);
-    alert("(TEMP)Changed password to " + password);
-    // var user = firebase.auth().currentUser;
-    // var newPassword = "asdf";
-    // //salt and hash ppassword;
-    // user.updatePassword(newPassword).then(function() {
-    //     // Update successful.
-    // }, function(error) {
-    //     // An error happened.
-    // });
+changePassword = function() {
+    if (document.querySelector("#change-password-input").value === document.querySelector("#change-password-input2").value) {
+        var user = firebase.auth().currentUser;
+        var password = document.querySelector('#old-password-input').value;
+        var credentials = firebase.auth.EmailAuthProvider.credential(
+            user.email,
+            password
+        );
+        user.reauthenticateWithCredential(credentials).then(function() {
+            user.updatePassword(document.querySelector('#change-password-input').value).then(function() {
+                alert('Password change successful');
+            }, function(error) {
+                alert("Password change unsuccessful");
+            });
+        }).catch(function(error) {
+            alert('Authentication failed');
+        });
+    } else {
+        alert("Passwords must match");
+    }
     clearChangePassword();
-    //need to hash + salt before sending to server
 }
-
-// logout = function() {
-//     // console.log("User logout");
-//     alert("(TEMP)Logged out");
-//     clearUserSettings();
-// }
 
 sendPasswordResetEmail = function() {
     var auth = firebase.auth();
-    // var user = firebase.auth().currentUser
-    var emailAddress = "alexjgeier@gmail.com";
-    auth.sendPasswordResetEmail(emailAddress).then(function() {
-        // Email sent.
+    var user = firebase.auth().currentUser;
+    var email = user.email;
+    auth.sendPasswordResetEmail(email).then(function() {
+        alert("EMAIL HAS BEEN SENT");
     }).catch(function(error) {
-        // An error happened.
+        alert("FAILURE")
     });
 }
 
 clearChangeName = function() {
-    document.querySelector("#change-name-input").value = null;
+    document.querySelector("#change-name-input").value = '';
 }
 
-clearChangeUsername = function() {
-    document.querySelector("#change-username-input").value = '';
+clearchangeEmail = function() {
+    document.querySelector("#change-email-input").value = '';
 }
 
 clearChangePassword = function() {
@@ -80,32 +87,22 @@ clearChangePassword = function() {
 
 clearUserSettings = function() {
     clearChangeName();
-    clearChangeUsername();
+    clearchangeEmail();
     clearChangePassword();
 }
 
 document.querySelector('#change-name-submit').onclick = function() {
-    console.log("User attempt change name");
-    changeName(document.querySelector("#change-name-input").value);
+    changeName();
 };
 
-document.querySelector('#change-username-submit').onclick = function() {
-    console.log("User attempt change username");
-    changeUsername(document.querySelector("#change-username-input").value);
+document.querySelector('#change-email-submit').onclick = function() {
+    changeEmail();
 };
 
 document.querySelector('#change-password-submit').onclick = function() {
-    console.log("User attempt change password");
-    changePassword(document.querySelector("#change-password-input").value);
+    changePassword();
 };
 
 document.querySelector('#reset-password').onclick = function() {
-    console.log("User attempt reset password");
-    alert();
     sendPasswordResetEmail();
 };
-
-// document.querySelector('#logout-button').onclick = function() {
-//     console.log("User attempt logout");
-//     logout();
-// };

@@ -1,35 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>HiveText</title>
-
-  <!-- Style Sheet --> 
-  <link rel="stylesheet" href="./css/index.css">
-
-  <!-- JQuery Component (Must be loaded first) -->
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.js"></script>
-  <script>if (typeof module === 'object') {window.jQuery = window.$ = module.exports;};</script>
-
-  <!-- Bootstrap Components -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-
-  <!-- Firebase Component -->
-  <script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>HiveText</title>
+    <!-- Style Sheet -->
+    <link rel="stylesheet" href="./css/index.css">
+    <!-- JQuery Component (Must be loaded first) -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.js"></script>
+    <script>
+    if (typeof module === 'object') { window.jQuery = window.$ = module.exports; };
+    </script>
+    <!-- Bootstrap Components -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <!-- Firebase Component -->
+    <script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
+    <link rel="stylesheet" href="css/index.css">
 </head>
-	
+
 <body>
-  <footer role="auth_footer"> <!-- TODO Change this footer into a bottom-right corner box -->
-    <button class='btn btn-success' id='authBtn'>Authenticate</button>
-    <button class='btn btn-danger' id='logoutBtn'>Logout</button>
-  </footer>
-  <script src="js/index.js"></script>
-  <script>
-      // Here we can require other files to use in this process
-  </script>
+    <div id="user-settings-wrapper">
+        <!-- When user logs in, this button will be shown.  If user was logged in when opening page, need to hidden this off. -->
+        <!-- <button id="toggle-user-settings" class=". hidden">|||</button> -->
+        <button id="toggle-user-settings" class="btn">|||</button>
+        <div id="user-settings" class=". hidden" style="position: absolute; background-color: white;"><!-- TODO put into css file -->
+            <form onsubmit="return false" id="change-name-form">
+                <span>Change Name</span>
+                <br>
+                <input type="text" placeholder="New Name:" name="name-field" id="change-name-input">
+                <br>
+                <input type="submit" name="summit-name" id="change-name-submit" class="btn">
+            </form>
+            <form onsubmit="return false" id="change-username-form">
+                <span>Change Username</span>
+                <br>
+                <input type="text" placeholder="New Username:" name="username-field" id="change-username-input">
+                <br>
+                <input type="submit" name="summit-username" id="change-username-submit" class="btn">
+            </form>
+            <form onsubmit="return false" id="change-password-form">
+                <span>Change Password</span>
+                <br>
+                <input type="password" placeholder="Old Password" name="old-password-field" id="old-password-input">
+                <br>
+                <input type="password" placeholder="New Password" name="new-password-field" id="change-password-input">
+                <br>
+                <input type="password" placeholder="Confirm New Password" name="new-password-field2" id="change-password-input2">
+                <br>
+                <input type="submit" name="summit-password" id="change-password-submit" class="btn">
+            </form>
+        </div>
+    </div>
+    <textarea id="temptextarea" style="width: 100%; height: 800px">Placeholder text breaks my file opening... :( but this would be the ace editor.</textarea>
+    <footer role="auth_footer">
+        <!-- TODO Change this footer into a bottom-right corner box -->
+        <button class='btn btn-success' id='authBtn'>Authenticate</button>
+        <button class='btn btn-danger' id='logoutBtn'>Logout</button>
+        <!-- <button class='btn btn-success' id='openFileBtn'>Open File</button> -->
+        <label class='btn btn-success' for="openedFile">Open File</label>
+        <!-- TODO need to figure out how to lign up properly -->
+        <input id="openedFile" type="file" style="position: fixed; top: -100em"> <!-- TODO put into css file -->
+        <button id="saveOpenedFile" class="btn btn-success">Save</button>
+    </footer>
+    <script src="js/index.js"></script>
+    <script src="js/localFile.js"></script>
+    <script src="js/userSettings.js"></script>
+    <script>
+    // Here we can require other files to use in this process
+    </script>
 </body>
+
 </html>

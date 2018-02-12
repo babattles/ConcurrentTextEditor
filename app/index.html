@@ -26,7 +26,8 @@
         <!-- When user logs in, this button will be shown.  If user was logged in when opening page, need to hidden this off. -->
         <!-- <button id="toggle-user-settings" class=". hidden">|||</button> -->
         <button id="toggle-user-settings" class="btn">|||</button>
-        <div id="user-settings" class=". hidden" style="position: absolute; background-color: white;"><!-- TODO put into css file -->
+        <div id="user-settings" class=". hidden" style="position: absolute; background-color: white;">
+            <!-- TODO put into css file -->
             <form onsubmit="return false" id="change-name-form">
                 <span>Change Name</span>
                 <br>
@@ -51,6 +52,7 @@
                 <input type="password" placeholder="Confirm New Password" name="new-password-field2" id="change-password-input2">
                 <br>
                 <input type="submit" name="summit-password" id="change-password-submit" class="btn">
+                <button id="reset-password" class="btn">Reset Password</button>
             </form>
         </div>
     </div>
@@ -62,7 +64,8 @@
         <!-- <button class='btn btn-success' id='openFileBtn'>Open File</button> -->
         <label class='btn btn-success' for="openedFile">Open File</label>
         <!-- TODO need to figure out how to lign up properly -->
-        <input id="openedFile" type="file" style="position: fixed; top: -100em"> <!-- TODO put into css file -->
+        <input id="openedFile" type="file" style="position: fixed; top: -100em">
+        <!-- TODO put into css file -->
         <button id="saveOpenedFile" class="btn btn-success">Save</button>
     </footer>
     <script src="js/index.js"></script>

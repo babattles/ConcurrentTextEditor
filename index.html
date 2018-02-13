@@ -31,16 +31,16 @@
 
     <style>
     .dropbtn {
-        background-color: #4CAF50;
+        background-color: #000000;
         color: white;
         padding: 16px;
-        font-size: 16px;
+        font-size: 8px;
         border: none;
         cursor: pointer;
     }
 
     .dropbtn:hover, .dropbtn:focus {
-        background-color: #3e8e41;
+        background-color: #C0C0C0;
     }
 
     .dropdown {
@@ -68,7 +68,7 @@
         display: block;
     }
 
-    .dropdown a:hover {background-color: #ddd}
+    .dropdown a:hover {background-color: #CCC}
 
     .show {display:block;}
     </style>
@@ -77,7 +77,7 @@
 <body>
     <!-- TODO Uncomment following block to embed ace editor -->
     <div id="editor">
-        <!--function foo(items) { var x = "\nAll this is syntax highlighted"; return x; } -->
+
     </div>
     <div id="file-options">
         <input id="file" type="file" multiple onchange="startRead()">
@@ -114,11 +114,12 @@
         </div>
     </div>
     <div class="dropdown">
-        <button onclick="myFunction()" class="dropbtn">Dropdown</button>
+        <button onclick="myFunction()" class="dropbtn">Syntax</button>
         <div id="myDropdown" class="dropdown-content">
         <a href="#Java">Java</a>
         <a href="#C">C</a>
         <a href="#C++">C++</a>
+        <a href="JavaScript">JavaScript</a>
         </div>
     </div>
 
@@ -135,6 +136,7 @@
         editor.setTheme("ace/theme/monokai");
         editor.session.setMode("ace/mode/javascript");
         editor.setShowPrintMargin(false);
+        editor.renderer.setShowGutter(false);
     </script>
 
     <script>
@@ -159,6 +161,7 @@
     }
     </script>
 </body>
+
 <script>
 require('file-operations.js')
 require('user-settings.js')

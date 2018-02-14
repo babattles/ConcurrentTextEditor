@@ -24,6 +24,7 @@ var LogoutListener = document.getElementById("logoutBtn");
 LogoutListener.addEventListener('click', function () {
     firebase.auth().signOut().then(function() {
         // Sign-out successful.
+        document.querySelector('#userSettings').classList.add("hidden");
         alert("user logged out");
       }, function(error) {
         // An error happened.
@@ -35,14 +36,17 @@ LogoutListener.addEventListener('click', function () {
 firebase.auth().onAuthStateChanged(function(user) {
     var authBtn = document.getElementById("authBtn");
     var logoutBtn = document.getElementById("logoutBtn");
+    var userSettingsBtn = document.getElementById("userSettingsBtn");
     if (user) {
         // User is signed in.
         logoutBtn.style.display = "initial";
         authBtn.style.display = "none";
+        userSettingsBtn.style.display = "initial";
     } else {
         // No user is signed in.
         authBtn.style.display = "initial";
         logoutBtn.style.display = "none";
+        userSettingsBtn.style.display = "none";
     }
   });
   

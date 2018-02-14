@@ -3,7 +3,7 @@
  * Login & Register Functionality
  * */
 'use strict';
-const {ipcRenderer} = require('electron');
+const { ipcRenderer } = require('electron');
 
 // Initialize Firebase
 var config = {
@@ -19,12 +19,12 @@ firebase.initializeApp(config);
 var loginBtn = document.getElementById("loginBtn");
 var registerBtn = document.getElementById("registerBtn");
 var closeBtn = document.getElementById("closeBtn");
-  
+
 // Login Button was clicked 
 loginBtn.addEventListener('click', function(e) {
     var loginEmail = document.getElementById('email').value;
     var loginPassword = document.getElementById('password').value;
-  
+
     // Sign in with email & password
     firebase.auth().signInWithEmailAndPassword(loginEmail, loginPassword).then(function() {
         // Close auth window
@@ -37,12 +37,12 @@ loginBtn.addEventListener('click', function(e) {
         }
     });
 });
-  
+
 // Register Button was clicked
 registerBtn.addEventListener("click", function() {
     var emailField = document.getElementById('email').value;
     var passwordField = document.getElementById('password').value;
-  
+
     firebase.auth().createUserWithEmailAndPassword(emailField, passwordField).then(function() {
         alert('User Registered... Logging in...');
         ipcRenderer.send('close-auth-window', 'logged');

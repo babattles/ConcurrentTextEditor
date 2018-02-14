@@ -1,0 +1,28 @@
+.hidden {
+    display: none;
+}
+
+#auth_footer {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+
+/*This will make user settings take up the full screen.*/
+#userSettings {
+    position: absolute;
+    top: 0;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+/*This will make user settings a small box in the corner*/
+/*#userSettings {
+    position: absolute;
+    bottom: 40px;
+    right: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+}*/

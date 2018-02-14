@@ -3,7 +3,7 @@
  * Login & Register Functionality
  * */
 'use strict';
-const {ipcRenderer} = require('electron');
+const { ipcRenderer } = require('electron');
 
 // Initialize Firebase
 var config = {
@@ -27,11 +27,8 @@ var usernameLabel = document.getElementById('usernameLabel');
   
 // Login Button was clicked 
 loginBtn.addEventListener('click', function(e) {
-    var loginEmail = document.getElementById('email');
-    var loginPassword = document.getElementById('password');
-  
     // Sign in with email & password
-    firebase.auth().signInWithEmailAndPassword(loginEmail.value, loginPassword.value).then(function() {
+    firebase.auth().signInWithEmailAndPassword(emailField.value, passwordField.value).then(function() {
         // Close auth window
         ipcRenderer.send('close-auth-window', 'logged');
     }).catch(function(error) {
@@ -42,7 +39,7 @@ loginBtn.addEventListener('click', function(e) {
         }
     });
 });
-  
+
 // Register Button was clicked
 registerBtn.addEventListener("click", function() {
     // Create a user with email & password then ask for username
@@ -58,7 +55,6 @@ registerBtn.addEventListener("click", function() {
         usernameField.classList.remove('hidden');
         usernameBtn.classList.remove('hidden');
         usernameLabel.classList.remove('hidden');
-
     }).catch(function(error) {
         if (error != null) {
             alert("ERROR REGISTERING ACCOUNT");

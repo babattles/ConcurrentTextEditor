@@ -17,6 +17,7 @@ function createWindow () {
     //resizeable: false,
     width: 1000, 
     height: 900,
+    backgroundColor: '#2a2a2a'
   });
 
   // and load the index.html of the app.
@@ -72,7 +73,10 @@ ipcMain.on('open-auth-window', (event, arg) => {
     authWindow = new BrowserWindow({
         parent: win, 
         modal: true, 
-        show: false
+        show: false,
+        width: 500,
+        height: 550,
+        backgroundColor: '#2a2a2a'
     });
 
     authWindow.loadURL('file://' + __dirname + '/app/auth.html');

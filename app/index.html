@@ -26,9 +26,10 @@
     <label id="openFileBtn" class='btn btn-success' for="openedFile" style="margin-top: 7px;">Open File</label>
     <input id="openedFile" type="file" style="position: fixed; top: -100em">
     <button id="saveFileBtn" class="btn btn-success">Save</button>
+    
     <!-- TODO insert electron here. Will have to change any instances of "temptextarea"
         in localFile.js to whatever id is used for the electron editor -->
-    <textarea id="temptextarea" style="width: 100%;"></textarea>
+    <textarea id="temptextarea" style="width: 100%; height: 500px;"></textarea>
     <div id="userSettings" class=". hidden">
         <span class="form-item form-text">Change Name:</span>
         <input type="text" class="form-item" placeholder="New Name:" name="name_field" id="change-name-input">

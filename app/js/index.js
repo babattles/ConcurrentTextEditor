@@ -49,4 +49,3 @@ firebase.auth().onAuthStateChanged(function(user) {
         userSettingsBtn.style.display = "none";
     }
   });
-  

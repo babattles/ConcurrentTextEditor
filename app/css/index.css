@@ -21,7 +21,7 @@ body {
 .form-text {
     color: #FFF;
 }
-/*This will make user settings take up the full screen.*/
+
 #userSettings {
     position: absolute;
     top: 0;

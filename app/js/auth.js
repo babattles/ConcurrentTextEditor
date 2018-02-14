@@ -19,14 +19,19 @@ firebase.initializeApp(config);
 var loginBtn = document.getElementById("loginBtn");
 var registerBtn = document.getElementById("registerBtn");
 var closeBtn = document.getElementById("closeBtn");
+var usernameBtn = document.getElementById("usernameBtn");
+var emailField = document.getElementById('email');
+var passwordField = document.getElementById('password');
+var usernameField = document.getElementById('username');
+var usernameLabel = document.getElementById('usernameLabel');
   
 // Login Button was clicked 
 loginBtn.addEventListener('click', function(e) {
-    var loginEmail = document.getElementById('email').value;
-    var loginPassword = document.getElementById('password').value;
+    var loginEmail = document.getElementById('email');
+    var loginPassword = document.getElementById('password');
   
     // Sign in with email & password
-    firebase.auth().signInWithEmailAndPassword(loginEmail, loginPassword).then(function() {
+    firebase.auth().signInWithEmailAndPassword(loginEmail.value, loginPassword.value).then(function() {
         // Close auth window
         ipcRenderer.send('close-auth-window', 'logged');
     }).catch(function(error) {
@@ -40,12 +45,20 @@ loginBtn.addEventListener('click', function(e) {
   
 // Register Button was clicked
 registerBtn.addEventListener("click", function() {
-    var emailField = document.getElementById('email').value;
-    var passwordField = document.getElementById('password').value;
-  
-    firebase.auth().createUserWithEmailAndPassword(emailField, passwordField).then(function() {
-        alert('User Registered... Logging in...');
-        ipcRenderer.send('close-auth-window', 'logged');
+    // Create a user with email & password then ask for username
+    firebase.auth().createUserWithEmailAndPassword(emailField.value, passwordField.value).then(function() {
+        // hide all the previous fields
+        emailField.classList.add('hidden');
+        passwordField.classList.add('hidden');
+        loginBtn.classList.add('hidden');
+        registerBtn.classList.add('hidden');
+        closeBtn.classList.add('hidden');
+
+        // show set username elements
+        usernameField.classList.remove('hidden');
+        usernameBtn.classList.remove('hidden');
+        usernameLabel.classList.remove('hidden');
+
     }).catch(function(error) {
         if (error != null) {
             alert("ERROR REGISTERING ACCOUNT");
@@ -53,6 +66,19 @@ registerBtn.addEventListener("click", function() {
             return;
         }
     });
+});
+
+// Set username button was clicked
+usernameBtn.addEventListener('click', function() {
+    var user = firebase.auth().currentUser;
+    if (user) {
+        // add user with username to database
+        firebase.database().ref().child("users").child(user.uid).set({username : usernameField.value});
+        // Close auth window
+        ipcRenderer.send('close-auth-window', 'logged');
+    } else {
+        alert("ERROR: current user was NULL");
+    }
 });
 
 // Close Button was clicked

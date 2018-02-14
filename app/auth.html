@@ -13,10 +13,11 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.js"></script>
     <script>if (typeof module === 'object') {window.jQuery = window.$ = module.exports;};</script>
     
-    <!-- Bootstrap Components !-->
+    <!-- Bootstrap Components 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    !-->
     
     <!-- Firebase Component !-->
     <script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
@@ -30,6 +31,11 @@
          <button class='btn btn-success' id='loginBtn'>Login</button>
          <button class='btn btn-danger' id="registerBtn">Register</button>
          <button class='btn btn-danger' id="closeBtn">Close</button>
+         <div class='form-group username-group'>
+          <label for='username' class='hidden' id='usernameLabel'>Please enter your desired username: </label>
+          <input type='text' placeholder='Username' class='form-control hidden' id='username'>
+          <button class='btn btn-success hidden' id='usernameBtn'>Set Username</button>
+         </div>
        </div>
      </div>
     <script src="./js/auth.js"></script>

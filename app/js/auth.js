@@ -55,6 +55,18 @@ registerBtn.addEventListener("click", function() {
         usernameField.classList.remove('hidden');
         usernameBtn.classList.remove('hidden');
         usernameLabel.classList.remove('hidden');
+
+        // create a user node in the database
+        var user = firebase.auth().currentUser;
+
+        if (user) {
+            // User is signed in.
+            // set temp username to uid
+            firebase.database().ref().child("users").child(user.uid).set({username : user.uid});
+        } else {
+            // No user is signed in.
+            alert("No user!!");
+        }
     }).catch(function(error) {
         if (error != null) {
             alert("ERROR REGISTERING ACCOUNT");
@@ -68,10 +80,14 @@ registerBtn.addEventListener("click", function() {
 usernameBtn.addEventListener('click', function() {
     var user = firebase.auth().currentUser;
     if (user) {
-        // add user with username to database
-        firebase.database().ref().child("users").child(user.uid).set({username : usernameField.value});
-        // Close auth window
-        ipcRenderer.send('close-auth-window', 'logged');
+        /* uncomment to reset database data when registering new user */
+        //firebase.database().ref().child("users").set(user.uid);
+
+        // update username with provided username
+        firebase.database().ref().child("users").child(user.uid).update({'username' : usernameField.value});
+
+        // Send message to main.js to tell index.js to update the username field
+        ipcRenderer.send('update-username', 'logged');
     } else {
         alert("ERROR: current user was NULL");
     }

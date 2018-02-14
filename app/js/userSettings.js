@@ -5,13 +5,15 @@ changeName = function() {
         return;
     }
     var user = firebase.auth().currentUser;
-    user.updateProfile({
-        displayName: newName
-    }).then(function() {
-        alert("SUCCESS");
-    }).catch(function(error) {
-        alert("FAIL");
-    });
+    if (user) {
+        // update username with provided username
+        firebase.database().ref().child("users").child(user.uid).update({'username' : newName});
+        // Send message to main.js to tell index.js to update the username field
+        ipcRenderer.send('update-username', 'logged');
+        alert("Username updated.");
+    } else {
+        alert("ERROR: current user was NULL");
+    }
     clearChangeName();
 }
 
@@ -23,9 +25,9 @@ changeEmail = function() {
     }
     var user = firebase.auth().currentUser;
     user.updateEmail(newEmail).then(function() {
-        alert("SUCCESS");
+        alert("Email update SUCCEEDED!");
     }).catch(function(error) {
-        alert("FAIL");
+        alert("Email update FAILED!");
     });
     clearchangeEmail();
 }
@@ -35,7 +37,6 @@ changePassword = function() {
         var user = firebase.auth().currentUser;
         var oldPassword = document.querySelector('#old-password-input').value;
         var newPassword = document.querySelector('#change-password-input').value;
-        alert(newPassword);
         var credentials = firebase.auth.EmailAuthProvider.credential(
             user.email,
             oldPassword
@@ -62,7 +63,7 @@ sendPasswordResetEmail = function() {
     auth.sendPasswordResetEmail(email).then(function() {
         alert("EMAIL HAS BEEN SENT");
     }).catch(function(error) {
-        alert("FAILURE")
+        alert("CAN'T SEND PASSWORD RESET EMAIL")
     });
 }
 

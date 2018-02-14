@@ -98,11 +98,17 @@ ipcMain.on('open-auth-window', (event, arg) => {
 
 // Listen for message to close auth window
 ipcMain.on('close-auth-window', (event, arg) => {
-    if (authWindow) {
-        authWindow.close();
-    }
+  if (authWindow) {
+      authWindow.close();
+  }
+});
 
-    if (arg == 'logged') {
-      // do something on login
-    }
+// Listen for message to update the username
+ipcMain.on('update-username', (event, arg) => {
+  // close the auth window
+  if (authWindow) {
+      authWindow.close();
+  }
+  // tell index.js to update the username
+  win.webContents.send('update-username-reply', 'pong')
 });

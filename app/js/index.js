@@ -13,6 +13,10 @@ var config = {
 };
 firebase.initializeApp(config);
 
+var database = firebase.database();
+
+var userSettingsBtn = document.getElementById("userSettingsBtn");
+
 // Authenticate Button is clicked
 var AuthListener = document.getElementById("authBtn");
 AuthListener.addEventListener('click', function() {
@@ -32,13 +36,32 @@ LogoutListener.addEventListener('click', function() {
     });
 });
 
-// Called when user state changes
+ipcRenderer.on('update-username-reply', function(event, arg) {
+    var user = firebase.auth().currentUser;
+    if (user) {
+        // User is signed in.
+        database.ref().child("users").child(user.uid).child("username").once("value").then(function(snapshot) {
+            userSettingsBtn.innerHTML = snapshot.val();
+        });
+    } else {
+        // No user is signed in.
+        alert("Can't update username without a user!!");
+    }
+});
+
+// Called when user state changes (login/logout)
 firebase.auth().onAuthStateChanged(function(user) {
     var authBtn = document.getElementById("authBtn");
     var logoutBtn = document.getElementById("logoutBtn");
-    var userSettingsBtn = document.getElementById("userSettingsBtn");
     if (user) {
         // User is signed in.
+
+        // update user settings button with username
+        database.ref().child("users").child(user.uid).child("username").once("value").then(function(snapshot) {
+            userSettingsBtn.innerHTML = snapshot.val();
+        });
+
+        // hide/show buttons
         logoutBtn.style.display = "initial";
         authBtn.style.display = "none";
         userSettingsBtn.style.display = "initial";

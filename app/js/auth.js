@@ -91,12 +91,6 @@ usernameBtn.addEventListener('click', function() {
 
         // Send message to main.js to tell index.js to update the username field
         ipcRenderer.send('update-username', 'logged');
-
-        // add user with username to database
-        firebase.database().ref().child("users").child(user.uid).set({ username: usernameField.value });
-
-        // Close auth window
-        ipcRenderer.send('close-auth-window', 'logged');
     } else {
         alert("ERROR: current user was NULL");
     }

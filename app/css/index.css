@@ -12,6 +12,15 @@ body {
     background-color: #424242
 }
 
+.form-item {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.form-text {
+    color: #FFF;
+}
 /*This will make user settings take up the full screen.*/
 #userSettings {
     position: absolute;
@@ -19,13 +28,7 @@ body {
     bottom: 40px;
     left: 0;
     right: 0;
-    background-color: rgba(255, 255, 255, 0.8);
+    padding-top: 150px;
+    background-color: rgba(66, 66, 66, 0.9);
+    text-align: center;
 }
-
-/*This will make user settings a small box in the corner*/
-/*#userSettings {
-    position: absolute;
-    bottom: 40px;
-    right: 0;
-    background-color: rgba(255, 255, 255, 0.8);
-}*/

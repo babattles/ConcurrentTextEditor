@@ -54,6 +54,7 @@ registerBtn.addEventListener("click", function() {
         loginBtn.classList.add('hidden');
         registerBtn.classList.add('hidden');
         closeBtn.classList.add('hidden');
+        forgotPasswordBtn.classList.add('hidden');
 
         // show set username elements
         usernameField.classList.remove('hidden');

@@ -26,6 +26,8 @@ var usernameField = document.getElementById('username');
 var usernameLabel = document.getElementById('usernameLabel');
 var forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
 var resetPasswordBtn = document.getElementById('resetPasswordBtn');
+var state = 'loginRegister';
+
 
 // Login Button was clicked 
 loginBtn.addEventListener('click', function(e) {
@@ -64,7 +66,7 @@ registerBtn.addEventListener("click", function() {
         if (user) {
             // User is signed in.
             // set temp username to uid
-            firebase.database().ref().child("users").child(user.uid).set({username : user.uid});
+            firebase.database().ref().child("users").child(user.uid).set({ username: user.uid });
         } else {
             // No user is signed in.
             alert("No user!!");
@@ -86,7 +88,7 @@ usernameBtn.addEventListener('click', function() {
         //firebase.database().ref().child("users").set(user.uid);
 
         // update username with provided username
-        firebase.database().ref().child("users").child(user.uid).update({'username' : usernameField.value});
+        firebase.database().ref().child("users").child(user.uid).update({ 'username': usernameField.value });
 
         // Send message to main.js to tell index.js to update the username field
         ipcRenderer.send('update-username', 'logged');
@@ -97,12 +99,24 @@ usernameBtn.addEventListener('click', function() {
 
 // Close Button was clicked
 closeBtn.addEventListener("click", function() {
-    ipcRenderer.send('close-auth-window', 'ping');
+    if (state === 'loginRegister') {
+        ipcRenderer.send('close-auth-window', 'ping');
+    } else {
+        document.getElementById('closeBtnImg').src = './img/close.png';
+        resetPasswordBtn.classList.add('hidden');
+        forgotPasswordBtn.classList.remove('hidden');
+        passwordField.classList.remove('hidden');
+        loginBtn.classList.remove('hidden');
+        registerBtn.classList.remove('hidden');
+        state = 'loginRegister';
+    }
 });
 
 // Forgot password button was clicked
 forgotPasswordBtn.addEventListener("click", function() {
     //TODO change the x button into a back arrow. when back arrow clicked, go back to login/register page.
+    state = 'resetPassword';
+    document.getElementById('closeBtnImg').src = './img/back.png';
     resetPasswordBtn.classList.remove('hidden');
     passwordField.classList.add('hidden');
     loginBtn.classList.add('hidden');
@@ -117,11 +131,13 @@ resetPasswordBtn.addEventListener("click", function() {
     auth.sendPasswordResetEmail(email).then(function() {
         alert("A link to reset password has been sent to " + email);
         emailField.value = '';
+        passwordField.value = '';
         resetPasswordBtn.classList.add('hidden');
         forgotPasswordBtn.classList.remove('hidden');
         passwordField.classList.remove('hidden');
         loginBtn.classList.remove('hidden');
         registerBtn.classList.remove('hidden');
+        state = 'loginRegister';
     }).catch(function(error) {
         alert("(DEBUG TEMP)failed")
     });

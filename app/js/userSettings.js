@@ -1,16 +1,16 @@
 var useSettingsBtn = document.getElementById('userSettingsBtn');
-var changeNameBtn = document.getElementById('changeNameBtn');
+var changeUsernameBtn = document.getElementById('changeUsernameBtn');
 var changeEmailBtn = document.getElementById('changeEmailBtn');
 var changePasswordBtn = document.getElementById('changePasswordBtn');
-var newNameInput = document.getElementById('change-name-input');
+var newUsernameInput = document.getElementById('change-username-input');
 var newEmailInput = document.getElementById('change-email-input');
 var oldPasswordInput = document.getElementById('old-password-input');
 var newPasswordInput = document.getElementById('new-password-input');
-var newPasswordInput2 = document.getElementById('new-password-input-input');
+var newPasswordInput2 = document.getElementById('new-password-input2');
 var userSettingsPanel = document.getElementById('userSettings');
 
-clearName = function() {
-    newNameInput.value = '';
+clearUsername = function() {
+    newUsernameInput.value = '';
 }
 
 clearEmail = function() {
@@ -25,30 +25,30 @@ clearPassword = function() {
 
 userSettingsBtn.addEventListener("click", function() {
     userSettingsPanel.classList.toggle("hidden");
-    clearName();
+    clearUsername();
     clearEmail();
     clearPassword();
 });
 
-changeNameBtn.addEventListener("click", function() {
-    var newName = newNameInput.value;
-    if (newName === '') {
+changeUsernameBtn.addEventListener("click", function() {
+    var newUsername = newUsernameInput.value;
+    if (newUsername === '') {
         alert("NAME CANNOT BE BLANK");
         return;
     }
     var user = firebase.auth().currentUser;
     if (user) {
         user.updateProfile({
-            displayName: newName
+            displayName: newUsername
         }).then(function() {
-            firebase.database().ref().child("users").child(user.uid).update({ 'username': newName });
+            firebase.database().ref().child("users").child(user.uid).update({ 'username': newUsername });
             // Send message to main.js to tell index.js to update the username field
             ipcRenderer.send('update-username', 'logged');
             alert("Username updated");
         }).catch(function(error) {
             alert("ERROR: could not change name");
         });
-        clearName();
+        clearUsername();
     } else {
         alert("ERROR: current user was NULL");
     }

@@ -76,7 +76,8 @@ ipcMain.on('open-auth-window', (event, arg) => {
         show: false,
         width: 500,
         height: 550,
-        backgroundColor: '#2a2a2a'
+        backgroundColor: '#2a2a2a',
+        frame: false
     });
 
     authWindow.loadURL('file://' + __dirname + '/app/auth.html');

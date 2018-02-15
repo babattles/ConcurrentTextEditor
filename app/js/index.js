@@ -1,6 +1,6 @@
 'use strict';
 
-const {ipcRenderer} = require('electron');
+const { ipcRenderer } = require('electron');
 
 // Initialize Firebase
 var config = {
@@ -19,21 +19,21 @@ var userSettingsBtn = document.getElementById("userSettingsBtn");
 
 // Authenticate Button is clicked
 var AuthListener = document.getElementById("authBtn");
-AuthListener.addEventListener('click', function () {
+AuthListener.addEventListener('click', function() {
     ipcRenderer.send('open-auth-window', 'ping');
 });
 
 // Logout Button is clicked
 var LogoutListener = document.getElementById("logoutBtn");
-LogoutListener.addEventListener('click', function () {
+LogoutListener.addEventListener('click', function() {
     firebase.auth().signOut().then(function() {
         // Sign-out successful.
         document.querySelector('#userSettings').classList.add("hidden");
         alert("user logged out");
-      }, function(error) {
+    }, function(error) {
         // An error happened.
         alert("oops, logout ERROR!");
-      });
+    });
 });
 
 ipcRenderer.on('update-username-reply', function(event, arg) {
@@ -71,5 +71,4 @@ firebase.auth().onAuthStateChanged(function(user) {
         logoutBtn.style.display = "none";
         userSettingsBtn.style.display = "none";
     }
-  });
-  
+});

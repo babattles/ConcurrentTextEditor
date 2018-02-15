@@ -24,7 +24,9 @@ var emailField = document.getElementById('email');
 var passwordField = document.getElementById('password');
 var usernameField = document.getElementById('username');
 var usernameLabel = document.getElementById('usernameLabel');
-  
+var forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+var resetPasswordBtn = document.getElementById('resetPasswordBtn');
+
 // Login Button was clicked 
 loginBtn.addEventListener('click', function(e) {
     // Sign in with email & password
@@ -96,4 +98,31 @@ usernameBtn.addEventListener('click', function() {
 // Close Button was clicked
 closeBtn.addEventListener("click", function() {
     ipcRenderer.send('close-auth-window', 'ping');
+});
+
+// Forgot password button was clicked
+forgotPasswordBtn.addEventListener("click", function() {
+    //TODO change the x button into a back arrow. when back arrow clicked, go back to login/register page.
+    resetPasswordBtn.classList.remove('hidden');
+    passwordField.classList.add('hidden');
+    loginBtn.classList.add('hidden');
+    registerBtn.classList.add('hidden');
+    forgotPasswordBtn.classList.add('hidden');
+});
+
+// Reset password button was clicked
+resetPasswordBtn.addEventListener("click", function() {
+    var email = emailField.value;
+    var auth = firebase.auth();
+    auth.sendPasswordResetEmail(email).then(function() {
+        alert("A link to reset password has been sent to " + email);
+        emailField.value = '';
+        resetPasswordBtn.classList.add('hidden');
+        forgotPasswordBtn.classList.remove('hidden');
+        passwordField.classList.remove('hidden');
+        loginBtn.classList.remove('hidden');
+        registerBtn.classList.remove('hidden');
+    }).catch(function(error) {
+        alert("(DEBUG TEMP)failed")
+    });
 });

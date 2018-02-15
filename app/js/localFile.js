@@ -2,6 +2,7 @@ const electron = require('electron');
 const dialog = require('electron').remote.dialog
 var currentFileName = 'untitled';
 var currentFileType = '';
+var currentUserName = '';
 
 document.querySelector('#openedFile').onchange = function() {
     var file = document.getElementById('openedFile').files[0];
@@ -12,6 +13,26 @@ document.querySelector('#openedFile').onchange = function() {
         fileReader.readAsText(file, "UTF-8");
         fileReader.onload = function loaded(evt) {
             var fileString = evt.target.result;
+            var user = firebase.auth().currentUser;
+            if (user) {
+                // user is logged in
+                var userRef = firebase.database().ref().child("users").child(user.uid);
+                // get the user's username
+                userRef.child("username").once("value").then(function(snapshot) {
+                    currentUserName = snapshot.val();
+                    var fileList = firebase.database().ref().child('files');
+                    var newFile = fileList.push(); // generate a new fileID
+                    newFile.set({
+                        'fileName': currentFileName,
+                        'fileContents': fileString,
+                    });
+                    // add user to file's userList
+                    newFile.child('userList').child(user.uid).set({'username' : currentUserName}).then(function() {
+                        // add fileID to user's fileList
+                        userRef.child('fileList').child(newFile.key).set({'fileName' : currentFileName});
+                    });
+                });
+            } 
             // File contents shown in ace editor. (Right now, it's the temporary text area.)
             document.getElementById('temptextarea').textContent = fileString;
         }

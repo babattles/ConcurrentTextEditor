@@ -63,9 +63,6 @@ changeEmailBtn.addEventListener("click", function() {
         return;
     }
     user.updateEmail(newEmail).then(function() {
-        firebase.database().ref('users/' + userId).set({
-            email: newEmail
-        });
         alert("Email updated");
     }).catch(function(error) {
         alert("Email update FAILED!");

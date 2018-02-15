@@ -82,7 +82,6 @@ registerBtn.addEventListener("click", function() {
 usernameBtn.addEventListener('click', function() {
     var user = firebase.auth().currentUser;
     if (user) {
-
         /* uncomment to reset database data when registering new user */
         //firebase.database().ref().child("users").set(user.uid);
 

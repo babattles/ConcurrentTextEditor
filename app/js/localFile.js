@@ -9,11 +9,18 @@ var path = '';
 var fileContents = '';
 var currentFileName = '';
 
-// openedFile.onchange = function() {
 openFileBtn.addEventListener('click', function() {
     dialog.showOpenDialog((fileNames) => {
         path = fileNames[0];
-        currentFileName = fileNames[0].substring(fileNames[0].lastIndexOf("\\") + 1, fileNames[0].length);
+        if (process.platform == 'darwin') { // OS is OSX (mac)
+            currentFileName = fileNames[0].substring(fileNames[0].lastIndexOf("/") + 1, fileNames[0].length);
+        } else if (process.platform == 'win32'){ // OS is Windows
+            currentFileName = fileNames[0].substring(fileNames[0].lastIndexOf("\\") + 1, fileNames[0].length);
+        } else {
+            // TODO: Add linux filepath stuff here
+            // May go under darwin as well?
+        }
+        
         fs.readFile(path, 'utf-8', (err, data) => {
             if (err) {
                 alert("An error ocurred reading the file :" + err.message);

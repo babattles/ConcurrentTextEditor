@@ -75,7 +75,7 @@ ipcMain.on('open-auth-window', (event, arg) => {
         modal: true, 
         show: false,
         width: 500,
-        height: 550,
+        height: 575,
         backgroundColor: '#2a2a2a',
         frame: false
     });

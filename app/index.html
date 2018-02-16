@@ -24,10 +24,19 @@
 <body>
     <button id="openFileBtn" class="btn btn-success">Open File</button>
     <button id="saveFileBtn" class="btn btn-success">Save</button>
+    <div class="dropdown">
+        <button onclick="syntax()" class="dropbtn">Syntax</button>
+        <div id="SyntaxDropdown" class="dropdown-content">
+            <a onclick="enable_javascript()" href="#javascript">JavaScript</a>
+            <a onclick="enable_html()" href="#html">HTML</a>
+            <a onclick="enable_css()" href="#css">CSS</a>
+        </div>
+    </div>
 
-    <!-- TODO insert electron here. Will have to change any instances of "temptextarea"
-        in localFile.js to whatever id is used for the electron editor -->
-
+    <!-- ACE Editor -->
+    <div id="editor">
+    </div>
+    
     <div id="userSettings" class=". hidden">
         <span class="form-item form-text">Change Username:</span>
         <input type="text" class="form-item" placeholder="New Username:" name="username_field" id="change-username-input">
@@ -41,21 +50,6 @@
         <input type="password" class="form-item" placeholder="Confirm New Password" name="new_password_input2" id="new-password-input2">
         <button id="changePasswordBtn" class="btn form-item ">Change Password</button>
     </div>
-
-    <!-- ACE Editor -->
-    <div id="editor">
-    </div>
-
-    <div class="dropdown">
-        <button onclick="syntax()" class="dropbtn">Syntax</button>
-        <div id="SyntaxDropdown" class="dropdown-content">
-        <a onclick="enable_javascript()" href="#javascript">JavaScript</a>
-        <a onclick="enable_html()" href="#html">HTML</a>
-        <a onclick="enable_css()" href="#css">CSS</a>
-        </div>
-    </div>
-
-
     <footer id="auth_footer" role="auth_footer">
         <button class='btn btn-success' id='authBtn'>Authenticate</button>
         <button class='btn btn-danger' id='logoutBtn'>Logout</button>

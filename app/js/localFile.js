@@ -70,6 +70,7 @@ saveFileBtn.addEventListener('click', function() {
                 }
                 alert("The file has been succesfully saved");
             });
+            path = filename;
         });
     }
 }, false);

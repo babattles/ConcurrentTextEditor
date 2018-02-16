@@ -61,6 +61,15 @@ saveFileBtn.addEventListener('click', function() {
             alert("The file has been succesfully saved");
         });
     } else {
-        alert("Please select a file first");
+        dialog.showSaveDialog(function (filename) {
+            fs.writeFile(filename, editor.getValue(), function(err) {
+                if (err) {
+                    alert("An error ocurred updating the file" + err.message);
+                    console.log(err);
+                    return;
+                }
+                alert("The file has been succesfully saved");
+            });
+        });
     }
 }, false);

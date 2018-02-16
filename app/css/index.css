@@ -2,6 +2,10 @@
     display: none;
 }
 
+.btn .hidden {
+    display: none;
+}
+
 #auth_footer {
     position: absolute;
     bottom: 0;

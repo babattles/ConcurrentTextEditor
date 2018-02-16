@@ -1,13 +1,14 @@
 'use strict';
 
 var editor = ace.edit("editor");
-//editor.setSession(js);
-//editor.setTheme("ace/theme/monokai");
+editor.setTheme("ace/theme/ambiance");
 editor.session.setMode("ace/mode/javascript");
 //Hide margin
 editor.setShowPrintMargin(false);
-//Hide line number
-editor.renderer.setShowGutter(false);
+//Show line number
+editor.renderer.setShowGutter(true);
+//Start blank
+editor.setValue('', -1);
 
 function syntax() {
     document.getElementById("SyntaxDropdown").classList.toggle("show");
@@ -24,4 +25,3 @@ function enable_html() {
 function enable_css() {
 	editor.session.setMode("ace/mode/css");
 }
-

@@ -8,3 +8,7 @@ editor.session.setMode("ace/mode/javascript");
 editor.setShowPrintMargin(false);
 //Hide line number
 editor.renderer.setShowGutter(false);
+
+function syntax() {
+    document.getElementById("SyntaxDropdown").classList.toggle("show");
+}

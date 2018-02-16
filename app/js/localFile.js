@@ -1,36 +1,30 @@
 const electron = require('electron');
 const dialog = require('electron').remote.dialog
 const fs = require('fs');
+const requirePath = require('path');
 
 var openedFile = document.getElementById('openFileBtn');
-var editor = document.getElementById('temptextarea');
+var editor = document.getElementById('editor');
 var saveFileBtn = document.getElementById('saveFileBtn');
 var path = '';
 var fileContents = '';
 var currentFileName = '';
+var pathSeperator = requirePath.sep;
 
 openFileBtn.addEventListener('click', function() {
     dialog.showOpenDialog((fileNames) => {
         path = fileNames[0];
-        if (process.platform == 'darwin') { // OS is OSX (mac)
-            currentFileName = fileNames[0].substring(fileNames[0].lastIndexOf("/") + 1, fileNames[0].length);
-        } else if (process.platform == 'win32'){ // OS is Windows
-            currentFileName = fileNames[0].substring(fileNames[0].lastIndexOf("\\") + 1, fileNames[0].length);
-        } else {
-            // TODO: Add linux filepath stuff here
-            // May go under darwin as well?
-        }
-        
+        currentFileName = fileNames[0].substring(fileNames[0].lastIndexOf(pathSeperator) + 1, fileNames[0].length);
+
         fs.readFile(path, 'utf-8', (err, data) => {
             if (err) {
                 alert("An error ocurred reading the file :" + err.message);
                 return;
             }
 
-            // show the text in the editor
             fileContents = data;
-            console.log(fileContents);
-            editor.textContent = data;
+            // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
+            editor.setValue(data, -1);
 
             // Add file to user's account
             var user = firebase.auth().currentUser;
@@ -58,7 +52,7 @@ openFileBtn.addEventListener('click', function() {
 
 saveFileBtn.addEventListener('click', function() {
     if (path) {
-        fs.writeFile(path, editor.value, function(err) {
+        fs.writeFile(path, editor.getValue(), function(err) {
             if (err) {
                 alert("An error ocurred updating the file" + err.message);
                 console.log(err);

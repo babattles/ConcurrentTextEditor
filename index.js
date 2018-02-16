@@ -8,6 +8,12 @@ const url = require('url');
 // be closed automatically when the JavaScript object is garbage collected.
 let win
 
+function myFunction() {
+  document.getElementById("myDropdown").classList.toggle("show");
+}
+
+    // Close the dropdown if the user clicks outside of it
+
 function createWindow () {
   // Create the browser window.
   win = new BrowserWindow({width: 800, height: 600})
@@ -30,6 +36,19 @@ function createWindow () {
     win = null
   })
 }
+
+// myFunction.onclick = function(event) {
+//   if (!event.target.matches('.dropbtn')) {
+//     var dropdowns = document.getElementsByClassName("dropdown-content");
+//     var i;
+//     for (i = 0; i < dropdowns.length; i++) {
+//       var openDropdown = dropdowns[i];
+//       if (openDropdown.classList.contains('show')) {
+//         openDropdown.classList.remove('show');
+//       }
+//     }
+//   }
+// }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

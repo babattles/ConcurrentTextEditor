@@ -7,6 +7,7 @@ var openedFile = document.getElementById('openFileBtn');
 var editor = document.getElementById('editor');
 var saveFileBtn = document.getElementById('saveFileBtn');
 var closeFileBtn = document.getElementById('closeFileBtn');
+var saveFileAsBtn = document.getElementById('saveFileAsBtn');
 var path = '';
 var fileContents = '';
 var currentFileName = '';
@@ -25,25 +26,25 @@ var openFile = function() {
 
             //Checks to see what type of file is opened
             var pathLength = path.length;
-            var jsCheck = path.slice(pathLength-3);
-            var cssCheck = path.slice(pathLength-4);
-            var htmlCheck = path.slice(pathLength-5);
-            
-            if(jsCheck == '.js') {
+            var jsCheck = path.slice(pathLength - 3);
+            var cssCheck = path.slice(pathLength - 4);
+            var htmlCheck = path.slice(pathLength - 5);
+
+            if (jsCheck == '.js') {
                 enable_javascript();
                 console.log('This is a .js file!');
             }
 
-            if(cssCheck == '.css') {
+            if (cssCheck == '.css') {
                 enable_css();
                 console.log('This is a .css file!');
             }
 
-            if(htmlCheck == '.html') {
+            if (htmlCheck == '.html') {
                 enable_html();
                 console.log('This is a .html file!');
             }
-            
+
             fileContents = data;
             // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
             editor.setValue(data, -1);
@@ -86,18 +87,22 @@ var saveFile = function() {
             alert("The file has been succesfully saved");
         });
     } else {
-        dialog.showSaveDialog(function (filename) {
-            fs.writeFile(filename, editor.getValue(), function(err) {
-                if (err) {
-                    alert("An error ocurred updating the file" + err.message);
-                    console.log(err);
-                    return;
-                }
-                alert("The file has been succesfully saved");
-            });
-            path = filename;
-        });
+        saveFileAs();
     }
+};
+
+var saveFileAs = function() {
+    dialog.showSaveDialog(function(filename) {
+        fs.writeFile(filename, editor.getValue(), function(err) {
+            if (err) {
+                alert("An error ocurred updating the file" + err.message);
+                console.log(err);
+                return;
+            }
+            alert("The file has been succesfully saved");
+        });
+        path = filename;
+    });
 };
 
 var closeFile = function() {
@@ -111,3 +116,5 @@ openFileBtn.addEventListener('click', openFile);
 saveFileBtn.addEventListener('click', saveFile);
 
 closeFileBtn.addEventListener('click', closeFile);
+
+saveFileAsBtn.addEventListener('click', saveFileAs);

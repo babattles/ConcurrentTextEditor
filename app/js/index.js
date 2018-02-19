@@ -72,6 +72,11 @@ ipcRenderer.on('save-file', function(event, arg) {
     saveFile();
 });
 
+// Listen for Save File Menu Select
+ipcRenderer.on('save-file-as', function(event, arg) {
+    saveFileAs();
+});
+
 // Listen for Close File Menu Select
 ipcRenderer.on('close-file', function(event, arg) {
     closeFile();

@@ -50,6 +50,19 @@ body {
     text-align: center;
 }
 
+/*Collaborator List*/
+#collaborators {
+    margin-top: 20px;
+    position: absolute;
+    right: 20px;
+    bottom: 200px;
+}
+
+#collabLabel {
+    text-align: center;
+    background-color: #65CB86;
+}
+
 /*Edit list*/
 #edits {
     margin-top: 20px;
@@ -58,7 +71,8 @@ body {
 }
 
 #editLabel {
-    padding-left: 5px;
+    padding-left: 20px;
+    text-align: center;
     background-color: #65CB86;
 }
 

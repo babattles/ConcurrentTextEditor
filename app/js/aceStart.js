@@ -42,15 +42,3 @@ fontListenerD.addEventListener('click', function() {
 function syntax() {
     document.getElementById("SyntaxDropdown").classList.toggle("show");
 }
-
-function enable_javascript() {
-    editor.session.setMode("ace/mode/javascript");
-}
-
-function enable_html() {
-    editor.session.setMode("ace/mode/html");
-}
-
-function enable_css() {
-    editor.session.setMode("ace/mode/css");
-}

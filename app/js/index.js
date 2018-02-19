@@ -35,7 +35,16 @@ LogoutListener.addEventListener('click', function() {
         alert("oops, logout ERROR!");
     });
 });
+var fontListenerI = document.getElementById("fontIncrease");
+fontListenerI.addEventListener('click', function() {
+    fontIncrease();
 
+});
+var fontListenerI = document.getElementById("fontDecrease");
+fontListenerI.addEventListener('click', function() {
+    fontDecrease();
+
+});
 ipcRenderer.on('update-username-reply', function(event, arg) {
     var user = firebase.auth().currentUser;
     if (user) {

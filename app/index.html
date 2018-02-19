@@ -10,7 +10,9 @@
     <!-- JQuery Component (Must be loaded first) -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.js"></script>
     <script>
-    if (typeof module === 'object') { window.jQuery = window.$ = module.exports; };
+        if (typeof module === 'object') {
+            window.jQuery = window.$ = module.exports;
+        };
     </script>
     <!-- Bootstrap Components -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -25,6 +27,7 @@
     <button id="openFileBtn" class="btn btn-success">Open File</button>
     <button id="saveFileBtn" class="btn btn-success">Save</button>
     <button id="closeFileBtn" class="btn btn-danger hidden">Close File</button>
+    <br>
     <div class="dropdown">
         <button onclick="syntax()" class="dropbtn">Syntax</button>
         <div id="SyntaxDropdown" class="dropdown-content">
@@ -34,10 +37,27 @@
         </div>
     </div>
 
+    <!--font increase decrease -->
+    <div id="fontBtns">
+        <button id="fontIncrease" class="btn btn-success">Increase font</button>
+        <button id="fontDecrease" class="btn btn-danger">Decrease font</button>
+    </div>
+
+    <!-- edits list -->
+    <div id="edits">
+        <div id="editLabel">Edits to approve</div>
+        <div id="edit" class="edit">Arun: Line #45</div>
+        <div id="edit" class="edit">Eric: Line #154</div>
+        <div id="edit" class="edit">Alex: Line #221</div>
+        <div id="edit" class="edit">Paramesh: Line #13</div>
+        <div id="edit" class="edit">George: Line #191</div>
+        <div id="edit" class="edit">Bryan: Line #133</div>
+    </div>
+
     <!-- ACE Editor -->
     <div id="editor">
     </div>
-    
+
     <div id="userSettings" class=". hidden">
         <span class="form-item form-text">Change Username:</span>
         <input type="text" class="form-item" placeholder="New Username:" name="username_field" id="change-username-input">
@@ -60,10 +80,11 @@
     <script src="js/index.js"></script>
     <script src="js/localFile.js"></script>
     <script src="js/userSettings.js"></script>
+    <script src="js/edits.js"></script>
     <script src="../ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/aceStart.js"></script>
     <script>
-    // Here we can require other files to use in this process
+        // Here we can require other files to use in this process
     </script>
 </body>
 

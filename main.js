@@ -98,7 +98,10 @@ const template = [
 	    	},
 	    	{
 	    		role: 'close'
-	    	}
+	    	},
+        {
+          role: 'toggledevtools'
+        }
 	    ]
     },
     {

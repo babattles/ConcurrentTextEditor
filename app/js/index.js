@@ -93,6 +93,18 @@ firebase.auth().onAuthStateChanged(function(user) {
         logoutBtn.style.display = "initial";
         authBtn.style.display = "none";
         userSettingsBtn.style.display = "initial";
+
+        // Load user's files
+        var filesRef = database.ref("/users/" + user.uid + "/fileList").orderByChild("fileName").on('value', function(snapshot) {
+            snapshot.forEach(function(childSnapshot) {
+                var div = document.createElement("div");
+                div.style.background = "green";
+                div.style.color = "white";
+                div.innerHTML = childSnapshot.val().fileName;
+                document.getElementById("file-container").appendChild(div);
+            });
+        });
+
     } else {
         // No user is signed in.
         authBtn.style.display = "initial";

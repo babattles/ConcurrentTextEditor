@@ -33,7 +33,7 @@ var openFile = function() {
             editor.setValue(data, -1);
 
             // Show the close file button
-            // closeFileBtn.classList.remove("hidden");
+            closeFileBtn.classList.remove("hidden");
 
             // Add file to user's account
             var user = firebase.auth().currentUser;
@@ -90,14 +90,14 @@ var saveFileAs = function() {
 
 var closeFile = function() {
     editor.setValue('', -1);
-    // closeFileBtn.classList.add("hidden");
+    closeFileBtn.classList.add("hidden");
     path = '';
 };
 
-// openFileBtn.addEventListener('click', openFile);
+openFileBtn.addEventListener('click', openFile);
 
-// saveFileBtn.addEventListener('click', saveFile);
+saveFileBtn.addEventListener('click', saveFile);
 
-// closeFileBtn.addEventListener('click', closeFile);
+closeFileBtn.addEventListener('click', closeFile);
 
-// saveFileAsBtn.addEventListener('click', saveFileAs);
+saveFileAsBtn.addEventListener('click', saveFileAs);

@@ -50,6 +50,29 @@ body {
     text-align: center;
 }
 
+<<<<<<< HEAD
+=======
+/*Edit list*/
+#edits {
+    margin-top: 20px;
+    position: absolute;
+    right: 20px;
+}
+
+#editLabel {
+    padding-left: 5px;
+    background-color: #65CB86;
+}
+
+#edit {
+    padding-left: 5px;
+    background-color: #B3FFCC;
+}
+
+#edit:hover{
+    background-color: #65CB86;
+}
+>>>>>>> style
 
 /*ACE Editor*/
 

@@ -11,126 +11,129 @@ const { Menu } = require('electron');
 let win = null;
 let authWindow = null;
 
-// Menu Bar Template
-const template = [{
-        label: 'File',
-        submenu: [{
-                label: 'Open File',
-                accelerator: 'CommandOrControl+O',
-                click: () => {
-                    if (win) {
-                        // tell index.js to open a file
-                        win.webContents.send('open-file', 'ping');
-                    }
-                }
-            },
-            {
-                label: 'Save File',
-                accelerator: 'CommandOrControl+S',
-                click: () => {
-                    if (win) {
-                        // tell index.js to save the file
-                        win.webContents.send('save-file', 'ping');
-                    }
-                }
-            },
-            {
-                label: 'Save File As',
-                accelerator: 'CommandOrControl+Shift+S',
-                click: () => {
-                    if (win) {
-                        // tell index.js to save the file
-                        win.webContents.send('save-file-as', 'ping');
-                    }
-                }
-            },
-            {
-                label: 'Close File',
-                accelerator: 'CommandOrControl+W',
-                click: () => {
-                    if (win) {
-                        // tell index.js to close the file
-                        win.webContents.send('close-file', 'ping');
-                    }
-                }
-            }
-        ]
-    },
-    {
-        label: 'Edit',
-        submenu: [{
-                role: 'undo'
-            },
-            {
-                role: 'redo'
-            },
-            {
-                type: 'separator'
-            },
-            {
-                label: 'Increase Font Size',
-                accelerator: 'CommandOrControl+9',
-                click: () => {
-                    if (win) {
-                        // tell index.js to increase the font size
-                        win.webContents.send('increase-font', 'ping');
-                    }
-                }
-            },
-            {
-                label: 'Decrease Font Size',
-                accelerator: 'CommandOrControl+0',
-                click: () => {
-                    if (win) {
-                        // tell index.js to increase the font size
-                        win.webContents.send('decrease-font', 'ping');
-                    }
-                }
-            },
-            {
-                type: 'separator'
-            },
-            {
-                role: 'cut'
-            },
-            {
-                role: 'copy'
-            },
-            {
-                role: 'paste'
-            },
-            {
-                role: 'pasteandmatchstyle'
-            },
-            {
-                role: 'delete'
-            },
-            {
-                role: 'selectall'
-            }
-        ]
-    },
-    {
-        label: 'Window',
-        submenu: [{
-                role: 'minimize'
-            },
-            {
-                role: 'toggledevtools'
-            }
-        ]
-    },
-    {
-        label: 'Help',
-        submenu: [{
-            label: 'Learn More',
-            click() { require('electron').shell.openExternal('https://github.com/babattles/HiveText') }
-        }]
-    }
-];
+
 
 /* Create the browser window. */
 function createWindow() {
+    // Menu Bar Template
+    const template = [{
+            label: 'File',
+            submenu: [{
+                    label: 'Open File',
+                    accelerator: 'CommandOrControl+O',
+                    click: () => {
+                        if (win) {
+                            // tell index.js to open a file
+                            win.webContents.send('open-file', 'ping');
+                            enableClose();
+                        }
+                    }
+                },
+                {
+                    label: 'Save File',
+                    accelerator: 'CommandOrControl+S',
+                    click: () => {
+                        if (win) {
+                            // tell index.js to save the file
+                            win.webContents.send('save-file', 'ping');
+                        }
+                    }
+                },
+                {
+                    label: 'Save File As',
+                    accelerator: 'CommandOrControl+Shift+S',
+                    click: () => {
+                        if (win) {
+                            // tell index.js to save the file
+                            win.webContents.send('save-file-as', 'ping');
+                        }
+                    }
+                },
+                {
+                    label: 'Close File',
+                    accelerator: 'CommandOrControl+W',
+                    click: () => {
+                        if (win) {
+                            // tell index.js to close the file
+                            win.webContents.send('close-file', 'ping');
+                            disableClose();
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            label: 'Edit',
+            submenu: [{
+                    role: 'undo'
+                },
+                {
+                    role: 'redo'
+                },
+                {
+                    type: 'separator'
+                },
+                {
+                    label: 'Increase Font Size',
+                    accelerator: 'CommandOrControl+9',
+                    click: () => {
+                        if (win) {
+                            // tell index.js to increase the font size
+                            win.webContents.send('increase-font', 'ping');
+                        }
+                    }
+                },
+                {
+                    label: 'Decrease Font Size',
+                    accelerator: 'CommandOrControl+0',
+                    click: () => {
+                        if (win) {
+                            // tell index.js to increase the font size
+                            win.webContents.send('decrease-font', 'ping');
+                        }
+                    }
+                },
+                {
+                    type: 'separator'
+                },
+                {
+                    role: 'cut'
+                },
+                {
+                    role: 'copy'
+                },
+                {
+                    role: 'paste'
+                },
+                {
+                    role: 'pasteandmatchstyle'
+                },
+                {
+                    role: 'delete'
+                },
+                {
+                    role: 'selectall'
+                }
+            ]
+        },
+        {
+            label: 'Window',
+            submenu: [{
+                    role: 'minimize'
+                },
+                {
+                    role: 'toggledevtools'
+                }
+            ]
+        },
+        {
+            label: 'Help',
+            submenu: [{
+                label: 'Learn More',
+                click() { require('electron').shell.openExternal('https://github.com/babattles/HiveText') }
+            }]
+        }
+    ];
     if (process.platform === 'darwin') {
         template.unshift({
             label: 'HiveText',
@@ -223,6 +226,16 @@ function createWindow() {
         protocol: 'file:',
         slashes: true
     }));
+
+    menu.items[1].submenu.items[3].enabled = false;
+
+    function enableClose() {
+        menu.items[1].submenu.items[3].enabled = true;
+    }
+
+    function disableClose() {
+        menu.items[1].submenu.items[3].enabled = false;
+    }
 
     /**
      * Uncomment line below to enable developer tools when opening this window

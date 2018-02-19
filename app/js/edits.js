@@ -1,8 +1,11 @@
 //Makes edit disappear when you approve it
 $(document).ready(function(){
-	console.log('testing 1');
     $(".edit").click(function(){
-    	this.style.display = 'none';
+    	// console.log(this.innerHTML);
+    	var confirmation = confirm("Are you sure you want to accept this edit?\n\n" + this.innerHTML);
+    	if (confirmation === true ) {
+    		this.style.display = 'none';
+    	} 
     });
 });
 

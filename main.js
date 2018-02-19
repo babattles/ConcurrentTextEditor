@@ -93,9 +93,6 @@ const template = [{
                 role: 'minimize'
             },
             {
-                role: 'close'
-            },
-            {
                 role: 'toggledevtools'
             }
         ]

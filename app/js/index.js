@@ -35,16 +35,20 @@ LogoutListener.addEventListener('click', function() {
         alert("oops, logout ERROR!");
     });
 });
+
+// Increase Font Size was Clicked
 var fontListenerI = document.getElementById("fontIncrease");
 fontListenerI.addEventListener('click', function() {
     fontIncrease();
-
 });
+
+// Decrease Font Size was Clicked
 var fontListenerI = document.getElementById("fontDecrease");
 fontListenerI.addEventListener('click', function() {
     fontDecrease();
-
 });
+
+// Listen for response to update username
 ipcRenderer.on('update-username-reply', function(event, arg) {
     var user = firebase.auth().currentUser;
     if (user) {
@@ -56,6 +60,21 @@ ipcRenderer.on('update-username-reply', function(event, arg) {
         // No user is signed in.
         alert("Can't update username without a user!!");
     }
+});
+
+// Listen for Open File Menu Select
+ipcRenderer.on('open-file', function(event, arg) {
+    openFile();
+});
+
+// Listen for Save File Menu Select
+ipcRenderer.on('save-file', function(event, arg) {
+    saveFile();
+});
+
+// Listen for Close File Menu Select
+ipcRenderer.on('close-file', function(event, arg) {
+    closeFile();
 });
 
 // Called when user state changes (login/logout)

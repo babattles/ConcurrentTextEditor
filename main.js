@@ -10,8 +10,162 @@ const {Menu} = require('electron');
 let win = null; 
 let authWindow = null;
 
+// Menu Bar Template
+const template = [
+  {
+  label: 'File',
+  submenu: [
+    {
+      label: 'Open File'
+    },
+    {
+      label: 'Save File'
+    },
+    {
+      label: 'Close File'
+    }
+  ]
+  },
+  {
+      label: 'Edit',
+    submenu: [
+        {
+          role: 'undo'
+      },
+        {
+          role: 'redo'
+      },
+        {
+          type: 'separator'
+      },
+        {
+          role: 'cut'
+      },
+        {
+          role: 'copy'
+      },
+        {
+          role: 'paste'
+      },
+        {
+          role: 'pasteandmatchstyle'
+       },
+        {
+          role: 'delete'
+      },
+        {
+          role: 'selectall'
+         }
+    ]
+  },
+  {
+    label: 'Window',
+    submenu: [
+      {
+        role: 'minimize'
+      },
+      {
+        role: 'close'
+      },
+      {
+        role: 'toggledevtools'
+      }
+    ]
+  },
+  {
+    label: 'Help',
+    submenu: [
+      {
+        label: 'Learn More',
+          click () { require('electron').shell.openExternal('https://github.com/babattles/HiveText') }
+      }
+    ]
+  }
+];
+
 /* Create the browser window. */
 function createWindow () {
+  if (process.platform === 'darwin') {
+    template.unshift({
+      label: 'HiveText',
+      submenu: [
+        {
+          role: 'about'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          role: 'services',
+          submenu: []
+        },
+        {
+          type: 'separator'
+        },
+        {
+          role: 'hide'
+        },
+        {
+          role: 'hideothers'
+        },
+        {
+          role: 'unhide'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          role: 'quit'
+        }
+      ]
+    })
+    template[1].submenu.push(
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Speech',
+        submenu: [
+          {
+            role: 'startspeaking'
+          },
+          {
+            role: 'stopspeaking'
+          }
+        ]
+      }
+    )
+    template[3].submenu = [
+      {
+        role: 'close'
+      },
+      {
+        role: 'minimize'
+      },
+      {
+        role: 'zoom'
+      },
+      {
+        type: 'separator'
+      },
+      {
+        role: 'front'
+      }
+    ]
+  } else {
+    template.unshift({
+      label: 'Electron',
+      submenu: [
+        {
+          role: 'quit'
+        }
+      ]
+    })
+  }
+  
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+
   win = new BrowserWindow({
     //frame: false,
     //resizeable: false,
@@ -42,81 +196,6 @@ function createWindow () {
     win = null;
   });
 };
-
-const template = [
-    {
-		label: 'File',
-		submenu: [
-			{
-				label: 'Open File'
-			},
-			{
-				label: 'Save File'
-			},
-			{
-				label: 'Close File'
-			}
-		]
-    },
-    {
-      	label: 'Edit',
-    	submenu: [
-	        {
-	        	role: 'undo'
-	    	},
-	        {
-	        	role: 'redo'
-	    	},
-	        {
-	        	type: 'separator'
-		    },
-	        {
-	        	role: 'cut'
-		    },
-	        {
-	        	role: 'copy'
-		    },
-	        {
-	        	role: 'paste'
-		    },
-	        {
-	        	role: 'pasteandmatchstyle'
-	 	  	},
-	        {
-	        	role: 'delete'
-	  		},
-        	{
-        		role: 'selectall'
-       		}
-    	]
-    },
-    {
-	    label: 'Window',
-	    submenu: [
-	    	{
-	    		role: 'minimize'
-	    	},
-	    	{
-	    		role: 'close'
-	    	},
-        {
-          role: 'toggledevtools'
-        }
-	    ]
-    },
-    {
-    	label: 'Help',
-	    submenu: [
-	    	{
-	    		label: 'Learn More',
-        		click () { require('electron').shell.openExternal('https://github.com/babattles/HiveText') }
-	    	}
-	    ]
-    }
-];
-
-const menu = Menu.buildFromTemplate(template);
-Menu.setApplicationMenu(menu);
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

@@ -25,15 +25,15 @@ function fontDecrease() {
     document.getElementById('editor').style.fontSize = fontSize + "px";
 }
 
-var fontListenerI = document.getElementById("fontIncrease");
-fontListenerI.addEventListener('click', function() {
-    fontIncrease();
-});
+// var fontListenerI = document.getElementById("fontIncrease");
+// fontListenerI.addEventListener('click', function() {
+//     fontIncrease();
+// });
 
-var fontListenerD = document.getElementById("fontDecrease");
-fontListenerD.addEventListener('click', function() {
-    fontDecrease();
-});
+// var fontListenerD = document.getElementById("fontDecrease");
+// fontListenerD.addEventListener('click', function() {
+//     fontDecrease();
+// });
 
 function syntax() {
     document.getElementById("SyntaxDropdown").classList.toggle("show");

@@ -12,7 +12,7 @@ var fileContents = '';
 var currentFileName = '';
 var pathSeperator = requirePath.sep;
 
-openFileBtn.addEventListener('click', function() {
+var openFile = function() {
     dialog.showOpenDialog((fileNames) => {
         path = fileNames[0];
         currentFileName = fileNames[0].substring(fileNames[0].lastIndexOf(pathSeperator) + 1, fileNames[0].length);
@@ -73,9 +73,9 @@ openFileBtn.addEventListener('click', function() {
             }
         });
     });
-});
+};
 
-saveFileBtn.addEventListener('click', function() {
+var saveFile = function() {
     if (path) {
         fs.writeFile(path, editor.getValue(), function(err) {
             if (err) {
@@ -98,10 +98,16 @@ saveFileBtn.addEventListener('click', function() {
             path = filename;
         });
     }
-}, false);
+};
 
-closeFileBtn.addEventListener('click', function() {
+var closeFile = function() {
     editor.setValue('', -1);
     closeFileBtn.classList.add("hidden");
     path = '';
-});
+};
+
+openFileBtn.addEventListener('click', openFile);
+
+saveFileBtn.addEventListener('click', saveFile);
+
+closeFileBtn.addEventListener('click', closeFile);

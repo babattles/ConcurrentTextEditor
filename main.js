@@ -16,13 +16,31 @@ const template = [
   label: 'File',
   submenu: [
     {
-      label: 'Open File'
+      label: 'Open File',
+      click: () => {
+        if (win) {
+          // tell index.js to open a file
+          win.webContents.send('open-file', 'ping');
+        }
+      }
     },
     {
-      label: 'Save File'
+      label: 'Save File',
+      click: () => {
+        if (win) {
+          // tell index.js to save the file
+          win.webContents.send('save-file', 'ping');
+        }
+      }
     },
     {
-      label: 'Close File'
+      label: 'Close File',
+      click: () => {
+        if (win) {
+          // tell index.js to close the file
+          win.webContents.send('close-file', 'ping');
+        }
+      }
     }
   ]
   },
@@ -150,6 +168,9 @@ function createWindow () {
       },
       {
         role: 'front'
+      },
+      {
+        role: 'toggledevtools'
       }
     ]
   } else {
@@ -162,7 +183,7 @@ function createWindow () {
       ]
     })
   }
-  
+
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
 
@@ -265,5 +286,5 @@ ipcMain.on('update-username', (event, arg) => {
       authWindow.close();
   }
   // tell index.js to update the username
-  win.webContents.send('update-username-reply', 'pong')
+  win.webContents.send('update-username-reply', 'pong');
 });

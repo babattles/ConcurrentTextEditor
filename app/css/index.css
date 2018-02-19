@@ -2,9 +2,9 @@
     display: none;
 }
 
-.btn .hidden {
+/*.btn .hidden {
     display: none;
-}
+}*/
 
 #auth_footer {
     position: absolute;
@@ -16,7 +16,7 @@ body {
     background-color: #424242  
 }
 
-#fontIncrease {
+/*#fontIncrease {
     position: absolute;
     top: 5px;
     right: 140px;
@@ -26,7 +26,7 @@ body {
     position: absolute;
     top: 5px;
     right: 5px;
-}
+}*/
 
 .form-item {
     display: block;
@@ -52,8 +52,8 @@ body {
 
 /*Edit list*/
 #edit-container {
-    margin-top: 12px;
     position: absolute;
+    top: 20px;
     right: 0px;
 }
 
@@ -124,7 +124,7 @@ body {
 
 #editor {
     position: absolute;
-    top: 50px;
+    top: 20px;
     right: 200px;
     bottom: 0;
     left: 200px;

@@ -11,32 +11,28 @@ editor.setShowPrintMargin(false);
 editor.renderer.setShowGutter(true);
 //Start blank
 editor.setValue('', -1);
-editor.commands.addCommand({
-    name: 'fontIncrease',
-    bindKey: { win: 'Ctrl-9', mac: 'Command-9' },
-    exec: function(editor) {
-        fontSize++;
-        document.getElementById('editor').style.fontSize = fontSize + "px";
-    },
-});
-editor.commands.addCommand({
-    name: 'fontDecrease',
-    bindKey: { win: 'Ctrl-0', mac: 'Command-0' },
-    exec: function(editor) {
-        fontSize--;
-        document.getElementById('editor').style.fontSize = fontSize + "px";
-    },
-});
-var fontListenerI = document.getElementById("fontIncrease");
+
 //listeners for font increase/decrease
-fontListenerI.addEventListener('click', function() {
+function fontIncrease() {
+    console.log("Increase Font");
     fontSize++;
     document.getElementById('editor').style.fontSize = fontSize + "px";
-});
-var fontListenerD = document.getElementById("fontDecrease");
-fontListenerD.addEventListener('click', function() {
+}
+
+function fontDecrease() {
+    console.log("Decrease Font");
     fontSize--;
     document.getElementById('editor').style.fontSize = fontSize + "px";
+}
+
+var fontListenerI = document.getElementById("fontIncrease");
+fontListenerI.addEventListener('click', function() {
+    fontIncrease();
+});
+
+var fontListenerD = document.getElementById("fontDecrease");
+fontListenerD.addEventListener('click', function() {
+    fontDecrease();
 });
 
 function syntax() {

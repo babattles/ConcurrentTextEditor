@@ -36,18 +36,6 @@ LogoutListener.addEventListener('click', function() {
     });
 });
 
-// Increase Font Size was Clicked
-var fontListenerI = document.getElementById("fontIncrease");
-fontListenerI.addEventListener('click', function() {
-    fontIncrease();
-});
-
-// Decrease Font Size was Clicked
-var fontListenerI = document.getElementById("fontDecrease");
-fontListenerI.addEventListener('click', function() {
-    fontDecrease();
-});
-
 // Listen for response to update username
 ipcRenderer.on('update-username-reply', function(event, arg) {
     var user = firebase.auth().currentUser;
@@ -80,6 +68,16 @@ ipcRenderer.on('save-file-as', function(event, arg) {
 // Listen for Close File Menu Select
 ipcRenderer.on('close-file', function(event, arg) {
     closeFile();
+});
+
+// Listen for Increase Font Size Menu Select
+ipcRenderer.on('increase-font', function(event, arg) {
+    fontIncrease();
+});
+
+// Listen for Decrease Font Size Menu Select
+ipcRenderer.on('decrease-font', function(event, arg) {
+    fontDecrease();
 });
 
 // Called when user state changes (login/logout)

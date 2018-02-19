@@ -68,6 +68,29 @@ const template = [{
                 type: 'separator'
             },
             {
+                label: 'Increase Font Size',
+                accelerator: 'CommandOrControl+9',
+                click: () => {
+                    if (win) {
+                        // tell index.js to increase the font size
+                        win.webContents.send('increase-font', 'ping');
+                    }
+                }
+            },
+            {
+                label: 'Decrease Font Size',
+                accelerator: 'CommandOrControl+0',
+                click: () => {
+                    if (win) {
+                        // tell index.js to increase the font size
+                        win.webContents.send('decrease-font', 'ping');
+                    }
+                }
+            },
+            {
+                type: 'separator'
+            },
+            {
                 role: 'cut'
             },
             {

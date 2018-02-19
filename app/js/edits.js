@@ -5,6 +5,9 @@ $(document).ready(function(){
     	var confirmation = confirm("Are you sure you want to accept this edit?\n\n" + this.innerHTML);
     	if (confirmation === true ) {
     		this.style.display = 'none';
+    		
+    		//INSERT CODE FOR MAKING EDIT PERMANENT HERE
+
     	} 
     });
 });

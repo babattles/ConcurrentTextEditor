@@ -28,7 +28,9 @@
     <button id="saveFileBtn" class="btn btn-success">Save</button>
 
     <button id="closeFileBtn" class="btn btn-danger hidden">Close File</button>
-    <br>
+    
+    <!-- Dropdown menu for syntax highliting. May be deleted soon -->
+    <!-- <br>
     <div class="dropdown">
         <button onclick="syntax()" class="dropbtn">Syntax</button>
         <div id="SyntaxDropdown" class="dropdown-content">
@@ -36,7 +38,7 @@
             <a onclick="enable_html()" href="#html">HTML</a>
             <a onclick="enable_css()" href="#css">CSS</a>
         </div>
-    </div>
+    </div> -->
 
     <!--font increase decrease -->
     <div id="fontBtns">
@@ -45,16 +47,38 @@
     </div>
 
     <!-- List of edits -->
-    <div id="edits">
-        <div id="editLabel" style="white-space:pre">Edits to approve&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
-        <div id="edit" class="edit">Arun: Line #45</div>
-        <div id="edit" class="edit">Eric: Line #154</div>
-        <div id="edit" class="edit">Alex: Line #221</div>
-        <div id="edit" class="edit">Paramesh: Line #13</div>
-        <div id="edit" class="edit">George: Line #191</div>
-        <div id="edit" class="edit">Bryan: Line #133</div>
+    <div id="edit-container">
+        <div id="editLabel" style="white-space:pre">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Edits To Approve&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+        <div id="edit" class="edit">George: Line #45</div>
+        <div id="edit" class="edit">Arun: Line #154</div>
+        <div id="edit" class="edit">Bryan: Line #221</div>
+        <div id="edit" class="edit">Alex: Line #13</div>
+        <div id="edit" class="edit">Paramesh: Line #191</div>
+        <div id="edit" class="edit">Eric: Line #133</div>
     </div>
 
+    <!-- List of collaborators -->
+    <div id="collab-container">
+        <div id="collabLabel" style="white-space:pre">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Collaborators&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+        <div id="collabActive">George</div>
+        <div id="collabActive">Arun</div>
+        <div id="collabActive">Bryan</div>
+        <div id="collabActive">Alex</div>
+        <div id="collabInactive">Paramesh</div>
+        <div id="collabInactive">Eric</div>
+    </div>
+
+    <div id="chat-container">
+        <div id="chatLabel">Chat</div>
+        <div id="chat">George: Sup guys
+            <br>Arun: Sup
+            <br>Bryan: We should do work
+            <br>Alex: Probably
+            <br>Paramesh: Chatting is fun
+            <br>Erich: Yeah<br><br></div>    
+        <textarea id="chatInput" rows="1" cols="26"></textarea>
+    </div>
+    
     <!-- ACE Editor -->
     <div id="editor">
     </div>

@@ -23,6 +23,27 @@ openFileBtn.addEventListener('click', function() {
                 return;
             }
 
+            //Checks to see what type of file is opened
+            var pathLength = path.length;
+            var jsCheck = path.slice(pathLength-3);
+            var cssCheck = path.slice(pathLength-4);
+            var htmlCheck = path.slice(pathLength-5);
+            
+            if(jsCheck == '.js') {
+                enable_javascript();
+                console.log('This is a .js file!');
+            }
+
+            if(cssCheck == '.css') {
+                enable_css();
+                console.log('This is a .css file!');
+            }
+
+            if(htmlCheck == '.html') {
+                enable_html();
+                console.log('This is a .html file!');
+            }
+            
             fileContents = data;
             // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
             editor.setValue(data, -1);

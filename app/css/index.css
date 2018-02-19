@@ -51,7 +51,7 @@ body {
 }
 
 /*Edit list*/
-#edits {
+#edit-container {
     margin-top: 12px;
     position: absolute;
     right: 0px;
@@ -74,7 +74,7 @@ body {
 }
 
 /*Collaborator List*/
-#collabs {
+#collab-container {
     position: absolute;
     right: 0px;
     bottom: 40px;
@@ -102,6 +102,22 @@ body {
 
 #collabInactive:hover {
     background-color: #999999;
+}
+
+/*Chat*/
+#chat-container {
+    position: absolute;
+    bottom: 0px;
+}
+
+#chatLabel {
+    text-align: center;
+    background-color: #1A1A1A;
+    color: #CCCCCC;
+}
+
+#chat {
+    background-color: #F2F2F2;
 }
 
 /*ACE Editor*/

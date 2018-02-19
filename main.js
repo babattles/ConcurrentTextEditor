@@ -4,7 +4,7 @@ const BrowserWindow = electron.BrowserWindow;
 const path = require('path');
 const url = require('url');
 const {ipcMain} = require('electron');
-
+const {Menu} = require('electron');
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win = null; 
@@ -17,7 +17,8 @@ function createWindow () {
     //resizeable: false,
     width: 1000, 
     height: 900,
-    backgroundColor: '#2a2a2a'
+    backgroundColor: '#2a2a2a',
+    icon: path.join(__dirname, '/Icon.png')
   });
 
   // and load the index.html of the app.
@@ -41,6 +42,78 @@ function createWindow () {
     win = null;
   });
 };
+
+const template = [
+    {
+		label: 'File',
+		submenu: [
+			{
+				label: 'Open File'
+			},
+			{
+				label: 'Save File'
+			},
+			{
+				label: 'Close File'
+			}
+		]
+    },
+    {
+      	label: 'Edit',
+    	submenu: [
+	        {
+	        	role: 'undo'
+	    	},
+	        {
+	        	role: 'redo'
+	    	},
+	        {
+	        	type: 'separator'
+		    },
+	        {
+	        	role: 'cut'
+		    },
+	        {
+	        	role: 'copy'
+		    },
+	        {
+	        	role: 'paste'
+		    },
+	        {
+	        	role: 'pasteandmatchstyle'
+	 	  	},
+	        {
+	        	role: 'delete'
+	  		},
+        	{
+        		role: 'selectall'
+       		}
+    	]
+    },
+    {
+	    label: 'Window',
+	    submenu: [
+	    	{
+	    		role: 'minimize'
+	    	},
+	    	{
+	    		role: 'close'
+	    	}
+	    ]
+    },
+    {
+    	label: 'Help',
+	    submenu: [
+	    	{
+	    		label: 'Learn More',
+        		click () { require('electron').shell.openExternal('https://github.com/babattles/HiveText') }
+	    	}
+	    ]
+    }
+];
+
+const menu = Menu.buildFromTemplate(template);
+Menu.setApplicationMenu(menu);
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

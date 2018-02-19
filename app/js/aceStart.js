@@ -14,13 +14,11 @@ editor.setValue('', -1);
 
 //listeners for font increase/decrease
 function fontIncrease() {
-    console.log("Increase Font");
     fontSize++;
     document.getElementById('editor').style.fontSize = fontSize + "px";
 }
 
 function fontDecrease() {
-    console.log("Decrease Font");
     fontSize--;
     document.getElementById('editor').style.fontSize = fontSize + "px";
 }

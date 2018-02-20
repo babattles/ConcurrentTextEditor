@@ -50,6 +50,9 @@ ipcRenderer.on('update-username-reply', function(event, arg) {
     }
 });
 
+/**
+ * Menu Item Listeners
+ */
 // Listen for Open File Menu Select
 ipcRenderer.on('open-file', function(event, arg) {
     openFile();

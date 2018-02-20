@@ -52,7 +52,7 @@ emailField.addEventListener('keydown', function(e) {
     if (!e) { var e = window.event; }
 
     if (e.keyCode == 13) {
-         login();
+        login();
     }
 }, false);
 
@@ -61,7 +61,7 @@ passwordField.addEventListener('keydown', function(e) {
     if (!e) { var e = window.event; }
 
     if (e.keyCode == 13) {
-         login();
+        login();
     } else {
 
     }
@@ -156,6 +156,7 @@ resetPasswordBtn.addEventListener("click", function() {
         alert("A link to reset password has been sent to " + email);
         emailField.value = '';
         passwordField.value = '';
+        document.getElementById('closeBtnImg').src = './img/close.png';
         resetPasswordBtn.classList.add('hidden');
         forgotPasswordBtn.classList.remove('hidden');
         passwordField.classList.remove('hidden');

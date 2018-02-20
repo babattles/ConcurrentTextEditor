@@ -94,6 +94,15 @@ function createWindow() {
                     }
                 },
                 {
+                    label: 'Line Number',
+                    click: () => {
+                        if (win) {
+                            win.webContents.send('line-number', 'ping');
+                        }
+                    }
+                },
+
+                {
                     type: 'separator'
                 },
                 {

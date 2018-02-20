@@ -83,6 +83,11 @@ ipcRenderer.on('decrease-font', function(event, arg) {
     fontDecrease();
 });
 
+// Listen for line number toggle
+ipcRenderer.on('line-number', function(event, arg) {
+    lineNumber();
+});
+
 // Called when user state changes (login/logout)
 firebase.auth().onAuthStateChanged(function(user) {
     var authBtn = document.getElementById("authBtn");

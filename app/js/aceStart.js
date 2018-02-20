@@ -2,6 +2,8 @@
 
 var editor = ace.edit("editor");
 var fontSize = 12;
+var lineNumberCurr = true;
+
 document.getElementById('editor').style.fontSize = '12px';
 editor.setTheme("ace/theme/ambiance");
 editor.session.setMode("ace/mode/javascript");
@@ -21,4 +23,15 @@ function fontIncrease() {
 function fontDecrease() {
     fontSize--;
     document.getElementById('editor').style.fontSize = fontSize + "px";
+}
+
+
+function lineNumber() {
+	if (lineNumberCurr) {
+		lineNumberCurr = false;
+	}
+	else {
+		lineNumberCurr = true;
+	}
+	editor.renderer.setOption('showLineNumbers', lineNumberCurr);
 }

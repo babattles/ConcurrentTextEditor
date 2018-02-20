@@ -108,12 +108,17 @@ body {
 #chat-container {
     position: absolute;
     bottom: 0px;
+    width: 200px;
 }
 
 #chatLabel {
     text-align: center;
     background-color: #1A1A1A;
     color: #CCCCCC;
+}
+
+#chatLabel:hover {
+    background-color: #333333;
 }
 
 #chat {

@@ -94,6 +94,15 @@ function createWindow() {
                     }
                 },
                 {
+                    label: 'Reset Font Size',
+                    click: () => {
+                        if (win) {
+                            // tell index.js to increase the font size
+                            win.webContents.send('reset-font', 'ping');
+                        }
+                    }
+                },
+                {
                     label: 'Line Number',
                     click: () => {
                         if (win) {

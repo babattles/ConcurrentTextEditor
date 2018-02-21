@@ -81,7 +81,7 @@ var openFileDrag = function(pathDrag) {
                 var fileList = firebase.database().ref().child('files');
                 var newFile = fileList.push(); // generate a new fileID
                 newFile.set({
-                    'fileName': fileName,
+                    'fileName': currentFileName,
                     'fileContents': fileContents
                 });
                 // add user to file's userList

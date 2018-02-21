@@ -100,7 +100,6 @@ firebase.auth().onAuthStateChanged(function(user) {
     var logoutBtn = document.getElementById("logoutBtn");
     if (user) {
         // User is signed in.
-
         // update user settings button with username
         database.ref().child("users").child(user.uid).child("username").once("value").then(function(snapshot) {
             userSettingsBtn.innerHTML = snapshot.val();
@@ -161,9 +160,13 @@ firebase.auth().onAuthStateChanged(function(user) {
                 // listener to open this file from database
                 openBtn.addEventListener('click', function() {
                     var file = database.ref("files").child(childSnapshot.key);
+                    var modelist = ace.require("ace/ext/modelist");
+                    var mode = modelist.getModeForPath(childSnapshot.val().fileName).mode;
+                    editor.getSession().setMode(mode);
                     var contents = file.child("fileContents").once('value').then(function(snapshot) {
                         editor.setValue(snapshot.val(), -1);
                     });
+
                 });
 
                 // add new entry to list of files

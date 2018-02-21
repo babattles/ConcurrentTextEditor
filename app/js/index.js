@@ -196,10 +196,8 @@ document.ondragover = document.ondrop = (e) => {
 };
 
 document.body.ondrop = (e) => {
-    //console.log(e.dataTransfer.files[0].path);
     var path = e.dataTransfer.files[0].path;
-    // var fileName = e.dataTransfer.files[0];
     openFileDrag(path);
-    //alert("dragged");
+    ipcRenderer.send('close-dragged', 'logged');
     e.preventDefault();
 };

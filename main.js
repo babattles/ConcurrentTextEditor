@@ -247,11 +247,11 @@ function createWindow() {
 
     menu.items[1].submenu.items[3].enabled = false;
 
-    function enableClose() {
+    enableClose = function() {
         menu.items[1].submenu.items[3].enabled = true;
     }
 
-    function disableClose() {
+    disableClose = function() {
         menu.items[1].submenu.items[3].enabled = false;
     }
 
@@ -334,12 +334,12 @@ ipcMain.on('close-auth-window', (event, arg) => {
 
 // Listen for message to update the username
 ipcMain.on('update-username', (event, arg) => {
-  // close the auth window
-  if (authWindow) {
-      authWindow.close();
-  }
-  // tell index.js to update the username
-  win.webContents.send('update-username-reply', 'pong');
+    // close the auth window
+    if (authWindow) {
+        authWindow.close();
+    }
+    // tell index.js to update the username
+    win.webContents.send('update-username-reply', 'pong');
 });
 
 // Listen for message to close the file
@@ -347,4 +347,9 @@ ipcMain.on('close-file-please', (event, arg) => {
     if (win) {
         win.webContents.send('close-file', 'ping');
     }
+});
+
+//close dragged file
+ipcMain.on('close-dragged', (event, arg) => {
+    enableClose();
 });

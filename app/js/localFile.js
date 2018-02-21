@@ -70,9 +70,6 @@ var openFileDrag = function(pathDrag) {
         // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
         editor.setValue(data, -1);
 
-        // Show the close file button
-        closeFileBtn.classList.remove("hidden");
-
         // Add file to user's account
         var user = firebase.auth().currentUser;
         if (user) {

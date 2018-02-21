@@ -85,7 +85,7 @@ function createWindow() {
                 },
                 {
                     label: 'Decrease Font Size',
-                    accelerator: 'CommandOrControl+0',
+                    accelerator: 'CommandOrControl+-',
                     click: () => {
                         if (win) {
                             // tell index.js to increase the font size

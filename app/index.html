@@ -37,6 +37,7 @@
         <div id="edit" class="edit">Paramesh: Line #191</div>
         <div id="edit" class="edit">Guangqi: Line #133</div>
     </div>
+
     <!-- List of collaborators -->
     <div id="collab-container">
         <div id="collabLabel" style="white-space:pre">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Collaborators&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
@@ -67,9 +68,20 @@
         </div>
         <textarea id="chatInput" rows="1" cols="26"></textarea>
     </div>
+
+    <!-- Tabs -->
+    <div id="tab-container">
+        <div class="rTable">
+            <div class="rTableRow">
+                <div id="new-tab" class="rTableCell">+</div>
+                <div id="tabs"></div>
+            </div>
+        </div>
+    </div>    
+    
     <!-- ACE Editor -->
-    <div id="editor">
-    </div>
+    <div id="editor"></div>
+    
     <div id="userSettings" class=". hidden">
         <span class="form-item form-text">Change Username:</span>
         <input type="text" class="form-item" placeholder="New Username:" name="username_field" id="change-username-input">
@@ -93,6 +105,7 @@
     <script src="js/userSettings.js"></script>
     <script src="js/edits.js"></script>
     <script src="js/chatbox.js"></script>
+    <script src="js/tab.js"></script>
     <script src="js/aceStart.js"></script>
     <script src="../ace-builds/src-noconflict/ext-modelist.js"></script>
     <script>

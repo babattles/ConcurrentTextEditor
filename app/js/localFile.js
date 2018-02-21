@@ -20,27 +20,10 @@ var openFile = function() {
                 return;
             }
 
-            //Checks to see what type of file is opened
-            var pathLength = path.length;
-            var jsCheck = path.slice(pathLength-3);
-            var cssCheck = path.slice(pathLength-4);
-            var htmlCheck = path.slice(pathLength-5);
-            
-            if(jsCheck == '.js') {
-                enable_javascript();
-                console.log('This is a .js file!');
-            }
+            var modelist = ace.require("ace/ext/modelist");
+            var mode = modelist.getModeForPath(path).mode;
+            editor.getSession().setMode(mode);
 
-            if(cssCheck == '.css') {
-                enable_css();
-                console.log('This is a .css file!');
-            }
-
-            if(htmlCheck == '.html') {
-                enable_html();
-                console.log('This is a .html file!');
-            }
-            
             fileContents = data;
             // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
             editor.setValue(data, -1);
@@ -68,6 +51,51 @@ var openFile = function() {
         });
     });
 };
+//open a file when dragged into ace
+var openFileDrag = function(pathDrag) {
+    path = pathDrag;
+    currentFileName = path.substring(path.lastIndexOf(pathSeperator) + 1, path.length);;
+
+    fs.readFile(path, 'utf-8', (err, data) => {
+        if (err) {
+            alert("An error ocurred reading the file :" + err.message);
+            return;
+        }
+
+        var modelist = ace.require("ace/ext/modelist");
+        var mode = modelist.getModeForPath(path).mode;
+        editor.getSession().setMode(mode);
+
+        fileContents = data;
+        // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
+        editor.setValue(data, -1);
+
+        // Show the close file button
+        closeFileBtn.classList.remove("hidden");
+
+        // Add file to user's account
+        var user = firebase.auth().currentUser;
+        if (user) {
+            // user is logged in
+            var userRef = firebase.database().ref().child("users").child(user.uid);
+            // get the user's username
+            userRef.child("username").once("value").then(function(snapshot) {
+                currentUserName = snapshot.val();
+                var fileList = firebase.database().ref().child('files');
+                var newFile = fileList.push(); // generate a new fileID
+                newFile.set({
+                    'fileName': fileName,
+                    'fileContents': fileContents
+                });
+                // add user to file's userList
+                newFile.child('userList').child(user.uid).set({ 'username': currentUserName });
+                // add fileID to user's fileList
+                userRef.child('fileList').child(newFile.key).set({ 'fileName': currentFileName });
+            });
+        }
+    });
+
+};
 
 var saveFile = function() {
     console.log("called??");
@@ -81,18 +109,22 @@ var saveFile = function() {
             alert("The file has been succesfully saved");
         });
     } else {
-        dialog.showSaveDialog(function (filename) {
-            fs.writeFile(filename, editor.getValue(), function(err) {
-                if (err) {
-                    alert("An error ocurred updating the file" + err.message);
-                    console.log(err);
-                    return;
-                }
-                alert("The file has been succesfully saved");
-            });
-            path = filename;
-        });
+        saveFileAs();
     }
+};
+
+var saveFileAs = function() {
+    dialog.showSaveDialog(function(filename) {
+        fs.writeFile(filename, editor.getValue(), function(err) {
+            if (err) {
+                alert("An error ocurred updating the file" + err.message);
+                console.log(err);
+                return;
+            }
+            alert("The file has been succesfully saved");
+        });
+        path = filename;
+    });
 };
 
 var closeFile = function() {

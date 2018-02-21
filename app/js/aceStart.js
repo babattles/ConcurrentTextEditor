@@ -1,56 +1,54 @@
 'use strict';
 
 var editor = ace.edit("editor");
-var fontSize = 12;
-document.getElementById('editor').style.fontSize = '12px';
+var fontSize = 14;
+var lineNumberCurr = true;
+var minFont = 10;
+var maxFont = 150;
+var increaseFont = fontSize / 8;
+var decreaseFont = increaseFont;
+document.getElementById('editor').style.fontSize = fontSize + "px";
 editor.setTheme("ace/theme/ambiance");
-editor.session.setMode("ace/mode/javascript");
 //Hide margin
 editor.setShowPrintMargin(false);
 //Show line number
 editor.renderer.setShowGutter(true);
 //Start blank
 editor.setValue('', -1);
-editor.commands.addCommand({
-    name: 'fontIncrease',
-    bindKey: { win: 'Ctrl-9', mac: 'Command-9' },
-    exec: function(editor) {
-        fontSize++;
-        document.getElementById('editor').style.fontSize = fontSize + "px";
-    },
-});
-editor.commands.addCommand({
-    name: 'fontDecrease',
-    bindKey: { win: 'Ctrl-0', mac: 'Command-0' },
-    exec: function(editor) {
-        fontSize--;
-        document.getElementById('editor').style.fontSize = fontSize + "px";
-    },
-});
-var fontListenerI = document.getElementById("fontIncrease");
+
 //listeners for font increase/decrease
-fontListenerI.addEventListener('click', function() {
-    fontSize++;
-    document.getElementById('editor').style.fontSize = fontSize + "px";
-});
-var fontListenerD = document.getElementById("fontDecrease");
-fontListenerD.addEventListener('click', function() {
-    fontSize--;
-    document.getElementById('editor').style.fontSize = fontSize + "px";
-});
-
-function syntax() {
-    document.getElementById("SyntaxDropdown").classList.toggle("show");
+function fontIncrease() {
+    if (fontSize < maxFont) {
+        if ((maxFont - fontSize) < increaseFont) {
+            increaseFont = maxFont - fontSize;
+        }
+        fontSize += increaseFont;
+        document.getElementById('editor').style.fontSize = fontSize + "px";
+    }
 }
 
-function enable_javascript() {
-    editor.session.setMode("ace/mode/javascript");
+function fontDecrease() {
+    if (fontSize > minFont) {
+        if ((fontSize - minFont) < decreaseFont) {
+            decreaseFont = fontSize - minFont;
+        }
+
+        fontSize -= decreaseFont;
+        document.getElementById('editor').style.fontSize = fontSize + "px";
+    }
 }
 
-function enable_html() {
-    editor.session.setMode("ace/mode/html");
+function fontReset() {
+    fontSize = 14;
+    document.getElementById('editor').style.fontSize = 14 + "px";
 }
 
-function enable_css() {
-    editor.session.setMode("ace/mode/css");
+
+function lineNumber() {
+    if (lineNumberCurr) {
+        lineNumberCurr = false;
+    } else {
+        lineNumberCurr = true;
+    }
+    editor.renderer.setOption('showLineNumbers', lineNumberCurr);
 }

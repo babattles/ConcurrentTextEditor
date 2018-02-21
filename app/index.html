@@ -10,9 +10,9 @@
     <!-- JQuery Component (Must be loaded first) -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.js"></script>
     <script>
-        if (typeof module === 'object') {
-            window.jQuery = window.$ = module.exports;
-        };
+    if (typeof module === 'object') {
+        window.jQuery = window.$ = module.exports;
+    };
     </script>
     <!-- Bootstrap Components -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -27,12 +27,6 @@
 </head>
 
 <body>
-    <!--font increase decrease -->
-    <div id="fontBtns">
-        <button id="fontIncrease" class="btn btn-success">Increase font</button>
-        <button id="fontDecrease" class="btn btn-danger">Decrease font</button>
-    </div>
-
     <!-- List of edits -->
     <div id="edit-container">
         <div id="editLabel" style="white-space:pre">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Edits To Approve&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
@@ -41,9 +35,8 @@
         <div id="edit" class="edit">Bryan: Line #221</div>
         <div id="edit" class="edit">Alex: Line #13</div>
         <div id="edit" class="edit">Paramesh: Line #191</div>
-        <div id="edit" class="edit">Eric: Line #133</div>
+        <div id="edit" class="edit">Guangqi: Line #133</div>
     </div>
-
     <!-- List of collaborators -->
     <div id="collab-container">
         <div id="collabLabel" style="white-space:pre">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Collaborators&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
@@ -52,7 +45,7 @@
         <div id="collabActive">Bryan</div>
         <div id="collabActive">Alex</div>
         <div id="collabInactive">Paramesh</div>
-        <div id="collabInactive">Eric</div>
+        <div id="collabInactive">Guangqi</div>
     </div>
 
     <!-- List of User's Files -->
@@ -60,6 +53,7 @@
         <!-- User Files will go here -->
     </div>
 
+    <!-- Chat Box -->
     <div id="chat-container">
         <div id="chatLabel">Chat</div>
         <div id="chat">George: Sup guys
@@ -67,14 +61,15 @@
             <br>Bryan: We should do work
             <br>Alex: Probably
             <br>Paramesh: Chatting is fun
-            <br>Erich: Yeah<br><br></div>    
+            <br>Guangqi: Yeah
+            <br>
+            <br>
+        </div>
         <textarea id="chatInput" rows="1" cols="26"></textarea>
     </div>
-    
     <!-- ACE Editor -->
     <div id="editor">
     </div>
-
     <div id="userSettings" class=". hidden">
         <span class="form-item form-text">Change Username:</span>
         <input type="text" class="form-item" placeholder="New Username:" name="username_field" id="change-username-input">
@@ -91,17 +86,17 @@
     <footer id="auth_footer" role="auth_footer">
         <button class='btn btn-success' id='authBtn'>Authenticate</button>
         <button class='btn btn-danger' id='logoutBtn'>Logout</button>
-        <!-- TODO YOURNAME would be set to whatever the user's username is.. use database.once(users/userid/name) to get this value -->
         <button class="btn" id="userSettingsBtn"></button>
     </footer>
     <script src="js/index.js"></script>
     <script src="js/localFile.js"></script>
     <script src="js/userSettings.js"></script>
     <script src="js/edits.js"></script>
+    <script src="js/chatbox.js"></script>
     <script src="js/aceStart.js"></script>
-
+    <script src="../ace-builds/src-noconflict/ext-modelist.js"></script>
     <script>
-        // Here we can require other files to use in this process
+    // Here we can require other files to use in this process
     </script>
 </body>
 

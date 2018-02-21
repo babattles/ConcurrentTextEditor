@@ -28,9 +28,7 @@ var forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
 var resetPasswordBtn = document.getElementById('resetPasswordBtn');
 var state = 'loginRegister';
 
-
-// Login Button was clicked 
-loginBtn.addEventListener('click', function(e) {
+var login = function() {
     // Sign in with email & password
     firebase.auth().signInWithEmailAndPassword(emailField.value, passwordField.value).then(function() {
         // Close auth window
@@ -42,7 +40,32 @@ loginBtn.addEventListener('click', function(e) {
             return;
         }
     });
+}
+
+// Login Button was clicked 
+loginBtn.addEventListener('click', function() {
+    login();
 });
+
+// Enter was pressed on the emailField
+emailField.addEventListener('keydown', function(e) {
+    if (!e) { var e = window.event; }
+
+    if (e.keyCode == 13) {
+        login();
+    }
+}, false);
+
+// Enter was pressed on the passwordField
+passwordField.addEventListener('keydown', function(e) {
+    if (!e) { var e = window.event; }
+
+    if (e.keyCode == 13) {
+        login();
+    } else {
+
+    }
+}, false);
 
 // Register Button was clicked
 registerBtn.addEventListener("click", function() {
@@ -133,6 +156,7 @@ resetPasswordBtn.addEventListener("click", function() {
         alert("A link to reset password has been sent to " + email);
         emailField.value = '';
         passwordField.value = '';
+        document.getElementById('closeBtnImg').src = './img/close.png';
         resetPasswordBtn.classList.add('hidden');
         forgotPasswordBtn.classList.remove('hidden');
         passwordField.classList.remove('hidden');

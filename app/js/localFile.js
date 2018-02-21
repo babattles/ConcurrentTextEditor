@@ -3,10 +3,7 @@ const dialog = require('electron').remote.dialog
 const fs = require('fs');
 const requirePath = require('path');
 
-var openedFile = document.getElementById('openFileBtn');
 var editor = document.getElementById('editor');
-var saveFileBtn = document.getElementById('saveFileBtn');
-var closeFileBtn = document.getElementById('closeFileBtn');
 var path = '';
 var fileContents = '';
 var currentFileName = '';
@@ -48,9 +45,6 @@ var openFile = function() {
             // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
             editor.setValue(data, -1);
 
-            // Show the close file button
-            closeFileBtn.classList.remove("hidden");
-
             // Add file to user's account
             var user = firebase.auth().currentUser;
             if (user) {
@@ -76,6 +70,7 @@ var openFile = function() {
 };
 
 var saveFile = function() {
+    console.log("called??");
     if (path) {
         fs.writeFile(path, editor.getValue(), function(err) {
             if (err) {
@@ -102,12 +97,5 @@ var saveFile = function() {
 
 var closeFile = function() {
     editor.setValue('', -1);
-    closeFileBtn.classList.add("hidden");
     path = '';
 };
-
-openFileBtn.addEventListener('click', openFile);
-
-saveFileBtn.addEventListener('click', saveFile);
-
-closeFileBtn.addEventListener('click', closeFile);

@@ -288,3 +288,10 @@ ipcMain.on('update-username', (event, arg) => {
   // tell index.js to update the username
   win.webContents.send('update-username-reply', 'pong');
 });
+
+// Listen for message to close the file
+ipcMain.on('close-file-please', (event, arg) => {
+    if (win) {
+        win.webContents.send('close-file', 'ping');
+    }
+});

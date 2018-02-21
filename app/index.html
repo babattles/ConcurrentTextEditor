@@ -21,25 +21,12 @@
     <!-- Firebase Component -->
     <script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
     <link rel="stylesheet" href="css/index.css">
+
+    <!-- ACE Component -->
+    <script src="../ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 </head>
 
 <body>
-    <button id="openFileBtn" class="btn btn-success">Open File</button>
-    <button id="saveFileBtn" class="btn btn-success">Save</button>
-
-    <button id="closeFileBtn" class="btn btn-danger hidden">Close File</button>
-    
-    <!-- Dropdown menu for syntax highliting. May be deleted soon -->
-    <!-- <br>
-    <div class="dropdown">
-        <button onclick="syntax()" class="dropbtn">Syntax</button>
-        <div id="SyntaxDropdown" class="dropdown-content">
-            <a onclick="enable_javascript()" href="#javascript">JavaScript</a>
-            <a onclick="enable_html()" href="#html">HTML</a>
-            <a onclick="enable_css()" href="#css">CSS</a>
-        </div>
-    </div> -->
-
     <!--font increase decrease -->
     <div id="fontBtns">
         <button id="fontIncrease" class="btn btn-success">Increase font</button>
@@ -111,8 +98,8 @@
     <script src="js/localFile.js"></script>
     <script src="js/userSettings.js"></script>
     <script src="js/edits.js"></script>
-    <script src="../ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="js/aceStart.js"></script>
+
     <script>
         // Here we can require other files to use in this process
     </script>

@@ -334,10 +334,17 @@ ipcMain.on('close-auth-window', (event, arg) => {
 
 // Listen for message to update the username
 ipcMain.on('update-username', (event, arg) => {
-    // close the auth window
-    if (authWindow) {
-        authWindow.close();
+  // close the auth window
+  if (authWindow) {
+      authWindow.close();
+  }
+  // tell index.js to update the username
+  win.webContents.send('update-username-reply', 'pong');
+});
+
+// Listen for message to close the file
+ipcMain.on('close-file-please', (event, arg) => {
+    if (win) {
+        win.webContents.send('close-file', 'ping');
     }
-    // tell index.js to update the username
-    win.webContents.send('update-username-reply', 'pong');
 });

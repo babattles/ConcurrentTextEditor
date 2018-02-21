@@ -50,6 +50,13 @@ body {
     text-align: center;
 }
 
+/*File List*/
+#file-container {
+    margin-top: 12px;
+    position: absolute;
+    left: 0px;
+}
+
 /*Edit list*/
 #edit-container {
     position: absolute;

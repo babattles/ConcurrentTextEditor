@@ -94,6 +94,27 @@ ipcRenderer.on('line-number', function(event, arg) {
     lineNumber();
 });
 
+// Listen for change in theme
+ipcRenderer.on('change-theme', function(event, arg) {
+    if (arg == 'dark') {
+        editor.setTheme("ace/theme/ambiance");
+    } else if (arg == 'light') {
+        editor.setTheme("ace/theme/tomorrow");
+    }
+});
+
+//drag and drop functionality
+document.ondragover = document.ondrop = (e) => {
+    e.preventDefault();
+};
+
+document.body.ondrop = (e) => {
+    var path = e.dataTransfer.files[0].path;
+    openFileDrag(path);
+    ipcRenderer.send('close-dragged', 'logged');
+    e.preventDefault();
+};
+
 // Called when user state changes (login/logout)
 firebase.auth().onAuthStateChanged(function(user) {
     var authBtn = document.getElementById("authBtn");
@@ -192,15 +213,3 @@ firebase.auth().onAuthStateChanged(function(user) {
         ipcRenderer.send('close-file-please', 'ping');
     }
 });
-
-//drag and drop functionality
-document.ondragover = document.ondrop = (e) => {
-    e.preventDefault();
-};
-
-document.body.ondrop = (e) => {
-    var path = e.dataTransfer.files[0].path;
-    openFileDrag(path);
-    ipcRenderer.send('close-dragged', 'logged');
-    e.preventDefault();
-};

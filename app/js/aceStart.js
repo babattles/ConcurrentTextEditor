@@ -8,8 +8,7 @@ var maxFont = 150;
 var increaseFont = fontSize / 8;
 var decreaseFont = increaseFont;
 document.getElementById('editor').style.fontSize = fontSize + "px";
-// editor.setTheme("ace/theme/ambiance"); I changed it temporarily so that line numbers are more visible even though it looks bad
-editor.setTheme("ace/theme/solarized_light");
+editor.setTheme("ace/theme/tomorrow");
 //Hide margin
 editor.setShowPrintMargin(false);
 //Show line number

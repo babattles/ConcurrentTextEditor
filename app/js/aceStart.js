@@ -25,13 +25,16 @@ function fontDecrease() {
     document.getElementById('editor').style.fontSize = fontSize + "px";
 }
 
+function fontReset() {
+    document.getElementById('editor').style.fontSize = 12 + "px";
+}
+
 
 function lineNumber() {
-	if (lineNumberCurr) {
-		lineNumberCurr = false;
-	}
-	else {
-		lineNumberCurr = true;
-	}
-	editor.renderer.setOption('showLineNumbers', lineNumberCurr);
+    if (lineNumberCurr) {
+        lineNumberCurr = false;
+    } else {
+        lineNumberCurr = true;
+    }
+    editor.renderer.setOption('showLineNumbers', lineNumberCurr);
 }

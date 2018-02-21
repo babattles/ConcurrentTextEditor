@@ -83,6 +83,11 @@ ipcRenderer.on('decrease-font', function(event, arg) {
     fontDecrease();
 });
 
+//Listener for Reset Font Size Menu Select
+ipcRenderer.on('reset-font', function(event, arg) {
+    fontReset();
+});
+
 // Listen for line number toggle
 ipcRenderer.on('line-number', function(event, arg) {
     lineNumber();

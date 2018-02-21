@@ -16,6 +16,7 @@ var config = {
 };
 firebase.initializeApp(config);
 
+
 var loginBtn = document.getElementById("loginBtn");
 var registerBtn = document.getElementById("registerBtn");
 var closeBtn = document.getElementById("closeBtn");
@@ -27,6 +28,38 @@ var usernameLabel = document.getElementById('usernameLabel');
 var forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
 var resetPasswordBtn = document.getElementById('resetPasswordBtn');
 var state = 'loginRegister';
+
+
+//Google Stuff
+var gLoginBtn = document.getElementById("gLoginBtn");
+var provider = new firebase.auth.GoogleAuthProvider();
+
+
+//Google Login
+var gLogin = function() {
+    firebase.auth().signInWithPopup(provider).then(function(result) {
+      // This gives you a Google Access Token. You can use it to access the Google API.
+      var token = result.credential.accessToken;
+      // The signed-in user info.
+      var user = result.user;
+      // ...
+    }).catch(function(error) {
+      // Handle Errors here.
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      // The email of the user's account used.
+      var email = error.email;
+      // The firebase.auth.AuthCredential type that was used.
+      var credential = error.credential;
+      // ...
+    });
+}
+
+// Google Login Button was clicked 
+gLoginBtn.addEventListener('click', function() {
+    gLogin();
+});
+
 
 var login = function() {
     // Sign in with email & password

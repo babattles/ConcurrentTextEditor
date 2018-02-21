@@ -111,3 +111,15 @@ firebase.auth().onAuthStateChanged(function(user) {
         userSettingsBtn.style.display = "none";
     }
 });
+
+//drag and drop functionality
+document.ondragover = document.ondrop = (e) => {
+    e.preventDefault();
+};
+
+document.body.ondrop = (e) => {
+    //console.log(e.dataTransfer.files[0].path);
+    //openFile();
+    alert("dragged");
+    e.preventDefault();
+};

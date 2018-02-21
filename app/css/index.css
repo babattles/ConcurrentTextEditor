@@ -1,33 +1,40 @@
+body {
+    background-color: #424242  
+}
+
+.rTable {
+    display: table; 
+}
+
+.rTableRow {
+    display: table-row; 
+}
+
+.rTableHeading {
+    display: table-header-group; 
+}
+
+.rTableBody {
+    display: table-row-group; 
+}
+
+.rTableFoot {
+    display: table-footer-group; 
+}
+
+.rTableCell, .rTableHead { 
+    display: table-cell;
+}
+
 .hidden {
     display: none;
 }
-
-/*.btn .hidden {
-    display: none;
-}*/
 
 #auth_footer {
     position: absolute;
     bottom: 0;
     right: 0;
 }
-
-body {
-    background-color: #424242  
-}
-
-/*#fontIncrease {
-    position: absolute;
-    top: 5px;
-    right: 140px;
-}
-
-#fontDecrease {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-}*/
-
 .form-item {
     display: block;
     margin-left: auto;
@@ -38,6 +45,7 @@ body {
     color: #FFF;
 }
 
+/*User Settings*/
 #userSettings {
     z-index: 9999;
     position: absolute;
@@ -130,6 +138,46 @@ body {
 
 #chat {
     background-color: #F2F2F2;
+}
+
+/*Tabs*/
+#tab-container {
+    position: absolute;
+    top: 0px;
+    right: 200px;
+    left: 200px;  
+    bottom: 20px;
+    font-size: 13.5px;  
+}
+
+#new-tab {
+    text-align:center;
+    width: 50px;
+    height: 20px;
+    background-color: #1A1A1A;
+    color: #CCCCCC;
+}
+
+#new-tab:hover {
+    background-color: #333333;
+}
+
+.tab {
+    text-align:center;
+    width: 100px;
+    height: 20px;
+    background-color: #1A1A1A;
+    color: #CCCCCC;
+    border-right: 1px solid #FDF6E3; 
+}
+
+.tab:hover {
+    background-color: #333333;
+}
+
+#activeTab {
+    background-color: #FDF6E3;
+    color: #1A1A1A;
 }
 
 /*ACE Editor*/

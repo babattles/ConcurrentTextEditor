@@ -132,6 +132,18 @@ body {
     background-color: #F2F2F2;
 }
 
+/*Tabs*/
+#tab-container {
+    position: absolute;
+    top: 0px;
+    right: 200px;
+    left: 200px;    
+}
+
+#new-tab {
+    
+}
+
 /*ACE Editor*/
 
 #editor {

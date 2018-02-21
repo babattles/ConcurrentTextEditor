@@ -168,16 +168,16 @@ body {
     height: 20px;
     background-color: #1A1A1A;
     color: #CCCCCC;
-    border-right: 1px solid #CCCCCC; 
-}
-
-#activeTab {
-    background-color: #CCCCCC;
-    color: #1A1A1A;
+    border-right: 1px solid #FDF6E3; 
 }
 
 .tab:hover {
     background-color: #333333;
+}
+
+#activeTab {
+    background-color: #FDF6E3;
+    color: #1A1A1A;
 }
 
 /*ACE Editor*/

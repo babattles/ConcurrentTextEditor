@@ -2,9 +2,28 @@ body {
     background-color: #424242  
 }
 
-td {
-    border-left: 1px solid #CCCCCC;
-    border-right: 1px solid #CCCCCC;
+.rTable {
+    display: table; 
+}
+
+.rTableRow {
+    display: table-row; 
+}
+
+.rTableHeading {
+    display: table-header-group; 
+}
+
+.rTableBody {
+    display: table-row-group; 
+}
+
+.rTableFoot {
+    display: table-footer-group; 
+}
+
+.rTableCell, .rTableHead { 
+    display: table-cell;
 }
 
 .hidden {
@@ -149,6 +168,7 @@ td {
     height: 20px;
     background-color: #1A1A1A;
     color: #CCCCCC;
+    border-right: 1px solid #CCCCCC; 
 }
 
 #activeTab {

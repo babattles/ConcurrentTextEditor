@@ -1,13 +1,13 @@
 'use strict';
 
 var editor = ace.edit("editor");
-var fontSize = 12;
+var fontSize = 14;
 var lineNumberCurr = true;
 var minFont = 10;
 var maxFont = 150;
 var increaseFont = fontSize / 8;
 var decreaseFont = increaseFont;
-document.getElementById('editor').style.fontSize = '12px';
+document.getElementById('editor').style.fontSize = fontSize + "px";
 editor.setTheme("ace/theme/ambiance");
 //Hide margin
 editor.setShowPrintMargin(false);
@@ -29,7 +29,7 @@ function fontIncrease() {
 
 function fontDecrease() {
     if (fontSize > minFont) {
-        if ((fontSize - minFont) > decreaseFont) {
+        if ((fontSize - minFont) < decreaseFont) {
             decreaseFont = fontSize - minFont;
         }
 
@@ -39,7 +39,8 @@ function fontDecrease() {
 }
 
 function fontReset() {
-    document.getElementById('editor').style.fontSize = 12 + "px";
+    fontSize = 14;
+    document.getElementById('editor').style.fontSize = 14 + "px";
 }
 
 

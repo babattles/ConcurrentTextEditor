@@ -124,7 +124,9 @@ document.ondragover = document.ondrop = (e) => {
 
 document.body.ondrop = (e) => {
     //console.log(e.dataTransfer.files[0].path);
-    //openFile();
-    alert("dragged");
+    var path = e.dataTransfer.files[0].path;
+    // var fileName = e.dataTransfer.files[0];
+    openFileDrag(path);
+    //alert("dragged");
     e.preventDefault();
 };

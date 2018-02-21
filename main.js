@@ -110,7 +110,6 @@ function createWindow() {
                         }
                     }
                 },
-
                 {
                     type: 'separator'
                 },
@@ -131,7 +130,32 @@ function createWindow() {
                 },
                 {
                     role: 'selectall'
-                }
+                },
+                {
+                    type: 'separator'
+                },
+                {
+                    label: "Theme",
+                    submenu: [{
+                            label: "Dark",
+                            click: () => {
+                                if (win) {
+                                    // tell index.js to change the theme to dark
+                                    win.webContents.send('change-theme', 'dark');
+                                }
+                            }
+                        }, 
+                        {
+                            label: "Light",
+                            click: () => {
+                                if (win) {
+                                    // tell index.js to change the theme to light
+                                    win.webContents.send('change-theme', 'light');
+                                }
+                            }
+                        }
+                    ]
+                },
             ]
         },
         {

@@ -75,7 +75,7 @@ function createWindow() {
                 },
                 {
                     label: 'Increase Font Size',
-                    accelerator: 'CommandOrControl+9',
+                    accelerator: 'CommandOrControl+=',
                     click: () => {
                         if (win) {
                             // tell index.js to increase the font size
@@ -85,11 +85,20 @@ function createWindow() {
                 },
                 {
                     label: 'Decrease Font Size',
-                    accelerator: 'CommandOrControl+0',
+                    accelerator: 'CommandOrControl+-',
                     click: () => {
                         if (win) {
                             // tell index.js to increase the font size
                             win.webContents.send('decrease-font', 'ping');
+                        }
+                    }
+                },
+                {
+                    label: 'Reset Font Size',
+                    click: () => {
+                        if (win) {
+                            // tell index.js to increase the font size
+                            win.webContents.send('reset-font', 'ping');
                         }
                     }
                 },

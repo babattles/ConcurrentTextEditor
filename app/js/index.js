@@ -83,6 +83,11 @@ ipcRenderer.on('decrease-font', function(event, arg) {
     fontDecrease();
 });
 
+//Listener for Reset Font Size Menu Select
+ipcRenderer.on('reset-font', function(event, arg) {
+    fontReset();
+});
+
 // Listen for line number toggle
 ipcRenderer.on('line-number', function(event, arg) {
     lineNumber();
@@ -111,3 +116,17 @@ firebase.auth().onAuthStateChanged(function(user) {
         userSettingsBtn.style.display = "none";
     }
 });
+
+//drag and drop functionality
+document.ondragover = document.ondrop = (e) => {
+    e.preventDefault();
+};
+
+document.body.ondrop = (e) => {
+    //console.log(e.dataTransfer.files[0].path);
+    var path = e.dataTransfer.files[0].path;
+    // var fileName = e.dataTransfer.files[0];
+    openFileDrag(path);
+    //alert("dragged");
+    e.preventDefault();
+};

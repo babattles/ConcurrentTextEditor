@@ -75,7 +75,7 @@ function createWindow() {
                 },
                 {
                     label: 'Increase Font Size',
-                    accelerator: 'CommandOrControl+9',
+                    accelerator: 'CommandOrControl+=',
                     click: () => {
                         if (win) {
                             // tell index.js to increase the font size
@@ -85,11 +85,20 @@ function createWindow() {
                 },
                 {
                     label: 'Decrease Font Size',
-                    accelerator: 'CommandOrControl+0',
+                    accelerator: 'CommandOrControl+-',
                     click: () => {
                         if (win) {
                             // tell index.js to increase the font size
                             win.webContents.send('decrease-font', 'ping');
+                        }
+                    }
+                },
+                {
+                    label: 'Reset Font Size',
+                    click: () => {
+                        if (win) {
+                            // tell index.js to increase the font size
+                            win.webContents.send('reset-font', 'ping');
                         }
                     }
                 },
@@ -101,7 +110,6 @@ function createWindow() {
                         }
                     }
                 },
-
                 {
                     type: 'separator'
                 },
@@ -122,7 +130,32 @@ function createWindow() {
                 },
                 {
                     role: 'selectall'
-                }
+                },
+                {
+                    type: 'separator'
+                },
+                {
+                    label: "Theme",
+                    submenu: [{
+                            label: "Dark",
+                            click: () => {
+                                if (win) {
+                                    // tell index.js to change the theme to dark
+                                    win.webContents.send('change-theme', 'dark');
+                                }
+                            }
+                        }, 
+                        {
+                            label: "Light",
+                            click: () => {
+                                if (win) {
+                                    // tell index.js to change the theme to light
+                                    win.webContents.send('change-theme', 'light');
+                                }
+                            }
+                        }
+                    ]
+                },
             ]
         },
         {
@@ -238,18 +271,18 @@ function createWindow() {
 
     menu.items[1].submenu.items[3].enabled = false;
 
-    function enableClose() {
+    enableClose = function() {
         menu.items[1].submenu.items[3].enabled = true;
     }
 
-    function disableClose() {
+    disableClose = function() {
         menu.items[1].submenu.items[3].enabled = false;
     }
 
     /**
      * Uncomment line below to enable developer tools when opening this window
      */
-    //win.webContents.openDevTools();
+    // win.webContents.openDevTools();
 
     // Emitted when the window is closed.
     win.on('closed', () => {
@@ -331,4 +364,16 @@ ipcMain.on('update-username', (event, arg) => {
     }
     // tell index.js to update the username
     win.webContents.send('update-username-reply', 'pong');
+});
+
+// Listen for message to close the file
+ipcMain.on('close-file-please', (event, arg) => {
+    if (win) {
+        win.webContents.send('close-file', 'ping');
+    }
+});
+
+//close dragged file
+ipcMain.on('close-dragged', (event, arg) => {
+    enableClose();
 });

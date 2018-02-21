@@ -1,12 +1,14 @@
 'use strict';
 
 var editor = ace.edit("editor");
-var fontSize = 12;
+var fontSize = 14;
 var lineNumberCurr = true;
-
-document.getElementById('editor').style.fontSize = '12px';
-editor.setTheme("ace/theme/ambiance");
-editor.session.setMode("ace/mode/javascript");
+var minFont = 10;
+var maxFont = 150;
+var increaseFont = fontSize / 8;
+var decreaseFont = increaseFont;
+document.getElementById('editor').style.fontSize = fontSize + "px";
+editor.setTheme("ace/theme/tomorrow");
 //Hide margin
 editor.setShowPrintMargin(false);
 //Show line number
@@ -16,22 +18,37 @@ editor.setValue('', -1);
 
 //listeners for font increase/decrease
 function fontIncrease() {
-    fontSize++;
-    document.getElementById('editor').style.fontSize = fontSize + "px";
+    if (fontSize < maxFont) {
+        if ((maxFont - fontSize) < increaseFont) {
+            increaseFont = maxFont - fontSize;
+        }
+        fontSize += increaseFont;
+        document.getElementById('editor').style.fontSize = fontSize + "px";
+    }
 }
 
 function fontDecrease() {
-    fontSize--;
-    document.getElementById('editor').style.fontSize = fontSize + "px";
+    if (fontSize > minFont) {
+        if ((fontSize - minFont) < decreaseFont) {
+            decreaseFont = fontSize - minFont;
+        }
+
+        fontSize -= decreaseFont;
+        document.getElementById('editor').style.fontSize = fontSize + "px";
+    }
+}
+
+function fontReset() {
+    fontSize = 14;
+    document.getElementById('editor').style.fontSize = 14 + "px";
 }
 
 
 function lineNumber() {
-	if (lineNumberCurr) {
-		lineNumberCurr = false;
-	}
-	else {
-		lineNumberCurr = true;
-	}
-	editor.renderer.setOption('showLineNumbers', lineNumberCurr);
+    if (lineNumberCurr) {
+        lineNumberCurr = false;
+    } else {
+        lineNumberCurr = true;
+    }
+    editor.renderer.setOption('showLineNumbers', lineNumberCurr);
 }

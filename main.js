@@ -377,3 +377,13 @@ ipcMain.on('close-file-please', (event, arg) => {
 ipcMain.on('close-dragged', (event, arg) => {
     enableClose();
 });
+
+// enable close menu option
+ipcMain.on("enable-close", (event, arg) => {
+    enableClose();
+});
+
+// disable close menu option
+ipcMain.on("disable-close", (event, arg) => {
+    disableClose();
+});

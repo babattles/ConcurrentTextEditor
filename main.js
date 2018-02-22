@@ -6,11 +6,6 @@ const url = require('url');
 const { ipcMain } = require('electron');
 const { Menu } = require('electron');
 
-const axios = require('axios');
-const qs = require('querystring');
-axios.defaults.adapter = function() {
-  return require('axios/adapters/http'); // always use Node.js adapter
-};
 
 
 
@@ -18,8 +13,6 @@ axios.defaults.adapter = function() {
 // be closed automatically when the JavaScript object is garbage collected.
 let win = null;
 let authWindow = null;
-let googleAuthWin = null;
-let gAuthCode = null;
 
 
 
@@ -388,81 +381,21 @@ ipcMain.on('close-dragged', (event, arg) => {
     enableClose();
 });
 
-//Listen for message to use google auth
 ipcMain.on('google-auth', (event, arg) => {
-    if (authWindow) {
-        authWindow.close();
-    }
     googlePopUp(function() {
         if (gAuthCode){
-            console.log('GoogleAuthCode: ', gAuthCode);
+            googleAuthWin.webContents.send('token', gAuthCode);
         }
     });   
 
-    //Get Google ID Token
-    /*var gTokenString = "code="+gAuthCode+"&"
-        + "client_id=254482798300-tn0q68a55m8taeiktgiue1gdq6btukjk.apps.googleusercontent.com&"
-        + "client_secret=KXEUaUZ0VlHVESbOQ95KpnBf&"
-        + "redirect_uri=http://127.0.0.1:9004&"
-        + "grantType=authorization_code&";
-    var gTokenUrl = "https://www.googleapis.com/oauth2/v4/token";
-    const options = {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            }
-        }
-    */
-    //const tokens = await axios.post(gTokenUrl, gTokenString, options);
-
-    var postData = qs.stringify({
-        code: gAuthCode,
-        client_id: "254482798300-tn0q68a55m8taeiktgiue1gdq6btukjk.apps.googleusercontent.com",
-        redirect_uri: "http://127.0.0.1:9004",
-        grant_type: 'authorization_code',
-    });
-
-    let axiosConfig = {
-      headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-      }
-    };
-
-    axios.post('http://<host>:<port>/<path>', postData, axiosConfig)
-    .then((res) => {
-      console.log("RESPONSE RECEIVED: ", res);
-    })
-    .catch((err) => {
-      console.log("AXIOS ERROR: ", err);
-    })    
-
-    //USE JQUERY INSTEAD!!!!!!
     
-    // Build Firebase credential with the Google ID token.
-    //var credential = firebase.auth.GoogleAuthProvider.credential(tokens.id_token);
-    var credential = firebase.auth.GoogleAuthProvider.credential(tokens.data.access_token);
-
-
-    // Sign in with credential from the Google user.
-    firebase.auth().signInWithCredential(credential).catch(function(error) {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // The email of the user's account used.
-        var email = error.email;
-        // The firebase.auth.AuthCredential type that was used.
-        var credential = error.credential;
-    });
-
-    //TODO: Username
-    
-    
-
 });
+
 
 function googlePopUp(_callback) {
     
     googleAuthWin = new BrowserWindow({
-            parent: win,
+            parent: authWindow,
             modal: true,
             width: 800,
             height: 650,
@@ -507,3 +440,4 @@ function googlePopUp(_callback) {
             _callback();
         });
 };
+

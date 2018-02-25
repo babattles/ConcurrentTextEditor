@@ -24,9 +24,15 @@ var openFile = function() {
             var mode = modelist.getModeForPath(path).mode;
             editor.getSession().setMode(mode);
 
+            // set the state (so opening a file doesn't stage an edit)
+            global_opening = true;
+
             fileContents = data;
             // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
             editor.setValue(data, -1);
+
+            // reset the state
+            global_opening = false;
 
             // enable the close menu option
             ipcRenderer.send('enable-close', 'ping');
@@ -70,9 +76,15 @@ var openFileDrag = function(pathDrag) {
         var mode = modelist.getModeForPath(path).mode;
         editor.getSession().setMode(mode);
 
+        // set the state (so opening a file doesn't stage an edit)
+        global_opening = true;
+
         fileContents = data;
         // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
         editor.setValue(data, -1);
+
+        // reset the state
+        global_opening = false;
 
         // enable the close menu option
         ipcRenderer.send('enable-close', 'ping');
@@ -132,8 +144,15 @@ var saveFileAs = function() {
 };
 
 var closeFile = function() {
+    // set the state (so opening a file doesn't stage an edit)
+    global_opening = true;
+
     editor.setValue('', -1);
     path = '';
+
+    //reset the state
+    global_opening = false;
+    
     // disable close
     ipcRenderer.send('disable-close', 'ping');
 };

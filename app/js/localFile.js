@@ -28,6 +28,9 @@ var openFile = function() {
             // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
             editor.setValue(data, -1);
 
+            // enable the close menu option
+            ipcRenderer.send('enable-close', 'ping');
+
             // Add file to user's account
             var user = firebase.auth().currentUser;
             if (user) {
@@ -51,6 +54,7 @@ var openFile = function() {
         });
     });
 };
+
 //open a file when dragged into ace
 var openFileDrag = function(pathDrag) {
     path = pathDrag;
@@ -69,6 +73,9 @@ var openFileDrag = function(pathDrag) {
         fileContents = data;
         // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
         editor.setValue(data, -1);
+
+        // enable the close menu option
+        ipcRenderer.send('enable-close', 'ping');
 
         // Add file to user's account
         var user = firebase.auth().currentUser;
@@ -127,4 +134,6 @@ var saveFileAs = function() {
 var closeFile = function() {
     editor.setValue('', -1);
     path = '';
+    // disable close
+    ipcRenderer.send('disable-close', 'ping');
 };

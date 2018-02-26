@@ -10,6 +10,9 @@ const https = require('https');
 
 
 
+//Enables live-reload
+require('electron-reload')(__dirname);
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win = null;
@@ -386,6 +389,7 @@ ipcMain.on('close-dragged', (event, arg) => {
     enableClose();
 });
 
+<<<<<<< HEAD
 ipcMain.on('google-auth', (event, arg) => {
 
     googlePopUp(function() {
@@ -492,3 +496,14 @@ function getToken (_callback) {
 
 
 
+=======
+// enable close menu option
+ipcMain.on("enable-close", (event, arg) => {
+    enableClose();
+});
+
+// disable close menu option
+ipcMain.on("disable-close", (event, arg) => {
+    disableClose();
+});
+>>>>>>> master

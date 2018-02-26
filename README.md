@@ -5,6 +5,6 @@ Note: This only needs to be installed once on your machine
 # Instructions to run (Unix)
 * Download/clone the repository
 * Navigate to the project's directory (e.g. HiveText)
-* Run the command `npm install electron --save-dev --save-exact`
+* Run the command `npm install`
   * This will create the node_modules directory which contains components needed to run Electron
 * To start HiveText, use the command `npm start`

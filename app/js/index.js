@@ -167,6 +167,8 @@ firebase.auth().onAuthStateChanged(function(user) {
                     database.ref("/users/" + user.uid + "/fileList").child(childSnapshot.key).remove();
                     database.ref("files").child(childSnapshot.key).remove();
                     closeFile();
+                    // disable close menu option
+                    ipcRenderer.send('disable-close', 'ping');
                 });
 
                 // make open button
@@ -187,7 +189,8 @@ firebase.auth().onAuthStateChanged(function(user) {
                     var contents = file.child("fileContents").once('value').then(function(snapshot) {
                         editor.setValue(snapshot.val(), -1);
                     });
-
+                    // enable close menu
+                    ipcRenderer.send('enable-close', 'ping');
                 });
 
                 // add new entry to list of files

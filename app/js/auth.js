@@ -46,9 +46,6 @@ ipcRenderer.on('token', (event, args) => {
     useToken(args);
 });
 
-
-
-
 function useToken (gAccessToken) {
     var credential = firebase.auth.GoogleAuthProvider.credential(gAccessToken.id_token);
     //TODO: save refresh token and make functionality to refresh auth

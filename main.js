@@ -389,7 +389,6 @@ ipcMain.on('close-dragged', (event, arg) => {
     enableClose();
 });
 
-<<<<<<< HEAD
 ipcMain.on('google-auth', (event, arg) => {
 
     googlePopUp(function() {
@@ -494,9 +493,6 @@ function getToken (_callback) {
 }
 
 
-
-
-=======
 // enable close menu option
 ipcMain.on("enable-close", (event, arg) => {
     enableClose();
@@ -506,4 +502,3 @@ ipcMain.on("enable-close", (event, arg) => {
 ipcMain.on("disable-close", (event, arg) => {
     disableClose();
 });
->>>>>>> master

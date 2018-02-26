@@ -5,6 +5,7 @@ const path = require('path');
 const url = require('url');
 const { ipcMain } = require('electron');
 const { Menu } = require('electron');
+const https = require('https');
 
 
 
@@ -13,6 +14,10 @@ const { Menu } = require('electron');
 // be closed automatically when the JavaScript object is garbage collected.
 let win = null;
 let authWindow = null;
+let gAuthCode = null;
+let googleAuthWin = null;
+let gAuthToken = null;
+
 
 
 
@@ -382,15 +387,19 @@ ipcMain.on('close-dragged', (event, arg) => {
 });
 
 ipcMain.on('google-auth', (event, arg) => {
+
     googlePopUp(function() {
         if (gAuthCode){
-            googleAuthWin.webContents.send('token', gAuthCode);
+            getToken(function(){
+                if (gAuthToken) {
+                    googleAuthWin.removeAllListeners('closed');
+                    setImmediate(() => googleAuthWin.close());
+                    authWindow.webContents.send('token', gAuthToken); 
+                }
+            });
         }
     });   
-
-    
 });
-
 
 function googlePopUp(_callback) {
     
@@ -405,10 +414,10 @@ function googlePopUp(_callback) {
 
         //URL to open
         var gAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth?"
-            + "scope=https://www.googleapis.com/auth/firebase&"
+            + "scope=profile+email+https://www.googleapis.com/auth/firebase&"
+            //+ "scope=https://www.googleapis.com/auth/firebase&"
             + "response_type=code&"
-            + "state=security_token%3D138r5719ru3e1%26url%3Dhttps://oauth2.example.com/token&"
-            + "redirect_uri=http://127.0.0.1:9004&"
+            + "redirect_uri=com.googleusercontent.apps.254482798300-tn0q68a55m8taeiktgiue1gdq6btukjk:redirect_uri_path&"
             + "client_id=254482798300-tn0q68a55m8taeiktgiue1gdq6btukjk.apps.googleusercontent.com";
 
         googleAuthWin.loadURL(gAuthUrl);
@@ -428,16 +437,58 @@ function googlePopUp(_callback) {
             if (query) {
                 if (query.error) {
                     return new Error(`There was an error: ${query.error}`);
-                } else if (query.code) {
-                    // Login is complete
-                    googleAuthWin.removeAllListeners('closed');
-                    setImmediate(() => googleAuthWin.close());
+                } else if (query.code){
 
                     //set AuthCode
                     gAuthCode = query.code;
+                    console.log(query);
                 }
             }
             _callback();
         });
 };
+
+function getToken (_callback) {
+    var postData = "code="+gAuthCode+"&"
+        + "client_id=254482798300-tn0q68a55m8taeiktgiue1gdq6btukjk.apps.googleusercontent.com&"
+        + "client_secret=KXEUaUZ0VlHVESbOQ95KpnBf&"
+        + "redirect_uri=com.googleusercontent.apps.254482798300-tn0q68a55m8taeiktgiue1gdq6btukjk:redirect_uri_path&"
+        + "grant_type=authorization_code";
+
+    var postOptions = {
+        host: "www.googleapis.com",
+        port: 443,
+        path: "/oauth2/v4/token",
+        method: 'POST',
+        headers: {
+
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    };
+
+    var data = "";
+    var request = https.request(postOptions, function(response) {
+        response.on('data', function(chunk) {
+            if (chunk) {
+                data += chunk.toString('utf8');
+
+            }
+        }).on('end', () => {
+            console.log('gAuthToken: ',data);
+            gAuthToken = JSON.parse(data); 
+            _callback();
+        });
+
+    }).on("error", function(e) {
+
+        console.log(e);
+
+    });
+
+    request.write(postData);
+    request.end();
+}
+
+
+
 

@@ -4,11 +4,9 @@
  * */
 'use strict';
 const { ipcRenderer } = require('electron');
-const axios = require('axios');
-const qs = require('querystring');
-axios.defaults.adapter = function() {
-  return require('axios/adapters/http'); // always use Node.js adapter
-};
+const url = require('url');
+
+
 
 
 // Initialize Firebase
@@ -36,6 +34,8 @@ var resetPasswordBtn = document.getElementById('resetPasswordBtn');
 var state = 'loginRegister';
 
 
+
+ 
 //Listen for message to use google auth
 gLoginBtn.addEventListener('click', function() {
      ipcRenderer.send('google-auth', 'ping');
@@ -43,63 +43,50 @@ gLoginBtn.addEventListener('click', function() {
 });
 
 ipcRenderer.on('token', (event, args) => {
-    getTokens(args);
+    useToken(args);
 });
 
 
-function getTokens (gAuthCode) {
-    //Get Google ID Token
-    /*var gTokenString = "code="+gAuthCode+"&"
-        + "client_id=254482798300-tn0q68a55m8taeiktgiue1gdq6btukjk.apps.googleusercontent.com&"
-        + "client_secret=KXEUaUZ0VlHVESbOQ95KpnBf&"
-        + "redirect_uri=http://127.0.0.1:9004&"
-        + "grantType=authorization_code&";
-    var gTokenUrl = "https://www.googleapis.com/oauth2/v4/token";
-    const options = {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            }
-        }
-    */
-    //const tokens = await axios.post(gTokenUrl, gTokenString, options);
 
-    var postData = qs.stringify({
-        code: gAuthCode,
-        client_id: "254482798300-tn0q68a55m8taeiktgiue1gdq6btukjk.apps.googleusercontent.com",
-        redirect_uri: "http://127.0.0.1:9004",
-        grant_type: 'authorization_code',
-    });
 
-    let axiosConfig = {
-      headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-      }
-    };
-
-    const tokens = await axios.post('http://<host>:<port>/<path>', postData, axiosConfig)
-    .then((res) => {
-      console.log("RESPONSE RECEIVED: ", res);
-    })
-    .catch((err) => {
-      console.log("AXIOS ERROR: ", err);
-    })    
-    // Build Firebase credential with the Google ID token.
-    //var credential = firebase.auth.GoogleAuthProvider.credential(tokens.id_token);
-    var credential = firebase.auth.GoogleAuthProvider.credential(tokens.data.access_token);
-
+function useToken (gAccessToken) {
+    var credential = firebase.auth.GoogleAuthProvider.credential(gAccessToken.id_token);
+    //TODO: save refresh token and make functionality to refresh auth
 
     // Sign in with credential from the Google user.
-    firebase.auth().signInWithCredential(credential).catch(function(error) {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // The email of the user's account used.
-        var email = error.email;
-        // The firebase.auth.AuthCredential type that was used.
-        var credential = error.credential;
-    });
+    firebase.auth().signInWithCredential(credential).then(function() {
+        // hide all the previous fields
+        emailField.classList.add('hidden');
+        passwordField.classList.add('hidden');
+        loginBtn.classList.add('hidden');
+        registerBtn.classList.add('hidden');
+        closeBtn.classList.add('hidden');
+        forgotPasswordBtn.classList.add('hidden');
+        gLoginBtn.classList.add('hidden');
 
-    //TODO: Username
+        // show set username elements
+        usernameField.classList.remove('hidden');
+        usernameBtn.classList.remove('hidden');
+        usernameLabel.classList.remove('hidden');
+
+        // create a user node in the database
+        var user = firebase.auth().currentUser;
+
+        if (user) {
+            // User is signed in.
+            // set temp username to uid
+            firebase.database().ref().child("users").child(user.uid).set({ username: user.uid });
+        } else {
+            // No user is signed in.
+            alert("No user!!");
+        }
+    }).catch(function(error) {
+        if (error != null) {
+            alert("ERROR REGISTERING ACCOUNT");
+            console.log(error.message);
+            return;
+        }
+    });
 }
 
 var login = function() {

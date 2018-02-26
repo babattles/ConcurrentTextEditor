@@ -42,6 +42,13 @@ changeUsernameBtn.addEventListener("click", function() {
             displayName: newUsername
         }).then(function() {
             firebase.database().ref().child("users").child(user.uid).update({ 'username': newUsername });
+            var userRef = firebase.database().ref().child("users").child(user.uid);
+            var fileList = userRef.child('fileList')
+            fileList.on('value', function(snapshot) {
+                snapshot.forEach(function(childSnapshot) {
+                    var currentFile = firebase.database().ref().child('files').child(childSnapshot.key).child('userList').child(user.uid).set({ 'username': newUsername });
+                });
+            });
             // Send message to main.js to tell index.js to update the username field
             ipcRenderer.send('update-username', 'logged');
             alert("Username updated");

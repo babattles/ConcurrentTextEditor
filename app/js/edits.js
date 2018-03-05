@@ -29,8 +29,25 @@ var stringify = function (lines) {
 	return result;
 }
 
+/* Helper - Clear all local edits */
 var clearEdits = function () {
 	edits.splice(0, edits.length);
+}
+
+/* Post a new edit to the database */
+var postEdit = function (edit) {
+
+}
+
+/* Update an existing edit in the database */
+var updateEdit = function (edit) {
+
+}
+
+/* Rewrite a "remove" type edit */
+// TODO: Highlight this as a color (red)
+var rewriteRemoved = function (edit) {
+
 }
 
 var setEdit = function (startIndex, endIndex, delta) {
@@ -47,7 +64,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 					content: obj.content.substring(obj.start, startIndex) + stringify(delta.lines) + obj.content.substring(startIndex, obj.end),
 					type: delta.action,
 					user: user.uid,
-				}; //TODO: content add
+				}; 
 				return true; // stop searching
 			} else if (obj.start == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the beginning of an existing edit
 				//console.log("added to beginning");

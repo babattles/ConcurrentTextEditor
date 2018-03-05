@@ -40,7 +40,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 		var bool = 0;
 		bool = edits.find((obj, index) => {
 			if (obj.start < startIndex && startIndex < obj.end && delta.action == "insert" && obj.type == "insert") { // new addition was within an existing edit
-				console.log("added within");
+				//console.log("added within");
 				edits[index] = {
 					start: obj.start,
 					end: obj.end + (endIndex - startIndex),
@@ -50,7 +50,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 				}; //TODO: content add
 				return true; // stop searching
 			} else if (obj.start == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the beginning of an existing edit
-				console.log("added to beginning");
+				//console.log("added to beginning");
 				edits[index] = {
 					start: startIndex,
 					end: obj.end + (endIndex - startIndex),
@@ -69,19 +69,65 @@ var setEdit = function (startIndex, endIndex, delta) {
 					user: user.uid,
 				};
 				return true;
-			//} else if (obj.start > startIndex && obj.end < endIndex && delta.action == "remove") { // removed an edit as well as content on both sides
-
-			//} else if () { // removed an edit as well as content on the right side
-
-			//} else if () { // removed an edit as well as content on the left side
-				
-			} else if (obj.start <= startIndex && endIndex <= obj.end && delta.action == "remove") { // removed something from within an edit
-				//console.log("remove from within");
-				if (obj.start == startIndex && obj.end == endIndex) { // you're deleting the last of an edit
-					console.log("That's the last of em!");
+			} else if (obj.start > startIndex && obj.end < endIndex && delta.action == "remove") { // removed an edit as well as content on both sides
+				//console.log("edit and both sides");
+				edits.splice(index, 1);
+				edits.push({
+					start: startIndex,
+					end: endIndex - (obj.end - obj.start),
+					content: stringify(delta.lines).substring(startIndex, obj.start) + stringify(delta.lines).substring(obj.end, endIndex),
+					type: delta.action,
+					user: user.uid,
+				});
+			} else if (obj.start <= startIndex && obj.end < endIndex && startIndex <= obj.end && delta.action == "remove") { // removed some or all of an edit as well as content on the right side
+				//console.log("remove edit and right side");
+				if (obj.start == startIndex) {
+					//console.log("removing whole edit");
 					edits.splice(index, 1);
 				} else {
-					console.log("Not really an insert"); 
+					//console.log("edit to the right ->")
+					edits[index] = {
+						start: obj.start,
+						end: startIndex,
+						content: obj.content.substring(obj.start, startIndex), // ?
+						type: "insert",
+						user:user.uid,
+					};
+				}
+				edits.push({
+					start: obj.end,
+					end: endIndex,
+					content: stringify(delta.lines).substring(obj.end - obj.start, endIndex - startIndex),
+					type: delta.action,
+					user: user.uid,
+				});
+			} else if (obj.start > startIndex && obj.end >= endIndex && endIndex > obj.start && delta.action == "remove") { // removed some or all of an edit as well as content on the left side
+				//console.log("remove edit and left");
+				if (obj.end == endIndex) {
+					edits.splice(index, 1);
+				} else {
+					edits[index] = {
+						start: endIndex,
+						end: obj.end,
+						content: stringify(delta.lines).substring(endIndex, obj.end),
+						type: "insert",
+						user: user.uid,
+					}
+				}
+				edits.push({
+					start: startIndex,
+					end: obj.start,
+					content: stringify(delta.lines).substring(startIndex, obj.start),
+					type: delta.action,
+					user: user.uid,
+				})
+			} else if (obj.start <= startIndex && endIndex <= obj.end && delta.action == "remove" && obj.type == "insert") { // removed something from within an edit
+				//console.log("remove from within");
+				if (obj.start == startIndex && obj.end == endIndex) { // you're deleting the last of an edit
+					//console.log("That's the last of em!");
+					edits.splice(index, 1);
+				} else {
+					//console.log("Not really an insert"); 
 					edits[index] = {
 						start: obj.start,
 						end: obj.end - (endIndex - startIndex),

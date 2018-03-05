@@ -210,12 +210,12 @@ firebase.auth().onAuthStateChanged(function (user) {
         editor.getSession().on('change', function (delta) {
             // delta.start, delta.end, delta.lines, delta.action
             if (!global_opening) {
-                var startIndex = editor.session.doc.positionToIndex(delta.start);
-                var endIndex = editor.session.doc.positionToIndex(delta.end);
+                var startIndex = editor.session.doc.positionToIndex(delta.start, 0);
+                var endIndex = editor.session.doc.positionToIndex(delta.end, 0);
                 setEdit(startIndex, endIndex, delta);
                 // output for debugging
+                console.log("**EDITS**");
                 for (var x = 0; x < edits.length; x++) {
-                    //console.log(edits[x].content + "\n" + edits[x].type);
                     console.log(edits[x]);
                 }
             }

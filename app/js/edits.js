@@ -79,6 +79,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 					type: delta.action,
 					user: user.uid,
 				});
+				return true;
 			} else if (obj.start <= startIndex && obj.end < endIndex && startIndex <= obj.end && delta.action == "remove") { // removed some or all of an edit as well as content on the right side
 				//console.log("remove edit and right side");
 				if (obj.start == startIndex) {
@@ -101,6 +102,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 					type: delta.action,
 					user: user.uid,
 				});
+				return true;
 			} else if (obj.start > startIndex && obj.end >= endIndex && endIndex > obj.start && delta.action == "remove") { // removed some or all of an edit as well as content on the left side
 				//console.log("remove edit and left");
 				if (obj.end == endIndex) {
@@ -120,7 +122,8 @@ var setEdit = function (startIndex, endIndex, delta) {
 					content: stringify(delta.lines).substring(startIndex, obj.start),
 					type: delta.action,
 					user: user.uid,
-				})
+				});
+				return true;
 			} else if (obj.start <= startIndex && endIndex <= obj.end && delta.action == "remove" && obj.type == "insert") { // removed something from within an edit
 				//console.log("remove from within");
 				if (obj.start == startIndex && obj.end == endIndex) { // you're deleting the last of an edit

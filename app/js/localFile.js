@@ -51,6 +51,10 @@ var openFile = function() {
                         'fileName': currentFileName,
                         'fileContents': fileContents
                     });
+                    // set the current open file to the new file
+                    currentFile = newFile;
+                    // set the editRef
+                    editRef = currentFile.child("edits");
                     // add user to file's userList
                     newFile.child('userList').child(user.uid).set({ 'username': currentUserName });
                     // add fileID to user's fileList
@@ -103,6 +107,10 @@ var openFileDrag = function(pathDrag) {
                     'fileName': currentFileName,
                     'fileContents': fileContents
                 });
+                // set the current open file to the new file
+                currentFile = newFile;
+                // set the editRef
+                editRef = currentFile.child("edits");
                 // add user to file's userList
                 newFile.child('userList').child(user.uid).set({ 'username': currentUserName });
                 // add fileID to user's fileList

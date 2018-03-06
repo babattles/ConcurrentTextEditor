@@ -36,7 +36,15 @@ var clearEdits = function () {
 
 /* Post a new edit to the database */
 var postEdit = function (edit) {
-
+	var newEdit = editRef.push(); // generate a new edit
+	newEdit.set({
+		'startIndex': edit.start,
+		'endIndex': edit.end,
+		'content': edit.content,
+		'type': edit.type,
+		'user': edit.user
+	});
+	edit.id = newEdit.key;
 }
 
 /* Update an existing edit in the database */
@@ -50,6 +58,7 @@ var rewriteRemoved = function (edit) {
 
 }
 
+/* Take a startIndex, endIndex, and the change, and make an edit */
 var setEdit = function (startIndex, endIndex, delta) {
 	// get the current user
 	var user = firebase.auth().currentUser;
@@ -161,14 +170,16 @@ var setEdit = function (startIndex, endIndex, delta) {
 		});
 		// never found parent edit, so add edit to edits
 		if (!bool) {
-			console.log("no parent");
-			edits.push({
+			//console.log("no parent");
+			var e = {
 				start: startIndex,
 				end: endIndex,
 				content: stringify(delta.lines),
 				type: delta.action,
 				user: user.uid,
-			});
+			}
+			edits.push(e);
+			postEdit(e);
 		}
 	}
 }

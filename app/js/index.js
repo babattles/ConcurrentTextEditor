@@ -18,6 +18,11 @@ var database = firebase.database();
 var userSettingsBtn = document.getElementById("userSettingsBtn");
 var editor = document.getElementById("editor");
 
+// track the user's current open file in the database
+var currentFile = null;
+// track the user's edits in their current open file
+var editRef = null;
+
 // state to track if a file is being opened
 var global_opening = false;
 
@@ -194,6 +199,10 @@ firebase.auth().onAuthStateChanged(function (user) {
                         editor.setValue(snapshot.val(), -1);
                         global_opening = false;
                     });
+                    // set the current open file to the new file
+                    currentFile = file;
+                    // set the editRef
+                    editRef = currentFile.child("edits");
                     // enable close menu
                     ipcRenderer.send('enable-close', 'ping');
                 });

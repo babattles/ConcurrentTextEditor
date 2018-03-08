@@ -17,35 +17,36 @@ var database = firebase.database();
 
 var userSettingsBtn = document.getElementById("userSettingsBtn");
 var editor = document.getElementById("editor");
+var onlineUsersContainer = document.getElementById("online-users");
 
 // state to track if a file is being opened
 var global_opening = false;
 
 // Authenticate Button is clicked
 var AuthListener = document.getElementById("authBtn");
-AuthListener.addEventListener('click', function () {
+AuthListener.addEventListener('click', function() {
     ipcRenderer.send('open-auth-window', 'ping');
 });
 
 // Logout Button is clicked
 var LogoutListener = document.getElementById("logoutBtn");
-LogoutListener.addEventListener('click', function () {
-    firebase.auth().signOut().then(function () {
+LogoutListener.addEventListener('click', function() {
+    firebase.auth().signOut().then(function() {
         // Sign-out successful.
         document.querySelector('#userSettings').classList.add("hidden");
         alert("user logged out");
-    }, function (error) {
+    }, function(error) {
         // An error happened.
         alert("oops, logout ERROR!");
     });
 });
 
 // Listen for response to update username
-ipcRenderer.on('update-username-reply', function (event, arg) {
+ipcRenderer.on('update-username-reply', function(event, arg) {
     var user = firebase.auth().currentUser;
     if (user) {
         // User is signed in.
-        database.ref().child("users").child(user.uid).child("username").once("value").then(function (snapshot) {
+        database.ref().child("users").child(user.uid).child("username").once("value").then(function(snapshot) {
             userSettingsBtn.innerHTML = snapshot.val();
         });
     } else {
@@ -58,47 +59,47 @@ ipcRenderer.on('update-username-reply', function (event, arg) {
  * Menu Item Listeners
  */
 // Listen for Open File Menu Select
-ipcRenderer.on('open-file', function (event, arg) {
+ipcRenderer.on('open-file', function(event, arg) {
     openFile();
 });
 
 // Listen for Save File Menu Select
-ipcRenderer.on('save-file', function (event, arg) {
+ipcRenderer.on('save-file', function(event, arg) {
     saveFile();
 });
 
 // Listen for Save File Menu Select
-ipcRenderer.on('save-file-as', function (event, arg) {
+ipcRenderer.on('save-file-as', function(event, arg) {
     saveFileAs();
 });
 
 // Listen for Close File Menu Select
-ipcRenderer.on('close-file', function (event, arg) {
+ipcRenderer.on('close-file', function(event, arg) {
     closeFile();
 });
 
 // Listen for Increase Font Size Menu Select
-ipcRenderer.on('increase-font', function (event, arg) {
+ipcRenderer.on('increase-font', function(event, arg) {
     fontIncrease();
 });
 
 // Listen for Decrease Font Size Menu Select
-ipcRenderer.on('decrease-font', function (event, arg) {
+ipcRenderer.on('decrease-font', function(event, arg) {
     fontDecrease();
 });
 
 //Listener for Reset Font Size Menu Select
-ipcRenderer.on('reset-font', function (event, arg) {
+ipcRenderer.on('reset-font', function(event, arg) {
     fontReset();
 });
 
 // Listen for line number toggle
-ipcRenderer.on('line-number', function (event, arg) {
+ipcRenderer.on('line-number', function(event, arg) {
     lineNumber();
 });
 
 // Listen for change in theme
-ipcRenderer.on('change-theme', function (event, arg) {
+ipcRenderer.on('change-theme', function(event, arg) {
     if (arg == 'dark') {
         editor.setTheme("ace/theme/ambiance");
     } else if (arg == 'light') {
@@ -119,13 +120,13 @@ document.body.ondrop = (e) => {
 };
 
 // Called when user state changes (login/logout)
-firebase.auth().onAuthStateChanged(function (user) {
+firebase.auth().onAuthStateChanged(function(user) {
     var authBtn = document.getElementById("authBtn");
     var logoutBtn = document.getElementById("logoutBtn");
     if (user) {
         // User is signed in.
         // update user settings button with username
-        database.ref().child("users").child(user.uid).child("username").once("value").then(function (snapshot) {
+        database.ref().child("users").child(user.uid).child("username").once("value").then(function(snapshot) {
             userSettingsBtn.innerHTML = snapshot.val();
         });
 
@@ -135,7 +136,7 @@ firebase.auth().onAuthStateChanged(function (user) {
         userSettingsBtn.style.display = "initial";
 
         // Load user's files
-        var filesRef = database.ref("/users/" + user.uid + "/fileList").orderByChild("fileName").on('value', function (snapshot) {
+        var filesRef = database.ref("/users/" + user.uid + "/fileList").orderByChild("fileName").on('value', function(snapshot) {
             // Clear files if any are there
             var files = document.getElementById("file-container");
             while (files.firstChild) {
@@ -143,7 +144,7 @@ firebase.auth().onAuthStateChanged(function (user) {
             }
 
             // for each file in the user's fileList...
-            snapshot.forEach(function (childSnapshot) {
+            snapshot.forEach(function(childSnapshot) {
                 // make row
                 var div = document.createElement("div");
                 div.style.background = "green";
@@ -166,7 +167,7 @@ firebase.auth().onAuthStateChanged(function (user) {
                 deleteBtn.innerHTML = "X";
 
                 // listener to delete this file from database
-                deleteBtn.addEventListener('click', function () {
+                deleteBtn.addEventListener('click', function() {
                     database.ref("/users/" + user.uid + "/fileList").child(childSnapshot.key).remove();
                     database.ref("files").child(childSnapshot.key).remove();
                     closeFile();
@@ -184,16 +185,53 @@ firebase.auth().onAuthStateChanged(function (user) {
                 openBtn.innerHTML = "OPEN";
 
                 // listener to open this file from database
-                openBtn.addEventListener('click', function () {
+                openBtn.addEventListener('click', function() {
                     var file = database.ref("files").child(childSnapshot.key);
+                    var onlineUsers = file.child('onlineUsers');
+                    var username = database.ref().child("users").child(user.uid).child("username");
+                    onlineUsers.on("child_added", function(snapshot) {
+                        /*while (onlineUsersContainer.firstChild) {
+                            onlineUsersContainer.removeChild(onlineUsersContainer.firstChild);
+                        }
+                        onlineUsers.on('value', function(snapshot) {
+                            snapshot.forEach(function(childSnapshot) {
+                                var element = document.createElement("div");
+                                element.setAttribute("id", childSnapshot.key);
+                                element.classList.add("collabActive");
+                                element.appendChild(document.createTextNode(childSnapshot.val().username));
+                                onlineUsersContainer.appendChild(element);
+                            });
+                        });*/
+                    });
+                    onlineUsers.on("child_removed", function(snapshot2) {
+                        // var keyId = '#' + snapshot2.key;
+                        /*while (onlineUsersContainer.firstChild) {
+                            onlineUsersContainer.removeChild(onlineUsersContainer.firstChild);
+                        }
+                        onlineUsers.on('value', function(snapshot) {
+                            snapshot.forEach(function(childSnapshot) {
+                                var element = document.createElement("div");
+                                element.setAttribute("id", childSnapshot.key);
+                                element.classList.add("collabActive");
+                                username.on("value", function(snapshotUser) {
+                                    element.appendChild(document.createTextNode(snapshotUser.val()));
+                                });
+                                onlineUsersContainer.appendChild(element);
+                            });
+                        });*/
+                    });
+                    username.on("value", function(snapshot) {
+                        file.child('onlineUsers').child(user.uid).set({ 'username': snapshot.val() });
+                    });
                     var modelist = ace.require("ace/ext/modelist");
                     var mode = modelist.getModeForPath(childSnapshot.val().fileName).mode;
                     editor.getSession().setMode(mode);
-                    var contents = file.child("fileContents").once('value').then(function (snapshot) {
+                    var contents = file.child("fileContents").once('value').then(function(snapshot) {
                         global_opening = true;
                         editor.setValue(snapshot.val(), -1);
                         global_opening = false;
                     });
+                    setCurrentFile(file.key);
                     // enable close menu
                     ipcRenderer.send('enable-close', 'ping');
                 });
@@ -207,7 +245,7 @@ firebase.auth().onAuthStateChanged(function (user) {
         });
 
         /* EDIT FUNCTIONALITY */
-        editor.getSession().on('change', function (delta) {
+        editor.getSession().on('change', function(delta) {
             // delta.start, delta.end, delta.lines, delta.action
             if (!global_opening) {
                 var startIndex = editor.session.doc.positionToIndex(delta.start, 0);

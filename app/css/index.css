@@ -79,13 +79,22 @@ body {
     color: #CCCCCC;
 }
 
-#edit {
+#edit-add {
     padding-left: 5px;
     background-color: #B3FFCC;
 }
 
-#edit:hover{
+#edit-add:hover{
     background-color: #65CB86;
+}
+
+#edit-remove {
+    padding-left: 5px;
+    background-color: #F1636A;
+}
+
+#edit-remove:hover{
+    background-color: #C64F64;
 }
 
 /*Collaborator List*/

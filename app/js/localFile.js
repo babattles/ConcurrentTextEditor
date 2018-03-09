@@ -8,6 +8,7 @@ var path = '';
 var fileContents = '';
 var currentFileName = '';
 var pathSeperator = requirePath.sep;
+var currentFile;
 
 var openFile = function() {
     dialog.showOpenDialog((fileNames) => {
@@ -59,6 +60,9 @@ var openFile = function() {
                     newFile.child('userList').child(user.uid).set({ 'username': currentUserName });
                     // add fileID to user's fileList
                     userRef.child('fileList').child(newFile.key).set({ 'fileName': currentFileName });
+                    // set current user online status
+                    newFile.child('onlineUsers').child(user.uid).set({ 'username': currentUserName });
+                    currentFile = newFile.key;
                 });
             }
         });
@@ -115,6 +119,9 @@ var openFileDrag = function(pathDrag) {
                 newFile.child('userList').child(user.uid).set({ 'username': currentUserName });
                 // add fileID to user's fileList
                 userRef.child('fileList').child(newFile.key).set({ 'fileName': currentFileName });
+                // set current user online status
+                    newFile.child('onlineUsers').child(user.uid).set({ 'username': currentUserName });
+                currentFile = newFile.key;
             });
         }
     });
@@ -122,7 +129,6 @@ var openFileDrag = function(pathDrag) {
 };
 
 var saveFile = function() {
-    console.log("called??");
     if (path) {
         fs.writeFile(path, editor.getValue(), function(err) {
             if (err) {
@@ -151,13 +157,20 @@ var saveFileAs = function() {
     });
 };
 
+setCurrentFile = function(fileKey) {
+    currentFile = fileKey;
+}
+
 var closeFile = function() {
     // set the state (so opening a file doesn't stage an edit)
     global_ignore = true;
 
     editor.setValue('', -1);
     path = '';
-
+    var user = firebase.auth().currentUser;
+    if (user) {
+        firebase.database().ref().child('files').child(currentFile).child('onlineUsers').child(user.uid).remove();
+    }
     //reset the state
     global_ignore = false;
     

@@ -26,14 +26,14 @@ var openFile = function() {
             editor.getSession().setMode(mode);
 
             // set the state (so opening a file doesn't stage an edit)
-            global_opening = true;
+            global_ignore = true;
 
             fileContents = data;
             // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
             editor.setValue(data, -1);
 
             // reset the state
-            global_opening = false;
+            global_ignore = false;
 
             // enable the close menu option
             ipcRenderer.send('enable-close', 'ping');
@@ -52,6 +52,10 @@ var openFile = function() {
                         'fileName': currentFileName,
                         'fileContents': fileContents
                     });
+                    // set the current open file to the new file
+                    currentFile = newFile;
+                    // set the editRef
+                    editRef = currentFile.child("edits");
                     // add user to file's userList
                     newFile.child('userList').child(user.uid).set({ 'username': currentUserName });
                     // add fileID to user's fileList
@@ -81,14 +85,14 @@ var openFileDrag = function(pathDrag) {
         editor.getSession().setMode(mode);
 
         // set the state (so opening a file doesn't stage an edit)
-        global_opening = true;
+        global_ignore = true;
 
         fileContents = data;
         // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
         editor.setValue(data, -1);
 
         // reset the state
-        global_opening = false;
+        global_ignore = false;
 
         // enable the close menu option
         ipcRenderer.send('enable-close', 'ping');
@@ -107,6 +111,10 @@ var openFileDrag = function(pathDrag) {
                     'fileName': currentFileName,
                     'fileContents': fileContents
                 });
+                // set the current open file to the new file
+                currentFile = newFile;
+                // set the editRef
+                editRef = currentFile.child("edits");
                 // add user to file's userList
                 newFile.child('userList').child(user.uid).set({ 'username': currentUserName });
                 // add fileID to user's fileList
@@ -155,7 +163,7 @@ setCurrentFile = function(fileKey) {
 
 var closeFile = function() {
     // set the state (so opening a file doesn't stage an edit)
-    global_opening = true;
+    global_ignore = true;
 
     editor.setValue('', -1);
     path = '';
@@ -164,7 +172,7 @@ var closeFile = function() {
         firebase.database().ref().child('files').child(currentFile).child('onlineUsers').child(user.uid).remove();
     }
     //reset the state
-    global_opening = false;
+    global_ignore = false;
     
     // disable close
     ipcRenderer.send('disable-close', 'ping');

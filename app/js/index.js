@@ -19,8 +19,16 @@ var userSettingsBtn = document.getElementById("userSettingsBtn");
 var editor = document.getElementById("editor");
 var onlineUsersContainer = document.getElementById("online-users");
 
+// track the user's current open file in the database
+var currentFile = null;
+// track the user's edits in their current open file
+var editRef = null;
+
 // state to track if a file is being opened
-var global_opening = false;
+var global_ignore = false;
+
+// variable to track the current user globally
+var global_user;
 
 // Authenticate Button is clicked
 var AuthListener = document.getElementById("authBtn");
@@ -120,7 +128,8 @@ document.body.ondrop = (e) => {
 };
 
 // Called when user state changes (login/logout)
-firebase.auth().onAuthStateChanged(function(user) {
+firebase.auth().onAuthStateChanged(function (user) {
+    global_user = user;
     var authBtn = document.getElementById("authBtn");
     var logoutBtn = document.getElementById("logoutBtn");
     if (user) {
@@ -226,12 +235,19 @@ firebase.auth().onAuthStateChanged(function(user) {
                     var modelist = ace.require("ace/ext/modelist");
                     var mode = modelist.getModeForPath(childSnapshot.val().fileName).mode;
                     editor.getSession().setMode(mode);
-                    var contents = file.child("fileContents").once('value').then(function(snapshot) {
-                        global_opening = true;
+                    var contents = file.child("fileContents").once('value').then(function (snapshot) {
+                        global_ignore = true;
+
                         editor.setValue(snapshot.val(), -1);
-                        global_opening = false;
+                        global_ignore = false;
                     });
-                    setCurrentFile(file.key);
+                    // set the current open file to the new file
+                    currentFile = file;
+                    // set the editRef
+                    editRef = currentFile.child("edits");
+                    // load the file's current edits (clear first, in case coming from another file)
+                    clearEdits();
+                    getEdits(); // Also listens for incoming edits
                     // enable close menu
                     ipcRenderer.send('enable-close', 'ping');
                 });
@@ -247,7 +263,7 @@ firebase.auth().onAuthStateChanged(function(user) {
         /* EDIT FUNCTIONALITY */
         editor.getSession().on('change', function(delta) {
             // delta.start, delta.end, delta.lines, delta.action
-            if (!global_opening) {
+            if (!global_ignore) {
                 var startIndex = editor.session.doc.positionToIndex(delta.start, 0);
                 var endIndex = editor.session.doc.positionToIndex(delta.end, 0);
                 setEdit(startIndex, endIndex, delta);

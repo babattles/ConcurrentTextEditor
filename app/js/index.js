@@ -17,6 +17,18 @@ var database = firebase.database();
 
 var userSettingsBtn = document.getElementById("userSettingsBtn");
 var editor = document.getElementById("editor");
+var onlineUsersContainer = document.getElementById("online-users");
+
+// track the user's current open file in the database
+var currentFile = null;
+// track the user's edits in their current open file
+var editRef = null;
+
+// state to track if a file is being opened
+var global_ignore = false;
+
+// variable to track the current user globally
+var global_user;
 
 // Authenticate Button is clicked
 var AuthListener = document.getElementById("authBtn");
@@ -116,7 +128,8 @@ document.body.ondrop = (e) => {
 };
 
 // Called when user state changes (login/logout)
-firebase.auth().onAuthStateChanged(function(user) {
+firebase.auth().onAuthStateChanged(function (user) {
+    global_user = user;
     var authBtn = document.getElementById("authBtn");
     var logoutBtn = document.getElementById("logoutBtn");
     if (user) {
@@ -183,12 +196,58 @@ firebase.auth().onAuthStateChanged(function(user) {
                 // listener to open this file from database
                 openBtn.addEventListener('click', function() {
                     var file = database.ref("files").child(childSnapshot.key);
+                    var onlineUsers = file.child('onlineUsers');
+                    var username = database.ref().child("users").child(user.uid).child("username");
+                    onlineUsers.on("child_added", function(snapshot) {
+                        /*while (onlineUsersContainer.firstChild) {
+                            onlineUsersContainer.removeChild(onlineUsersContainer.firstChild);
+                        }
+                        onlineUsers.on('value', function(snapshot) {
+                            snapshot.forEach(function(childSnapshot) {
+                                var element = document.createElement("div");
+                                element.setAttribute("id", childSnapshot.key);
+                                element.classList.add("collabActive");
+                                element.appendChild(document.createTextNode(childSnapshot.val().username));
+                                onlineUsersContainer.appendChild(element);
+                            });
+                        });*/
+                    });
+                    onlineUsers.on("child_removed", function(snapshot2) {
+                        // var keyId = '#' + snapshot2.key;
+                        /*while (onlineUsersContainer.firstChild) {
+                            onlineUsersContainer.removeChild(onlineUsersContainer.firstChild);
+                        }
+                        onlineUsers.on('value', function(snapshot) {
+                            snapshot.forEach(function(childSnapshot) {
+                                var element = document.createElement("div");
+                                element.setAttribute("id", childSnapshot.key);
+                                element.classList.add("collabActive");
+                                username.on("value", function(snapshotUser) {
+                                    element.appendChild(document.createTextNode(snapshotUser.val()));
+                                });
+                                onlineUsersContainer.appendChild(element);
+                            });
+                        });*/
+                    });
+                    username.on("value", function(snapshot) {
+                        file.child('onlineUsers').child(user.uid).set({ 'username': snapshot.val() });
+                    });
                     var modelist = ace.require("ace/ext/modelist");
                     var mode = modelist.getModeForPath(childSnapshot.val().fileName).mode;
                     editor.getSession().setMode(mode);
-                    var contents = file.child("fileContents").once('value').then(function(snapshot) {
+                    var contents = file.child("fileContents").once('value').then(function (snapshot) {
+                        global_ignore = true;
+
                         editor.setValue(snapshot.val(), -1);
+                        global_ignore = false;
                     });
+                    // set the current open file to the new file
+                    currentFile = file;
+                    // set the editRef
+                    editRef = currentFile.child("edits");
+                    // load the file's current edits (clear first, in case coming from another file)
+                    clearEdits();
+                    getEdits(); // Also listens for incoming edits
                     // enable close menu
                     ipcRenderer.send('enable-close', 'ping');
                 });
@@ -199,6 +258,21 @@ firebase.auth().onAuthStateChanged(function(user) {
                 div.appendChild(deleteBtn);
                 files.appendChild(div);
             });
+        });
+
+        /* EDIT FUNCTIONALITY */
+        editor.getSession().on('change', function(delta) {
+            // delta.start, delta.end, delta.lines, delta.action
+            if (!global_ignore) {
+                var startIndex = editor.session.doc.positionToIndex(delta.start, 0);
+                var endIndex = editor.session.doc.positionToIndex(delta.end, 0);
+                setEdit(startIndex, endIndex, delta);
+                // output for debugging
+                console.log("**EDITS**");
+                for (var x = 0; x < edits.length; x++) {
+                    console.log(edits[x]);
+                }
+            }
         });
     } else {
         // No user is signed in.

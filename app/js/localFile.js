@@ -8,6 +8,7 @@ var path = '';
 var fileContents = '';
 var currentFileName = '';
 var pathSeperator = requirePath.sep;
+var currentFile;
 
 var openFile = function() {
     dialog.showOpenDialog((fileNames) => {
@@ -24,9 +25,15 @@ var openFile = function() {
             var mode = modelist.getModeForPath(path).mode;
             editor.getSession().setMode(mode);
 
+            // set the state (so opening a file doesn't stage an edit)
+            global_ignore = true;
+
             fileContents = data;
             // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
             editor.setValue(data, -1);
+
+            // reset the state
+            global_ignore = false;
 
             // enable the close menu option
             ipcRenderer.send('enable-close', 'ping');
@@ -45,10 +52,17 @@ var openFile = function() {
                         'fileName': currentFileName,
                         'fileContents': fileContents
                     });
+                    // set the current open file to the new file
+                    currentFile = newFile;
+                    // set the editRef
+                    editRef = currentFile.child("edits");
                     // add user to file's userList
                     newFile.child('userList').child(user.uid).set({ 'username': currentUserName });
                     // add fileID to user's fileList
                     userRef.child('fileList').child(newFile.key).set({ 'fileName': currentFileName });
+                    // set current user online status
+                    newFile.child('onlineUsers').child(user.uid).set({ 'username': currentUserName });
+                    currentFile = newFile.key;
                 });
             }
         });
@@ -70,9 +84,15 @@ var openFileDrag = function(pathDrag) {
         var mode = modelist.getModeForPath(path).mode;
         editor.getSession().setMode(mode);
 
+        // set the state (so opening a file doesn't stage an edit)
+        global_ignore = true;
+
         fileContents = data;
         // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
         editor.setValue(data, -1);
+
+        // reset the state
+        global_ignore = false;
 
         // enable the close menu option
         ipcRenderer.send('enable-close', 'ping');
@@ -91,10 +111,17 @@ var openFileDrag = function(pathDrag) {
                     'fileName': currentFileName,
                     'fileContents': fileContents
                 });
+                // set the current open file to the new file
+                currentFile = newFile;
+                // set the editRef
+                editRef = currentFile.child("edits");
                 // add user to file's userList
                 newFile.child('userList').child(user.uid).set({ 'username': currentUserName });
                 // add fileID to user's fileList
                 userRef.child('fileList').child(newFile.key).set({ 'fileName': currentFileName });
+                // set current user online status
+                    newFile.child('onlineUsers').child(user.uid).set({ 'username': currentUserName });
+                currentFile = newFile.key;
             });
         }
     });
@@ -102,7 +129,6 @@ var openFileDrag = function(pathDrag) {
 };
 
 var saveFile = function() {
-    console.log("called??");
     if (path) {
         fs.writeFile(path, editor.getValue(), function(err) {
             if (err) {
@@ -131,9 +157,23 @@ var saveFileAs = function() {
     });
 };
 
+setCurrentFile = function(fileKey) {
+    currentFile = fileKey;
+}
+
 var closeFile = function() {
+    // set the state (so opening a file doesn't stage an edit)
+    global_ignore = true;
+
     editor.setValue('', -1);
     path = '';
+    var user = firebase.auth().currentUser;
+    if (user) {
+        firebase.database().ref().child('files').child(currentFile).child('onlineUsers').child(user.uid).remove();
+    }
+    //reset the state
+    global_ignore = false;
+    
     // disable close
     ipcRenderer.send('disable-close', 'ping');
 };

@@ -14,6 +14,21 @@ $(document).ready(function () {
 
 var edits = [];
 
+// Retrieve new edits as they are added to the database (including your own!)
+var getEdits = function() {
+	editRef.on("child_added", function(snapshot, prevChildKey) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
+		var e = snapshot.val();
+		edits.push({
+			start: e.startIndex,
+			end: e.endIndex,
+			content: e.content,
+			type: e.type,
+			user: e.user,
+			id: snapshot.key,
+		});
+	});
+}
+
 /* helper function */
 // Returns an array of strings as a single multi-line string
 var stringify = function (lines) {
@@ -32,14 +47,13 @@ var stringify = function (lines) {
 /* Helper - Clear all edits */
 var clearEdits = function () {
 	edits.splice(0, edits.length);
-	editRef.remove();
 }
 
 /* Helper - Get the database reference for an edit */
 var getEditRef = function (edit) {
 	if (editRef == null) return null;
-	return editRef.child(edit.id);
-} 
+	return editRef.child("" + edit.id);
+}
 
 /* Post a new edit to the database */
 var postEdit = function (edit) {
@@ -121,7 +135,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 					type: delta.action,
 					user: user.uid,
 				};
-				edits.push(e);
+				//edits.push(e);
 				postEdit(e);
 				return true;
 			} else if (obj.start <= startIndex && obj.end < endIndex && startIndex <= obj.end && delta.action == "remove") { // removed some or all of an edit as well as content on the right side
@@ -146,7 +160,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 					edits[index].user = user.uid;
 					updateEdit(edits[index]);
 				}
-				edits.push(e);
+				//edits.push(e);
 				postEdit(e);
 				return true;
 			} else if (obj.start > startIndex && obj.end >= endIndex && endIndex > obj.start && delta.action == "remove") { // removed some or all of an edit as well as content on the left side
@@ -171,7 +185,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 					edits[index].user = user.uid;
 					updateEdit(edits[index]);
 				}
-				edits.push(e);
+				//edits.push(e);
 				postEdit(e);
 				return true;
 			} else if (obj.start <= startIndex && endIndex <= obj.end && delta.action == "remove" && obj.type == "insert") { // removed something from within an edit
@@ -202,7 +216,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 				type: delta.action,
 				user: user.uid,
 			}
-			edits.push(e);
+			//edits.push(e);
 			postEdit(e);
 		}
 	}

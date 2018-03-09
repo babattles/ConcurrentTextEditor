@@ -389,8 +389,8 @@ ipcMain.on('close-dragged', (event, arg) => {
     enableClose();
 });
 
+//listens for google button press and calls helper funtions
 ipcMain.on('google-auth', (event, arg) => {
-
     googlePopUp(function() {
         if (gAuthCode){
             getToken(function(){
@@ -398,12 +398,15 @@ ipcMain.on('google-auth', (event, arg) => {
                     googleAuthWin.removeAllListeners('closed');
                     setImmediate(() => googleAuthWin.close());
                     authWindow.webContents.send('token', gAuthToken); 
+                    gAuthToken = null;
+                    gAuthCode = null; 
                 }
             });
         }
     });   
 });
 
+//creates a new BroswerWindow for google auth
 function googlePopUp(_callback) {
     
     googleAuthWin = new BrowserWindow({
@@ -434,7 +437,7 @@ function googlePopUp(_callback) {
          */
         //googleAuthWin.webContents.openDevTools();
 
-        //Get Auth Code
+        //receive http url encoded auth code
         googleAuthWin.webContents.on('will-navigate', (event, args) => {
             const query = url.parse(args, true).query;
             if (query) {
@@ -451,7 +454,9 @@ function googlePopUp(_callback) {
         });
 };
 
+//gets user token from google
 function getToken (_callback) {
+
     var postData = "code="+gAuthCode+"&"
         + "client_id=254482798300-tn0q68a55m8taeiktgiue1gdq6btukjk.apps.googleusercontent.com&"
         + "client_secret=KXEUaUZ0VlHVESbOQ95KpnBf&"
@@ -469,6 +474,7 @@ function getToken (_callback) {
         }
     };
 
+    //Post Http request
     var data = "";
     var request = https.request(postOptions, function(response) {
         response.on('data', function(chunk) {

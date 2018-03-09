@@ -42,14 +42,17 @@ gLoginBtn.addEventListener('click', function() {
 
 });
 
+//proccessing for web requests happens in  main
 ipcRenderer.on('token', (event, args) => {
     useToken(args);
 });
 
+//sign in with token
 function useToken (gAccessToken) {
     var credential = firebase.auth.GoogleAuthProvider.credential(gAccessToken.id_token);
-    //TODO: save refresh token and make functionality to refresh auth
+    var refreshToken = gAccessToken.refresh_token;
 
+    console.log(credential);
     // Sign in with credential from the Google user.
     firebase.auth().signInWithCredential(credential).then(function() {
         // hide all the previous fields
@@ -61,31 +64,44 @@ function useToken (gAccessToken) {
         forgotPasswordBtn.classList.add('hidden');
         gLoginBtn.classList.add('hidden');
 
-        // show set username elements
-        usernameField.classList.remove('hidden');
-        usernameBtn.classList.remove('hidden');
-        usernameLabel.classList.remove('hidden');
 
+       
         // create a user node in the database
         var user = firebase.auth().currentUser;
 
-        if (user) {
-            // User is signed in.
-            // set temp username to uid
-            firebase.database().ref().child("users").child(user.uid).set({ username: user.uid });
-        } else {
-            // No user is signed in.
-            alert("No user!!");
-        }
+        //check if user exists
+        firebase.database().ref().child("users").child(user.uid).once('value', function (snapshot) {
+                var exists = (snapshot.val() !== null);
+                console.log(snapshot.val());
+                //if user does not already exist, prompt username
+                if (!exists) {
+                    console.log("user does not exist");
+
+                    // show set username elements
+                    usernameField.classList.remove('hidden');
+                    usernameBtn.classList.remove('hidden');
+                    usernameLabel.classList.remove('hidden');
+
+                    // set temp username to uid
+                    firebase.database().ref().child("users")
+                        .child(user.uid).set({ username: user.uid });
+                    //save refresh token
+                    firebase.database().ref().child("users")
+                        .child(user.uid).set({ refreshToken: refreshToken });
+                } else {
+                    console.log("user signed in");
+                    ipcRenderer.send('close-auth-window', 'logged');
+                }          
+            });
+ 
     }).catch(function(error) {
         if (error != null) {
-            alert("ERROR REGISTERING ACCOUNT");
+            alert(error, "ERROR REGISTERING ACCOUNT AT " + error.lineNumber);
             console.log(error.message);
             return;
         }
     });
 }
-
 var login = function() {
     // Sign in with email & password
     firebase.auth().signInWithEmailAndPassword(emailField.value, passwordField.value).then(function() {

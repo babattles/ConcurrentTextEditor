@@ -6,7 +6,7 @@
 .container {
     padding: 10px;
     max-width: 410px;
-    max-height: 500px;
+    max-height: 600px;
     width: 100% !important;
     height: 100% !important;
     background-color: rgb(155, 155, 155);
@@ -21,6 +21,12 @@
     text-align: center;
     font-size: 1.8em;
     font-family: roboto;
+}
+.btn-google{
+    padding:0px;
+    border:0px;
+    margin:0px;
+    background-color: rgba(0,0,0,0);
 }
   
 .btn {
@@ -63,6 +69,7 @@
     font-size: 14px;
     /* background-image: -webkit-gradient(linear, 0 0, 0 100%,   from(#4d90fe), to(#4787ed)); */
   }
+
   
   .btn-bad:hover {
     /* border: 1px solid #2f5bb7; */
@@ -99,7 +106,7 @@
 .btn-forgot {
   outline: none;
 }
-  
+
 .form-control {
     height: 44px;
     font-size: 16px;

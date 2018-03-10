@@ -4,6 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="google-signin-client_id" 
+            content="254482798300-tn0q68a55m8taeiktgiue1gdq6btukjk.apps.googleusercontent.com">
+    <meta name="google-signin-cookiepolicy" content="single_host_origin">
+    <meta name="google-signin-scope" content="profile email">
     <title>Login or Register an Account</title>
     <!-- Style Sheet -->
     <link rel="stylesheet" href="./css/auth.css">
@@ -36,6 +40,10 @@
             <button class="btn btn-good hidden" id="resetPasswordBtn">Reset Password</button>
             <button class="btn btn-forgot" id="forgotPasswordBtn" style="color: black; background-color: rgba(0,0,0,0); border: none">Forgot your password?</button>
         </div>
+        <button class='btn-google' id='gLoginBtn'><img src='./img/google_logo.png' style=" max-width:50%;
+                height:'auto';""></button>
+        <!-- <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div> !-->
+        <script src="https://apis.google.com/js/platform.js" async defer></script>
         <div class='form-group username-group' id='usernameGroup'>
             <label for='username' class='hidden' id='usernameLabel'>Please enter your desired username: </label>
             <input type='text' placeholder='Username' class='form-control hidden' id='username'>

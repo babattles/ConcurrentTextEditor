@@ -4,6 +4,10 @@
  * */
 'use strict';
 const { ipcRenderer } = require('electron');
+const url = require('url');
+
+
+
 
 // Initialize Firebase
 var config = {
@@ -15,6 +19,7 @@ var config = {
     messagingSenderId: "254482798300"
 };
 firebase.initializeApp(config);
+
 
 var loginBtn = document.getElementById("loginBtn");
 var registerBtn = document.getElementById("registerBtn");
@@ -28,6 +33,75 @@ var forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
 var resetPasswordBtn = document.getElementById('resetPasswordBtn');
 var state = 'loginRegister';
 
+
+
+ 
+//Listen for message to use google auth
+gLoginBtn.addEventListener('click', function() {
+     ipcRenderer.send('google-auth', 'ping');
+
+});
+
+//proccessing for web requests happens in  main
+ipcRenderer.on('token', (event, args) => {
+    useToken(args);
+});
+
+//sign in with token
+function useToken (gAccessToken) {
+    var credential = firebase.auth.GoogleAuthProvider.credential(gAccessToken.id_token);
+    var refreshToken = gAccessToken.refresh_token;
+
+    console.log(credential);
+    // Sign in with credential from the Google user.
+    firebase.auth().signInWithCredential(credential).then(function() {
+        // hide all the previous fields
+        emailField.classList.add('hidden');
+        passwordField.classList.add('hidden');
+        loginBtn.classList.add('hidden');
+        registerBtn.classList.add('hidden');
+        closeBtn.classList.add('hidden');
+        forgotPasswordBtn.classList.add('hidden');
+        gLoginBtn.classList.add('hidden');
+
+
+       
+        // create a user node in the database
+        var user = firebase.auth().currentUser;
+
+        //check if user exists
+        firebase.database().ref().child("users").child(user.uid).once('value', function (snapshot) {
+                var exists = (snapshot.val() !== null);
+                console.log(snapshot.val());
+                //if user does not already exist, prompt username
+                if (!exists) {
+                    console.log("user does not exist");
+
+                    // show set username elements
+                    usernameField.classList.remove('hidden');
+                    usernameBtn.classList.remove('hidden');
+                    usernameLabel.classList.remove('hidden');
+
+                    // set temp username to uid
+                    firebase.database().ref().child("users")
+                        .child(user.uid).set({ username: user.uid });
+                    //save refresh token
+                    firebase.database().ref().child("users")
+                        .child(user.uid).set({ refreshToken: refreshToken });
+                } else {
+                    console.log("user signed in");
+                    ipcRenderer.send('close-auth-window', 'logged');
+                }          
+            });
+ 
+    }).catch(function(error) {
+        if (error != null) {
+            alert(error, "ERROR REGISTERING ACCOUNT AT " + error.lineNumber);
+            console.log(error.message);
+            return;
+        }
+    });
+}
 var login = function() {
     // Sign in with email & password
     firebase.auth().signInWithEmailAndPassword(emailField.value, passwordField.value).then(function() {
@@ -78,6 +152,7 @@ registerBtn.addEventListener("click", function() {
         registerBtn.classList.add('hidden');
         closeBtn.classList.add('hidden');
         forgotPasswordBtn.classList.add('hidden');
+        gLoginBtn.classList.add('hidden');
 
         // show set username elements
         usernameField.classList.remove('hidden');

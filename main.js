@@ -5,6 +5,10 @@ const path = require('path');
 const url = require('url');
 const { ipcMain } = require('electron');
 const { Menu } = require('electron');
+const https = require('https');
+
+
+
 
 //Enables live-reload
 require('electron-reload')(__dirname);
@@ -13,6 +17,10 @@ require('electron-reload')(__dirname);
 // be closed automatically when the JavaScript object is garbage collected.
 let win = null;
 let authWindow = null;
+let gAuthCode = null;
+let googleAuthWin = null;
+let gAuthToken = null;
+
 
 
 
@@ -331,7 +339,7 @@ ipcMain.on('open-auth-window', (event, arg) => {
         modal: true,
         show: false,
         width: 500,
-        height: 575,
+        height: 650,
         backgroundColor: '#2a2a2a',
         frame: false
     });
@@ -380,6 +388,116 @@ ipcMain.on('close-file-please', (event, arg) => {
 ipcMain.on('close-dragged', (event, arg) => {
     enableClose();
 });
+
+//listens for google button press and calls helper funtions
+ipcMain.on('google-auth', (event, arg) => {
+    googlePopUp(function() {
+        if (gAuthCode){
+            getToken(function(){
+                if (gAuthToken) {
+                    googleAuthWin.removeAllListeners('closed');
+                    setImmediate(() => googleAuthWin.close());
+                    authWindow.webContents.send('token', gAuthToken); 
+                    gAuthToken = null;
+                    gAuthCode = null; 
+                }
+            });
+        }
+    });   
+});
+
+//creates a new BroswerWindow for google auth
+function googlePopUp(_callback) {
+    
+    googleAuthWin = new BrowserWindow({
+            parent: authWindow,
+            modal: true,
+            width: 800,
+            height: 650,
+            backgroundColor: '#2a2a2a',
+            frame: false
+        });
+
+        //URL to open
+        var gAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth?"
+            + "scope=profile+email+https://www.googleapis.com/auth/firebase&"
+            //+ "scope=https://www.googleapis.com/auth/firebase&"
+            + "response_type=code&"
+            + "redirect_uri=com.googleusercontent.apps.254482798300-tn0q68a55m8taeiktgiue1gdq6btukjk:redirect_uri_path&"
+            + "client_id=254482798300-tn0q68a55m8taeiktgiue1gdq6btukjk.apps.googleusercontent.com";
+
+        googleAuthWin.loadURL(gAuthUrl);
+
+        googleAuthWin.once('ready-to-show', () => {
+            googleAuthWin.show();
+        });
+
+        /**
+         * Uncomment line below to enable developer tools when opening this window
+         */
+        //googleAuthWin.webContents.openDevTools();
+
+        //receive http url encoded auth code
+        googleAuthWin.webContents.on('will-navigate', (event, args) => {
+            const query = url.parse(args, true).query;
+            if (query) {
+                if (query.error) {
+                    return new Error(`There was an error: ${query.error}`);
+                } else if (query.code){
+
+                    //set AuthCode
+                    gAuthCode = query.code;
+                    console.log(query);
+                }
+            }
+            _callback();
+        });
+};
+
+//gets user token from google
+function getToken (_callback) {
+
+    var postData = "code="+gAuthCode+"&"
+        + "client_id=254482798300-tn0q68a55m8taeiktgiue1gdq6btukjk.apps.googleusercontent.com&"
+        + "client_secret=KXEUaUZ0VlHVESbOQ95KpnBf&"
+        + "redirect_uri=com.googleusercontent.apps.254482798300-tn0q68a55m8taeiktgiue1gdq6btukjk:redirect_uri_path&"
+        + "grant_type=authorization_code";
+
+    var postOptions = {
+        host: "www.googleapis.com",
+        port: 443,
+        path: "/oauth2/v4/token",
+        method: 'POST',
+        headers: {
+
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    };
+
+    //Post Http request
+    var data = "";
+    var request = https.request(postOptions, function(response) {
+        response.on('data', function(chunk) {
+            if (chunk) {
+                data += chunk.toString('utf8');
+
+            }
+        }).on('end', () => {
+            console.log('gAuthToken: ',data);
+            gAuthToken = JSON.parse(data); 
+            _callback();
+        });
+
+    }).on("error", function(e) {
+
+        console.log(e);
+
+    });
+
+    request.write(postData);
+    request.end();
+}
+
 
 // enable close menu option
 ipcMain.on("enable-close", (event, arg) => {

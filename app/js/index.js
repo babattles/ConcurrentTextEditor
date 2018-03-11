@@ -145,7 +145,7 @@ firebase.auth().onAuthStateChanged(function(user) {
         userSettingsBtn.style.display = "initial";
 
         // Load user's files
-        var filesRef = database.ref("/users/" + user.uid + "/fileList").orderByChild("fileName").on('value', function(snapshot) {
+        var filesRef = database.ref("/users/" + user.uid + "/fileList").orderByChild("fileName").once('value', function(snapshot) {
             // Clear files if any are there
             var files = document.getElementById("file-container");
             while (files.firstChild) {
@@ -200,6 +200,8 @@ firebase.auth().onAuthStateChanged(function(user) {
                     var onlineUsers = file.child('userList');
                     var username = database.ref().child("users").child(user.uid).child("username");
                     onlineUsers.on("child_added", function(snapshot) {
+                        //When a user creates a file or gains access to a file
+                        //(I need to fix a bug where this is called when a user opens a preexisting file)
                         console.log("added");
                         var element = document.createElement("div");
                         element.setAttribute("id", snapshot.key);
@@ -210,7 +212,12 @@ firebase.auth().onAuthStateChanged(function(user) {
                     onlineUsers.on("child_removed", function(snapshot) {
                         //When a user is deleted from the file userlist (ie. no longer has access)
                         console.log("removed");
-                        //TODO remove element with same id as snapshot.key
+                        try {
+                            var element = document.getElementById(snapshot.key);
+                            element.parentNode.removeChild(element);
+                        } catch (error) {
+                            console.log("Attempted to re-remove user from GUI (I am working on fixing this error)");
+                        }
                     });
                     onlineUsers.on("child_changed", function(snapshot) {
                         if (snapshot.val().online === 'true') {
@@ -222,10 +229,15 @@ firebase.auth().onAuthStateChanged(function(user) {
                             // onlineUsersContainer.appendChild(element);
                         } else {
                             console.log("online status changed to false");
-                            var element = document.getElementById(snapshot.key);
-                            element.parentNode.removeChild(element);
+                            try {
+                                var element = document.getElementById(snapshot.key);
+                                element.parentNode.removeChild(element);
+                            } catch (error) {
+                                console.log("Attempted to re-remove user from GUI (I am working on fixing this error)");
+                            }
                         }
                     });
+                    //TODO This line causes child_added and child_changed to be called which is unintened. Only child_changed should be called.
                     file.child('userList').child(user.uid).child('online').set('true');
                     var modelist = ace.require("ace/ext/modelist");
                     var mode = modelist.getModeForPath(childSnapshot.val().fileName).mode;

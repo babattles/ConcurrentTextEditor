@@ -110,21 +110,21 @@ body {
     color: #CCCCCC;
 }
 
-#collabActive {
+.collabActive {
     padding-left: 5px;
     background-color: #E6FFFF;
 }
 
-#collabActive:hover {
+.collabActive:hover {
     background-color: #BCE9E9;
 }
 
-#collabInactive {
+.collabInactive {
     padding-left: 5px;
     background-color: #D9D9D9;
 }
 
-#collabInactive:hover {
+.collabInactive:hover {
     background-color: #999999;
 }
 

@@ -61,8 +61,7 @@ var openFile = function() {
                     // add fileID to user's fileList
                     userRef.child('fileList').child(newFile.key).set({ 'fileName': currentFileName });
                     // set current user online status
-                    newFile.child('onlineUsers').child(user.uid).set({ 'username': currentUserName });
-                    currentFile = newFile.key;
+                    newFile.child('userList').child(user.uid).child('online').set('true');
                 });
             }
         });
@@ -120,12 +119,10 @@ var openFileDrag = function(pathDrag) {
                 // add fileID to user's fileList
                 userRef.child('fileList').child(newFile.key).set({ 'fileName': currentFileName });
                 // set current user online status
-                    newFile.child('onlineUsers').child(user.uid).set({ 'username': currentUserName });
-                currentFile = newFile.key;
+                newFile.child('userList').child(user.uid).child('online').set('true');
             });
         }
     });
-
 };
 
 var saveFile = function() {
@@ -169,11 +166,11 @@ var closeFile = function() {
     path = '';
     var user = firebase.auth().currentUser;
     if (user) {
-        firebase.database().ref().child('files').child(currentFile).child('onlineUsers').child(user.uid).remove();
+        currentFile.child('userList').child(user.uid).child('online').set('false');
     }
     //reset the state
     global_ignore = false;
-    
+
     // disable close
     ipcRenderer.send('disable-close', 'ping');
 };

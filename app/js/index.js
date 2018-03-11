@@ -128,7 +128,7 @@ document.body.ondrop = (e) => {
 };
 
 // Called when user state changes (login/logout)
-firebase.auth().onAuthStateChanged(function (user) {
+firebase.auth().onAuthStateChanged(function(user) {
     global_user = user;
     var authBtn = document.getElementById("authBtn");
     var logoutBtn = document.getElementById("logoutBtn");
@@ -177,9 +177,9 @@ firebase.auth().onAuthStateChanged(function (user) {
 
                 // listener to delete this file from database
                 deleteBtn.addEventListener('click', function() {
+                    closeFile();
                     database.ref("/users/" + user.uid + "/fileList").child(childSnapshot.key).remove();
                     database.ref("files").child(childSnapshot.key).remove();
-                    closeFile();
                     // disable close menu option
                     ipcRenderer.send('disable-close', 'ping');
                 });
@@ -195,22 +195,23 @@ firebase.auth().onAuthStateChanged(function (user) {
 
                 // listener to open this file from database
                 openBtn.addEventListener('click', function() {
+                    setCurrentFile(childSnapshot.key);
                     var file = database.ref("files").child(childSnapshot.key);
                     var onlineUsers = file.child('onlineUsers');
                     var username = database.ref().child("users").child(user.uid).child("username");
                     onlineUsers.on("child_added", function(snapshot) {
-                        /*while (onlineUsersContainer.firstChild) {
-                            onlineUsersContainer.removeChild(onlineUsersContainer.firstChild);
-                        }
-                        onlineUsers.on('value', function(snapshot) {
-                            snapshot.forEach(function(childSnapshot) {
-                                var element = document.createElement("div");
-                                element.setAttribute("id", childSnapshot.key);
-                                element.classList.add("collabActive");
-                                element.appendChild(document.createTextNode(childSnapshot.val().username));
-                                onlineUsersContainer.appendChild(element);
-                            });
-                        });*/
+                        // while (onlineUsersContainer.firstChild) {
+                        //     onlineUsersContainer.removeChild(onlineUsersContainer.firstChild);
+                        // }
+                        // onlineUsers.on('value', function(snapshot) {
+                        //     snapshot.forEach(function(childSnapshot) {
+                        //         var element = document.createElement("div");
+                        //         element.setAttribute("id", childSnapshot.key);
+                        //         element.classList.add("collabActive");
+                        //         element.appendChild(document.createTextNode(childSnapshot.val().username));
+                        //         onlineUsersContainer.appendChild(element);
+                        //     });
+                        // });
                     });
                     onlineUsers.on("child_removed", function(snapshot2) {
                         // var keyId = '#' + snapshot2.key;
@@ -229,13 +230,18 @@ firebase.auth().onAuthStateChanged(function (user) {
                             });
                         });*/
                     });
-                    username.on("value", function(snapshot) {
-                        file.child('onlineUsers').child(user.uid).set({ 'username': snapshot.val() });
-                    });
+                    file.child('userList').child(user.uid).child('online').set('true');
+                    /*username.on("value", function(snapshot) {
+                        file.child('userList').child(user.uid).child('online').on('value', function(snapshot) {
+                            if (snapshot.val() === 'false') {
+                                file.child('userList').child(user.uid).child('online').set("true");
+                            }
+                        });
+                    });*/
                     var modelist = ace.require("ace/ext/modelist");
                     var mode = modelist.getModeForPath(childSnapshot.val().fileName).mode;
                     editor.getSession().setMode(mode);
-                    var contents = file.child("fileContents").once('value').then(function (snapshot) {
+                    var contents = file.child("fileContents").once('value').then(function(snapshot) {
                         global_ignore = true;
 
                         editor.setValue(snapshot.val(), -1);

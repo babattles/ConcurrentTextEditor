@@ -197,53 +197,41 @@ firebase.auth().onAuthStateChanged(function(user) {
                 openBtn.addEventListener('click', function() {
                     setCurrentFile(childSnapshot.key);
                     var file = database.ref("files").child(childSnapshot.key);
-                    var onlineUsers = file.child('onlineUsers');
+                    var onlineUsers = file.child('userList');
                     var username = database.ref().child("users").child(user.uid).child("username");
                     onlineUsers.on("child_added", function(snapshot) {
-                        // while (onlineUsersContainer.firstChild) {
-                        //     onlineUsersContainer.removeChild(onlineUsersContainer.firstChild);
-                        // }
-                        // onlineUsers.on('value', function(snapshot) {
-                        //     snapshot.forEach(function(childSnapshot) {
-                        //         var element = document.createElement("div");
-                        //         element.setAttribute("id", childSnapshot.key);
-                        //         element.classList.add("collabActive");
-                        //         element.appendChild(document.createTextNode(childSnapshot.val().username));
-                        //         onlineUsersContainer.appendChild(element);
-                        //     });
-                        // });
+                        console.log("added");
+                        var element = document.createElement("div");
+                        element.setAttribute("id", snapshot.key);
+                        element.classList.add("collabActive");
+                        element.appendChild(document.createTextNode(snapshot.val().username));
+                        onlineUsersContainer.appendChild(element);
                     });
-                    onlineUsers.on("child_removed", function(snapshot2) {
-                        // var keyId = '#' + snapshot2.key;
-                        /*while (onlineUsersContainer.firstChild) {
-                            onlineUsersContainer.removeChild(onlineUsersContainer.firstChild);
+                    onlineUsers.on("child_removed", function(snapshot) {
+                        //When a user is deleted from the file userlist (ie. no longer has access)
+                        console.log("removed");
+                        //TODO remove element with same id as snapshot.key
+                    });
+                    onlineUsers.on("child_changed", function(snapshot) {
+                        if (snapshot.val().online === 'true') {
+                            console.log("online status changed to true");
+                            // var element = document.createElement("div");
+                            // element.setAttribute("id", snapshot.key);
+                            // element.classList.add("collabActive");
+                            // element.appendChild(document.createTextNode(snapshot.val().username));
+                            // onlineUsersContainer.appendChild(element);
+                        } else {
+                            console.log("online status changed to false");
+                            var element = document.getElementById(snapshot.key);
+                            element.parentNode.removeChild(element);
                         }
-                        onlineUsers.on('value', function(snapshot) {
-                            snapshot.forEach(function(childSnapshot) {
-                                var element = document.createElement("div");
-                                element.setAttribute("id", childSnapshot.key);
-                                element.classList.add("collabActive");
-                                username.on("value", function(snapshotUser) {
-                                    element.appendChild(document.createTextNode(snapshotUser.val()));
-                                });
-                                onlineUsersContainer.appendChild(element);
-                            });
-                        });*/
                     });
                     file.child('userList').child(user.uid).child('online').set('true');
-                    /*username.on("value", function(snapshot) {
-                        file.child('userList').child(user.uid).child('online').on('value', function(snapshot) {
-                            if (snapshot.val() === 'false') {
-                                file.child('userList').child(user.uid).child('online').set("true");
-                            }
-                        });
-                    });*/
                     var modelist = ace.require("ace/ext/modelist");
                     var mode = modelist.getModeForPath(childSnapshot.val().fileName).mode;
                     editor.getSession().setMode(mode);
                     var contents = file.child("fileContents").once('value').then(function(snapshot) {
                         global_ignore = true;
-
                         editor.setValue(snapshot.val(), -1);
                         global_ignore = false;
                     });

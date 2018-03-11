@@ -162,8 +162,15 @@ var closeFile = function() {
     // set the state (so opening a file doesn't stage an edit)
     global_ignore = true;
 
+    var onlineUsersContainer = document.getElementById("online-users");
+    //Remove all users from GUI 
+    while (onlineUsersContainer.firstChild) {
+        onlineUsersContainer.removeChild(onlineUsersContainer.firstChild);
+    }
+
     editor.setValue('', -1);
     path = '';
+    currentKey = '';
     var user = firebase.auth().currentUser;
     if (user) {
         currentFile.child('userList').child(user.uid).child('online').set('false');

@@ -18,6 +18,7 @@ var database = firebase.database();
 var userSettingsBtn = document.getElementById("userSettingsBtn");
 var editor = document.getElementById("editor");
 var onlineUsersContainer = document.getElementById("online-users");
+var currentKey;
 
 // track the user's current open file in the database
 var currentFile = null;
@@ -193,69 +194,96 @@ firebase.auth().onAuthStateChanged(function(user) {
                 openBtn.style.right = "25%";
                 openBtn.innerHTML = "OPEN";
 
-                // listener to open this file from database
-                openBtn.addEventListener('click', function() {
-                    setCurrentFile(childSnapshot.key);
-                    var file = database.ref("files").child(childSnapshot.key);
-                    var onlineUsers = file.child('userList');
-                    var username = database.ref().child("users").child(user.uid).child("username");
-                    onlineUsers.on("child_added", function(snapshot) {
-                        //When a user creates a file or gains access to a file
-                        //(I need to fix a bug where this is called when a user opens a preexisting file)
-                        console.log("added");
+                //
+                var file = database.ref("files").child(childSnapshot.key);
+                var onlineUsers = file.child('userList');
+                onlineUsers.on("child_added", function(snapshot) {
+                    //When a user creates a file or gains access to a file
+                    console.log("added");
+                    if (snapshot.val().online === 'true') {
                         var element = document.createElement("div");
                         element.setAttribute("id", snapshot.key);
                         element.classList.add("collabActive");
                         element.appendChild(document.createTextNode(snapshot.val().username));
                         onlineUsersContainer.appendChild(element);
-                    });
-                    onlineUsers.on("child_removed", function(snapshot) {
-                        //When a user is deleted from the file userlist (ie. no longer has access)
-                        console.log("removed");
+                    }
+                });
+                onlineUsers.on("child_removed", function(snapshot) {
+                    //When a user is deleted from the file userlist (ie. no longer has access)
+                    console.log("removed");
+                    try {
+                        var element = document.getElementById(snapshot.key);
+                        element.parentNode.removeChild(element);
+                    } catch (error) {
+                        console.log("Attempted to re-remove user from GUI");
+                    }
+                });
+                onlineUsers.on("child_changed", function(snapshot) {
+                    if (snapshot.val().online === 'true') {
+                        console.log("online status changed to true");
+                        var element = document.createElement("div");
+                        element.setAttribute("id", snapshot.key);
+                        element.classList.add("collabActive");
+                        element.appendChild(document.createTextNode(snapshot.val().username));
+                        onlineUsersContainer.appendChild(element);
+                    } else {
+                        console.log("online status changed to false");
                         try {
                             var element = document.getElementById(snapshot.key);
                             element.parentNode.removeChild(element);
                         } catch (error) {
-                            console.log("Attempted to re-remove user from GUI (I am working on fixing this error)");
+                            console.log("Attempted to re-remove user from GUI");
                         }
-                    });
-                    onlineUsers.on("child_changed", function(snapshot) {
-                        if (snapshot.val().online === 'true') {
-                            console.log("online status changed to true");
-                            // var element = document.createElement("div");
-                            // element.setAttribute("id", snapshot.key);
-                            // element.classList.add("collabActive");
-                            // element.appendChild(document.createTextNode(snapshot.val().username));
-                            // onlineUsersContainer.appendChild(element);
-                        } else {
-                            console.log("online status changed to false");
-                            try {
-                                var element = document.getElementById(snapshot.key);
-                                element.parentNode.removeChild(element);
-                            } catch (error) {
-                                console.log("Attempted to re-remove user from GUI (I am working on fixing this error)");
-                            }
+                    }
+                });
+
+                // listener to open this file from database
+                openBtn.addEventListener('click', function() {
+                    if (currentKey != childSnapshot.key) {
+                        //Set online status of old file to false
+                        if (currentKey != null && currentKey != '') {
+                            database.ref("files/" + currentKey + "/userList/" + user.uid + "/online").set("false");
                         }
-                    });
-                    //TODO This line causes child_added and child_changed to be called which is unintened. Only child_changed should be called.
-                    file.child('userList').child(user.uid).child('online').set('true');
-                    var modelist = ace.require("ace/ext/modelist");
-                    var mode = modelist.getModeForPath(childSnapshot.val().fileName).mode;
-                    editor.getSession().setMode(mode);
-                    var contents = file.child("fileContents").once('value').then(function(snapshot) {
-                        global_ignore = true;
-                        editor.setValue(snapshot.val(), -1);
-                        global_ignore = false;
-                    });
-                    // set the current open file to the new file
-                    currentFile = file;
-                    // set the editRef
-                    editRef = currentFile.child("edits");
-                    // load the file's current edits (clear first, in case coming from another file)
-                    clearEdits();
-                    getEdits(); // Also listens for incoming edits
-                    // enable close menu
-                    ipcRenderer.send('enable-close', 'ping');
+                        //Remove all users from GUI 
+                        while (onlineUsersContainer.firstChild) {
+                            onlineUsersContainer.removeChild(onlineUsersContainer.firstChild);
+                        }
+                        //Update GUI to show already online users
+                        file.child('userList').orderByChild("username").once('value', function(snapshot) {
+                            snapshot.forEach(function(childSnapshot) {
+                                if (childSnapshot.val().online === 'true') {
+                                    var element = document.createElement("div");
+                                    element.setAttribute("id", childSnapshot.key);
+                                    element.classList.add("collabActive");
+                                    element.appendChild(document.createTextNode(childSnapshot.val().username));
+                                    onlineUsersContainer.appendChild(element);
+                                }
+                            });
+                        });
+                        currentKey = childSnapshot.key;
+                        setCurrentFile(childSnapshot.key);
+                        // var file = database.ref("files").child(childSnapshot.key);
+
+                        //TODO This line causes child_added and child_changed to be called which is unintened. Only child_changed should be called.
+                        file.child('userList').child(user.uid).child('online').set('true');
+                        var modelist = ace.require("ace/ext/modelist");
+                        var mode = modelist.getModeForPath(childSnapshot.val().fileName).mode;
+                        editor.getSession().setMode(mode);
+                        var contents = file.child("fileContents").once('value').then(function(snapshot) {
+                            global_ignore = true;
+                            editor.setValue(snapshot.val(), -1);
+                            global_ignore = false;
+                        });
+                        // set the current open file to the new file
+                        currentFile = file;
+                        // set the editRef
+                        editRef = currentFile.child("edits");
+                        // load the file's current edits (clear first, in case coming from another file)
+                        clearEdits();
+                        getEdits(); // Also listens for incoming edits
+                        // enable close menu
+                        ipcRenderer.send('enable-close', 'ping');
+                    }
                 });
 
                 // add new entry to list of files

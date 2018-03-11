@@ -194,18 +194,19 @@ firebase.auth().onAuthStateChanged(function(user) {
                 openBtn.style.right = "25%";
                 openBtn.innerHTML = "OPEN";
 
-                //
                 var file = database.ref("files").child(childSnapshot.key);
                 var onlineUsers = file.child('userList');
                 onlineUsers.on("child_added", function(snapshot) {
                     //When a user creates a file or gains access to a file
                     console.log("added");
-                    if (snapshot.val().online === 'true') {
-                        var element = document.createElement("div");
-                        element.setAttribute("id", snapshot.key);
-                        element.classList.add("collabActive");
-                        element.appendChild(document.createTextNode(snapshot.val().username));
-                        onlineUsersContainer.appendChild(element);
+                    if (currentKey === childSnapshot.key) {
+                        if (snapshot.val().online === 'true') {
+                            var element = document.createElement("div");
+                            element.setAttribute("id", snapshot.key);
+                            element.classList.add("collabActive");
+                            element.appendChild(document.createTextNode(snapshot.val().username));
+                            onlineUsersContainer.appendChild(element);
+                        }
                     }
                 });
                 onlineUsers.on("child_removed", function(snapshot) {
@@ -262,9 +263,6 @@ firebase.auth().onAuthStateChanged(function(user) {
                         });
                         currentKey = childSnapshot.key;
                         setCurrentFile(childSnapshot.key);
-                        // var file = database.ref("files").child(childSnapshot.key);
-
-                        //TODO This line causes child_added and child_changed to be called which is unintened. Only child_changed should be called.
                         file.child('userList').child(user.uid).child('online').set('true');
                         var modelist = ace.require("ace/ext/modelist");
                         var mode = modelist.getModeForPath(childSnapshot.val().fileName).mode;

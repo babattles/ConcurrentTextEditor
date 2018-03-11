@@ -263,7 +263,7 @@ firebase.auth().onAuthStateChanged(function (user) {
         /* EDIT FUNCTIONALITY */
         editor.getSession().on('change', function(delta) {
             // delta.start, delta.end, delta.lines, delta.action
-            if (!global_ignore) {
+            if (!global_ignore && editRef != null) {
                 var startIndex = editor.session.doc.positionToIndex(delta.start, 0);
                 var endIndex = editor.session.doc.positionToIndex(delta.end, 0);
                 setEdit(startIndex, endIndex, delta);

@@ -15,8 +15,8 @@ $(document).ready(function () {
 var edits = [];
 
 // Retrieve new edits as they are added to the database (including your own!)
-var getEdits = function() {
-	editRef.on("child_added", function(snapshot, prevChildKey) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
+var getEdits = function () {
+	editRef.on("child_added", function (snapshot, prevChildKey) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
 		var e = snapshot.val();
 		edits.push({
 			start: e.startIndex,

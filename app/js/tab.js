@@ -6,8 +6,8 @@ $(document).ready(function(){
     });
 });
 
-var addTab = function() {
-	tabs.push('Tab' + (tabs.length==0?'':tabs.length));
+var addTab = function(filename) {
+	tabs.push(filename);
 	updateTabs();
 }
 

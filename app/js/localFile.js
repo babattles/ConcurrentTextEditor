@@ -14,7 +14,7 @@ var openFile = function() {
     dialog.showOpenDialog((fileNames) => {
         path = fileNames[0];
         currentFileName = fileNames[0].substring(fileNames[0].lastIndexOf(pathSeperator) + 1, fileNames[0].length);
-
+        addTab(currentFileName);
         fs.readFile(path, 'utf-8', (err, data) => {
             if (err) {
                 alert("An error ocurred reading the file :" + err.message);

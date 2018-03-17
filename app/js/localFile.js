@@ -14,6 +14,7 @@ var openFile = function() {
     dialog.showOpenDialog((fileNames) => {
         path = fileNames[0];
         currentFileName = fileNames[0].substring(fileNames[0].lastIndexOf(pathSeperator) + 1, fileNames[0].length);
+        addTab(currentFileName);
         fs.readFile(path, 'utf-8', (err, data) => {
             if (err) {
                 alert("An error ocurred reading the file :" + err.message);
@@ -31,8 +32,6 @@ var openFile = function() {
             // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
             editor.setValue(data, -1);
 
-            //Create a new Tab for the file
-            addTab(currentFileName);
             // reset the state
             global_ignore = false;
 

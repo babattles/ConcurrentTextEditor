@@ -174,7 +174,8 @@ var closeFile = function() {
         onlineUsersContainer.removeChild(onlineUsersContainer.firstChild);
     }
 
-    editor.setValue('', -1);
+    //Remove this tab
+    closeTab();
     path = '';
     currentKey = '';
     var user = firebase.auth().currentUser;

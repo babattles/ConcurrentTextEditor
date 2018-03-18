@@ -67,7 +67,7 @@ function createWindow() {
                         if (win) {
                             // tell index.js to close the file
                             win.webContents.send('close-file', 'ping');
-                            disableClose();
+                            //disableClose();
                         }
                     }
                 }

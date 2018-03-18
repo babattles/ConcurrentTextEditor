@@ -9,6 +9,8 @@ var fileContents = '';
 var currentFileName = '';
 var pathSeperator = requirePath.sep;
 var currentFile;
+var fileNum = 2;
+
 
 var openFile = function() {
     dialog.showOpenDialog((fileNames) => {
@@ -34,6 +36,8 @@ var openFile = function() {
 
             //Create a new tab for the file
             addTab(currentFileName);
+            fileNum++;
+            console.log("curr file number " + fileNum);
 
             // reset the state
             global_ignore = false;
@@ -95,6 +99,7 @@ var openFileDrag = function(pathDrag) {
 
         //Create a new tab for the file
         addTab(currentFileName);
+        fileNum++;
 
         // reset the state
         global_ignore = false;
@@ -176,6 +181,7 @@ var closeFile = function() {
 
     //Remove this tab
     closeTab();
+    fileNum--;
     path = '';
     currentKey = '';
     var user = firebase.auth().currentUser;
@@ -186,5 +192,8 @@ var closeFile = function() {
     global_ignore = false;
 
     // disable close
-    ipcRenderer.send('disable-close', 'ping');
+    console.log("file number after close " + fileNum);
+    // if (fileNum == 1) {
+    //      ipcRenderer.send('disable-close', 'ping');
+    // }
 };

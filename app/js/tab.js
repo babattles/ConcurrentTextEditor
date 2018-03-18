@@ -40,11 +40,10 @@ var closeTab = function() {
     	tabs.splice(index, 1);
     	sessions.splice(index, 1);
 	}
-	console.log(sessions);
+	
 	editor.setValue('', -1);
-	if (index == -1) {
-		index = 0;
-	}
+
+	console.log(index);
 	//editor.setValue(sessions[index]);
 	updateTabs(index);
 }

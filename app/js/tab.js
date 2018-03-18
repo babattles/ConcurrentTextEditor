@@ -13,6 +13,7 @@ $(document).ready(function(){
     });
 });
 
+//Add a new tab
 var addTab = function(filename) {
 	//Create a new tab 
 	tabs.push(filename);
@@ -27,32 +28,33 @@ var addTab = function(filename) {
 	updateTabs();
 }
 
-
+//Switch to a tab
 var switchTab = function(args) {
     var target = -1;
-    //console.log(sessions);
     
+    //Store the content of current editor to previous tab before switching
     for (i in tabs) {
     	if(tabs[i] == lastTab) {
     		var buff = editor.getValue();
-    		//console.log(buff);
     		sessions[i] = buff;
     	}
     }
 
-    //console.log(sessions);
+    //Update target tab
     for (i in tabs) {
     	if(tabs[i] == args.innerHTML) {
     		target = i;
     		break;
     	}
     }
-    
+
+    //Update previous tab
     lastTab = tabs[target];
 
     if(target != -1) {
     	updateTabs(target);
     }
+    
     //Reset editor
     editor.setValue(sessions[target]);
 }

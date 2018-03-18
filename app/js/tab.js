@@ -44,8 +44,9 @@ var closeTab = function() {
 	editor.setValue('', -1);
 
 	console.log(index);
-	//editor.setValue(sessions[index]);
-	updateTabs(index);
+	//editor.reset();
+	editor.setValue(sessions[index - 1]);
+	updateTabs(index - 1);
 }
 
 //Switch to a tab

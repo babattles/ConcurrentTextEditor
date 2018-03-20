@@ -1,5 +1,4 @@
 'use strict';
-
 const { ipcRenderer } = require('electron');
 
 // Initialize Firebase
@@ -278,6 +277,8 @@ firebase.auth().onAuthStateChanged(function(user) {
                         editRef = currentFile.child("edits");
                         // load the file's current edits (clear first, in case coming from another file)
                         clearEdits();
+                        //implements concurrency to update files across all users
+                        checkConcurrency();
                         getEdits(); // Also listens for incoming edits
                         // enable close menu
                         ipcRenderer.send('enable-close', 'ping');

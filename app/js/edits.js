@@ -269,3 +269,71 @@ var setEdit = function (startIndex, endIndex, delta) {
 		}
 	}
 }
+
+// Takes an index and reduces it by the sum of the lengths of
+// unaccepted lengths before the index
+var convertIndex = function(index) {
+	var newIndex = index;
+	editRef.once('value', function (snapshot) {
+		snapshot.forEach(function (child) {
+			var e = child.val();
+			if (e.startIndex < index) {
+				if (e.type == "insert") {
+					console.log(e.content.length);
+					newIndex = newIndex - e.content.length;
+				}
+			}
+		});
+	});
+	return newIndex;
+}
+
+// Reduces start and end indices by the lenght of an edit removed
+// for all edits that appear after the edit being removed
+var fixIndicesAfterRemovalAccept = function(index, length) {
+	editRef.once('value', function (snapshot) {
+		snapshot.forEach(function (child) {
+			var e = child.val();
+			if (e.startIndex >= index) {
+				editRef.child(child.key).update({
+					startIndex: e.startIndex - length,
+					endIndex: e.endIndex - length
+				});
+			}
+		});
+	});
+}
+
+// This function is called once all users have accepted an edit.
+var acceptEdit = function(editID) {
+	var thisEdit = editRef.child(editID);
+	thisEdit.once('value', function (snapshot) {
+		var e = snapshot.val();
+		// console.log("Index before = " + e.startIndex);
+		var index = convertIndex(e.startIndex);
+		// console.log("Index after = " + index)
+		currentFile.once('value', function (childSnapshot) {
+			var f = childSnapshot.val();
+			var fileContent = f.fileContents;
+			// console.log(fileContent);
+			var prefix = fileContent.substring(0, index);
+			// console.log("prefix = " + prefix);
+			var suffix = fileContent.substring(index);
+			// console.log("suffix = " + suffix);
+
+			if (e.type == 'insert') {
+				currentFile.update({
+					fileContents: prefix + e.content + suffix
+				});
+			} else {
+				currentFile.update({
+					fileContents: prefix + suffix
+				});
+				fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
+			}
+			thisEdit.remove();
+
+			//TODO remove highlighting from the file (once highlighting is implemented)
+		});
+	});
+}

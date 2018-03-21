@@ -33,7 +33,7 @@ var addTab = function(filename) {
 
 //Close current tab
 var closeTab = function() {
-	var index = -1;
+	var index = 0;
 	index = tabs.indexOf(currTab);
 	
 	if (index > -1) {
@@ -45,6 +45,10 @@ var closeTab = function() {
 
 	console.log(index);
 	//editor.reset();
+	if (index < 0) {
+		index = 1;
+	}
+	console.log(index);
 	editor.setValue(sessions[index - 1]);
 	updateTabs(index - 1);
 }

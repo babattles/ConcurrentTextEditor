@@ -279,7 +279,7 @@ var convertIndex = function(index) {
 			var e = child.val();
 			if (e.startIndex < index) {
 				if (e.type == "insert") {
-					console.log(e.content.length);
+					// console.log(e.content.length);
 					newIndex = newIndex - e.content.length;
 				}
 			}
@@ -326,6 +326,7 @@ var acceptEdit = function(editID) {
 					fileContents: prefix + e.content + suffix
 				});
 			} else {
+				suffix = fileContent.substring(e.endIndex, fileContent.length);
 				currentFile.update({
 					fileContents: prefix + suffix
 				});

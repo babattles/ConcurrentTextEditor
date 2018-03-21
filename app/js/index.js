@@ -198,7 +198,6 @@ firebase.auth().onAuthStateChanged(function(user) {
                 var onlineUsers = file.child('userList');
                 onlineUsers.on("child_added", function(snapshot) {
                     //When a user creates a file or gains access to a file
-                    console.log("added");
                     if (currentKey === childSnapshot.key) {
                         if (snapshot.val().online === 'true') {
                             var element = document.createElement("div");

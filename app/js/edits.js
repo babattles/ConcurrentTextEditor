@@ -104,7 +104,7 @@ var deleteEdit = function (edit) {
 /* Fixes indecies for all edits after current edit */
 // edit is the updated/new edit
 // size is the amount to increase all other edits by
-var fixIndecies = function (edit, size, type) {
+var fixIndices = function (edit, size, type) {
 	editRef.once('value', function (snapshot) {
 		snapshot.forEach(function (child) {
 			var e = child.val();
@@ -146,7 +146,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 				edits[index].type = delta.action;
 				edits[index].user = user.uid;
 				updateEdit(edits[index]);
-				fixIndecies(edits[index], endIndex - startIndex, delta.action);
+				fixIndices(edits[index], endIndex - startIndex, delta.action);
 				return true; // stop searching
 			} else if (obj.start == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the beginning of an existing edit
 				//console.log("added to beginning");
@@ -156,7 +156,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 				edits[index].type = delta.action;
 				edits[index].user = user.uid;
 				updateEdit(edits[index]);
-				fixIndecies(edits[index], endIndex - startIndex, delta.action);
+				fixIndices(edits[index], endIndex - startIndex, delta.action);
 				return true;
 			} else if (obj.end == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the end of an existing edit
 				//console.log("added to end");
@@ -166,7 +166,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 				edits[index].type = delta.action;
 				edits[index].user = user.uid;
 				updateEdit(edits[index]);
-				fixIndecies(edits[index], endIndex - startIndex, delta.action);
+				fixIndices(edits[index], endIndex - startIndex, delta.action);
 				return true;
 			} else if (obj.start > startIndex && obj.end < endIndex && delta.action == "remove") { // removed an edit as well as content on both sides
 				//console.log("edit and both sides");
@@ -180,7 +180,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 					user: user.uid,
 				};
 				postEdit(e);
-				fixIndecies(edits[index], obj.end - obj.start, delta.action);
+				fixIndices(edits[index], obj.end - obj.start, delta.action);
 				return true;
 			} else if (obj.start <= startIndex && obj.end < endIndex && startIndex <= obj.end && delta.action == "remove") { // removed some or all of an edit as well as content on the right side
 				//console.log("remove edit and right side");
@@ -193,7 +193,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 				};
 				if (obj.start == startIndex) {
 					//console.log("removing whole edit");
-					fixIndecies(edits[index], edits[index].end - edits[index].start, delta.action);
+					fixIndices(edits[index], edits[index].end - edits[index].start, delta.action);
 					deleteEdit(edits[index]);
 					edits.splice(index, 1);
 				} else {
@@ -204,7 +204,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 					edits[index].type = "insert";
 					edits[index].user = user.uid;
 					updateEdit(edits[index]);
-					fixIndecies(edits[index], obj.end - startIndex, delta.action);
+					fixIndices(edits[index], obj.end - startIndex, delta.action);
 				}
 				postEdit(e);
 				return true;
@@ -219,7 +219,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 				};
 				if (obj.end == endIndex) {
 					//console.log("removing whole edit");
-					fixIndecies(edits[index], edits[index].end - edits[index].start, delta.action);
+					fixIndices(edits[index], edits[index].end - edits[index].start, delta.action);
 					deleteEdit(edits[index]);
 					edits.splice(index, 1);
 				} else {
@@ -230,7 +230,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 					edits[index].type = "insert";
 					edits[index].user = user.uid;
 					updateEdit(edits[index]);
-					fixIndecies(edits[index], startIndex - obj.start, delta.action);
+					fixIndices(edits[index], startIndex - obj.start, delta.action);
 				}
 				postEdit(e);
 				return true;
@@ -238,7 +238,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 				//console.log("remove from within");
 				if (obj.start == startIndex && obj.end == endIndex) { // you're deleting the last of an edit
 					//console.log("That's the last of em!");
-					fixIndecies(edits[index], edits[index].end - edits[index].start, delta.action);
+					fixIndices(edits[index], edits[index].end - edits[index].start, delta.action);
 					deleteEdit(edits[index]);
 					edits.splice(index, 1);
 				} else {
@@ -249,7 +249,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 					edits[index].type = "insert";
 					edits[index].user = user.uid;
 					updateEdit(edits[index]);
-					fixIndecies(edits[index], endIndex - startIndex, delta.action);
+					fixIndices(edits[index], endIndex - startIndex, delta.action);
 				}
 				return true;
 			}
@@ -265,7 +265,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 				user: user.uid,
 			}
 			postEdit(e);
-			fixIndecies(e, endIndex - startIndex, delta.action);
+			fixIndices(e, endIndex - startIndex, delta.action);
 		}
 	}
 }

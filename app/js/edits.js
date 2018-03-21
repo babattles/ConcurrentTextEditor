@@ -16,27 +16,38 @@ var edits = [];
 
 // Retrieve new edits as they are added to the database (including your own!)
 var getEdits = function() {
-    editRef.on("child_added", function(snapshot, prevChildKey) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
-        var e = snapshot.val();
-        edits.push({
-            start: e.startIndex,
-            end: e.endIndex,
-            content: e.content,
-            type: e.type,
-            user: e.user,
-            id: snapshot.key,
-            parent: null,
+        editRef.on("child_added", function(snapshot, prevChildKey) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
+            var e = snapshot.val();
+            edits.push({
+                start: e.startIndex,
+                end: e.endIndex,
+                content: e.content,
+                type: e.type,
+                user: e.user,
+                id: snapshot.key,
+            });
+            checkConcurrency(e);
         });
-        var editor = ace.edit("editor");
-        var currentEdit = e;
-        var oldContents = editor.getSession().getValue();
-        var newContents = oldContents.slice(0, currentEdit.startIndex) + currentEdit.content + oldContents.slice(currentEdit.endIndex);
-        editor.getSession().setValue(newContents);
-    });
-}
 
-/* helper function */
-// Returns an array of strings as a single multi-line string
+        // update local edit array when edits are changed on the database
+        editRef.on("child_changed", function(snapshot) {
+            var changedEdit = snapshot.val();
+            edits.find((obj, index) => {
+                if (obj.id == snapshot.key && (obj.start != changedEdit.startIndex || obj.end != changedEdit.endIndex)) {
+                    edits[index] = {
+                        start: changedEdit.startIndex,
+                        end: changedEdit.endIndex,
+                        content: changedEdit.content,
+                        type: changedEdit.type,
+                        user: changedEdit.user,
+                        id: snapshot.key,
+                    };
+                }
+            })
+        });
+    }
+    /* helper function */
+    // Returns an array of strings as a single multi-line string
 var stringify = function(lines) {
     var result = "";
     var x = 1;

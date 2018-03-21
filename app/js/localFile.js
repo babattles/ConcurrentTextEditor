@@ -9,7 +9,6 @@ var fileContents = '';
 var currentFileName = '';
 var pathSeperator = requirePath.sep;
 var currentFile;
-var fileNum = 2;
 
 
 var openFile = function() {

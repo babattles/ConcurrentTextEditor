@@ -1,6 +1,7 @@
 'use strict';
 
 const { ipcRenderer } = require('electron');
+var fileNum = 1;
 
 // Initialize Firebase
 var config = {
@@ -268,11 +269,26 @@ firebase.auth().onAuthStateChanged(function(user) {
                         editor.getSession().setMode(mode);
                         var contents = file.child("fileContents").once('value').then(function(snapshot) {
                             global_ignore = true;
-                            editor.setValue(snapshot.val(), -1);
+                            var flag = 1;
+                            //Create a new tab
+                            for (i in tabs) {
+                                if (tabs[i] == childSnapshot.val().fileName) {
+                                    flag = 0;
+                                }
+                            }
+                            if (flag) {
+                                editor.setValue(snapshot.val(), -1);
+                                fileNum++;
+                                addTab(childSnapshot.val().fileName);
+                                console.log(fileNum);
+                            }
+
+
                             global_ignore = false;
                         });
                         // set the current open file to the new file
                         currentFile = file;
+
                         // set the editRef
                         editRef = currentFile.child("edits");
                         // load the file's current edits (clear first, in case coming from another file)

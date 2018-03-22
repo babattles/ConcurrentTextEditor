@@ -1,9 +1,15 @@
-function getCurrentFile() {
-	let files = database.ref('files');
-	files.on('value', function(data) {
-		let file = data.val();
-		// console.log(file);
+const { clipboard } = require('electron');
+function copyLink() {
+	if(currentKey == undefined) {
+		console.log('No File Selected');
+		return;
+	}
+	let fileEdits = database.ref('files/' + currentKey);
+	fileEdits.on('value', function(data){
+		console.log(data.val().link);
+		clipboard.writeText(data.val().link);
 	});
+
 }
 
 function loadEdits() {
@@ -20,7 +26,6 @@ function loadEdits() {
 			for(edit in data.val()) {
 				editVal = data.val()[edit];
 				let eU = userData.val()[editVal.user].username;
-				// let divContent = eU + ': ' + editVal.startIndex + ' - ' + editVal.endIndex;
 				let eContent;
 				if(editVal.content.length > 20) {
 					eContent = editVal.content.substring(0, 20);
@@ -28,7 +33,6 @@ function loadEdits() {
 				else {
 					eContent = editVal.content;
 				}
-				console.log(eContent);
 				let divContent = eU + ':' + eContent;
 				if(editVal.type == 'insert') {
 					editHTML += '<div id="edit-add" class="edit">' + divContent + '</div>\n';						

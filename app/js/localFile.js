@@ -71,6 +71,9 @@ var openFile = function() {
                 });
             }
         });
+
+        //Loads the edits for the file
+        loadEdits();
     });
 };
 
@@ -195,4 +198,7 @@ var closeFile = function() {
     // if (fileNum == 1) {
     //      ipcRenderer.send('disable-close', 'ping');
     // }
+
+    //Updates the edits for the file
+    loadEdits();
 };

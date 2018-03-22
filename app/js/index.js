@@ -183,6 +183,14 @@ firebase.auth().onAuthStateChanged(function(user) {
                     database.ref("files").child(childSnapshot.key).remove();
                     // disable close menu option
                     ipcRenderer.send('disable-close', 'ping');
+                    
+                    //Updates the edits for the file
+                    loadEdits();
+                });
+
+                //Allows you to get the link for a file
+                label.addEventListener('click', function(){
+                    copyLink();
                 });
 
                 // make open button
@@ -298,6 +306,8 @@ firebase.auth().onAuthStateChanged(function(user) {
                         // enable close menu
                         ipcRenderer.send('enable-close', 'ping');
                     }
+                    //Loads the edits for the file
+                    loadEdits();
                 });
 
                 // add new entry to list of files

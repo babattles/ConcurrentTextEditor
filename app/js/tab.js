@@ -90,7 +90,6 @@ var switchTab = function(args) {
     //Reset editor
     editor.setValue(sessions[target]);
     editor.clearSelection();
-    
     global_ignore = false;
 }
 

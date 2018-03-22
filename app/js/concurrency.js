@@ -1,7 +1,10 @@
-var checkConcurrency = function(edit) {
-    updateFile(edit);
+var checkConcurrency = function (edit) {
+    if (edit) {
+        updateFile(edit);
+    }
 };
-var updateFile = function(edit) {
+
+var updateFile = function (edit) {
     var editor = ace.edit("editor");
     var currentEdit = edit;
     var oldContents = editor.getSession().getValue();

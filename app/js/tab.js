@@ -55,6 +55,7 @@ var closeTab = function() {
 
 //Switch to a tab
 var switchTab = function(args) {
+    global_ignore = true;
     var target = -1;
     
     //Store the content of current editor to previous tab before switching
@@ -87,6 +88,7 @@ var switchTab = function(args) {
     //Reset editor
     editor.setValue(sessions[target]);
     editor.clearSelection();
+    global_ignore = false;
 }
 
 var updateTabs = function (activeTab) {

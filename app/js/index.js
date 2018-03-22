@@ -178,11 +178,13 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                 // listener to delete this file from database
                 deleteBtn.addEventListener('click', function() {
+                    global_ignore = true;
                     closeFile();
                     database.ref("/users/" + user.uid + "/fileList").child(childSnapshot.key).remove();
                     database.ref("files").child(childSnapshot.key).remove();
                     // disable close menu option
-                    ipcRenderer.send('disable-close', 'ping');
+                    //ipcRenderer.send('disable-close', 'ping');
+                    global_ignore = false;
                 });
 
                 // make open button
@@ -268,20 +270,24 @@ firebase.auth().onAuthStateChanged(function(user) {
                         editor.getSession().setMode(mode);
                         var contents = file.child("fileContents").once('value').then(function(snapshot) {
                             global_ignore = true;
+                            //Create a flag to check if the files is opened
                             var flag = 1;
+
                             //Create a new tab
                             for (i in tabs) {
+                                //Update the flag if the filename exist in tabs[]
                                 if (tabs[i] == childSnapshot.val().fileName) {
                                     flag = 0;
                                 }
                             }
+
+                            //Add a new tab
                             if (flag) {
                                 editor.setValue(snapshot.val(), -1);
                                 fileNum++;
                                 addTab(childSnapshot.val().fileName);
                                 console.log(fileNum);
                             }
-
 
                             global_ignore = false;
                         });
@@ -290,6 +296,7 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                         // set the editRef
                         editRef = currentFile.child("edits");
+
                         // load the file's current edits (clear first, in case coming from another file)
                         clearEdits();
                         //implements concurrency to update files across all users

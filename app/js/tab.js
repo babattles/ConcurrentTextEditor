@@ -28,6 +28,7 @@ var addTab = function(filename) {
 	lastTab = tabs.slice(-1)[0]; 
 
 	//Update GUI
+	//editor.getSession().setUndoManager(new ace.UndoManager());
 	updateTabs();
 }
 
@@ -40,8 +41,9 @@ var closeTab = function() {
     	tabs.splice(index, 1);
     	sessions.splice(index, 1);
 	}
-	
+	global_ignore = true;
 	editor.setValue('', -1);
+	global_ignore = false;
 
 	console.log(index);
 	//editor.reset();
@@ -55,6 +57,7 @@ var closeTab = function() {
 
 //Switch to a tab
 var switchTab = function(args) {
+	global_ignore = true;
     var target = -1;
     
     //Store the content of current editor to previous tab before switching
@@ -87,6 +90,8 @@ var switchTab = function(args) {
     //Reset editor
     editor.setValue(sessions[target]);
     editor.clearSelection();
+    
+    global_ignore = false;
 }
 
 var updateTabs = function (activeTab) {

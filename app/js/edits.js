@@ -26,6 +26,24 @@ var getEdits = function () {
 			user: e.user,
 			id: snapshot.key,
 		});
+		checkConcurrency(e);
+	});
+
+	// update local edit array when edits are changed on the database
+	editRef.on("child_changed", function (snapshot) {
+		var changedEdit = snapshot.val();
+		edits.find((obj, index) => {
+			if (obj.id == snapshot.key && (obj.start != changedEdit.startIndex || obj.end != changedEdit.endIndex)) {
+				edits[index] = {
+					start: changedEdit.startIndex,
+					end: changedEdit.endIndex,
+					content: changedEdit.content,
+					type: changedEdit.type,
+					user: changedEdit.user,
+					id: snapshot.key,
+				};
+			}
+		})
 	});
 
 	// update local edit array when edits are changed on the database

@@ -9,5 +9,7 @@ var updateFile = function (edit) {
     var currentEdit = edit;
     var oldContents = editor.getSession().getValue();
     var newContents = oldContents.slice(0, currentEdit.startIndex) + currentEdit.content + oldContents.slice(currentEdit.endIndex);
+    global_ignore = true;
     editor.getSession().setValue(newContents);
+    global_ignore = false;
 }

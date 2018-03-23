@@ -294,7 +294,6 @@ firebase.auth().onAuthStateChanged(function(user) {
                                 editor.setValue(snapshot.val(), -1);
                                 fileNum++;
                                 addTab(childSnapshot.val().fileName);
-                                console.log(fileNum);
                             }
 
                             global_ignore = false;

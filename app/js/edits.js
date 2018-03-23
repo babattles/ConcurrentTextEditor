@@ -1,13 +1,4 @@
-//Makes edit disappear when you approve it
-// $(document).ready(function () {
-// 	$(".edit").click(function () {
-// 		// console.log(this.innerHTML);
-// 		var confirmation = confirm("Are you sure you want to accept this edit?\n\n" + this.innerHTML);
-// 		if (confirmation === true) {
-// 			this.style.display = 'none';
-// 		}
-// 	});
-// });
+var Range = ace.require("ace/range").Range;
 
 var edits = [];
 
@@ -337,3 +328,51 @@ var acceptEdit = function(editID) {
 		});
 	});
 }
+
+/* Highlights the provided edit */
+var highlight = function(edit) {
+	var startRow = getRowColumnIndices(edit.start).row;
+	var startColumn = getRowColumnIndices(edit.start).column;
+	var endRow = getRowColumnIndices(edit.end).row;
+	var endColumn = getRowColumnIndices(edit.end).column;
+	console.log("setting marker at " + startRow + " " + startColumn + " and " + endRow + " " + endColumn);
+	if (edit.type == "insert") {
+		editor.session.addMarker(new Range(startRow, startColumn, endRow, endColumn), "mark_green", "text");
+	} else if (edit.type == "remove") {
+		editor.session.addMarker(new Range(startRow, startColumn, endRow, endColumn), "mark_red", "text");
+	}
+}
+
+/* Helper function for highlight */
+var getLastColumnIndex = function (row) {
+	return editor.session.getDocumentLastRowColumnPosition(row, 0).column;
+}
+
+/* Helper function for highlight */
+var getLastColumnIndices = function () {
+	var rows = editor.session.getLength();
+	var lastColumnIndices = [];
+	var lastColIndex = 0;
+	for (var i = 0; i < rows; i++) {
+		lastColIndex += getLastColumnIndex(i);
+		if (i > 0) { lastColIndex += 1; }
+		lastColumnIndices[i] = lastColIndex;
+	}
+	return lastColumnIndices;
+};
+
+/* Helper function for highlight */
+var getRowColumnIndices = function (characterIndex) {
+	var lastColumnIndices = getLastColumnIndices();
+	if (characterIndex <= lastColumnIndices[0]) {
+		return { row: 0, column: characterIndex };
+	}
+	var row = 1;
+	for (var i = 1; i < lastColumnIndices.length; i++) {
+		if (characterIndex > lastColumnIndices[i]) {
+			row = i + 1;
+		}
+	}
+	var column = characterIndex - lastColumnIndices[row - 1] - 1;
+	return { row: row, column: column };
+};

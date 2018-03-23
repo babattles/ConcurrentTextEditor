@@ -7,9 +7,6 @@ const { ipcMain } = require('electron');
 const { Menu } = require('electron');
 const https = require('https');
 
-
-
-
 //Enables live-reload
 require('electron-reload')(__dirname);
 
@@ -20,9 +17,6 @@ let authWindow = null;
 let gAuthCode = null;
 let googleAuthWin = null;
 let gAuthToken = null;
-
-
-
 
 /* Create the browser window. */
 function createWindow() {

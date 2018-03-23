@@ -1,0 +1,11 @@
+.mark_green {
+    position: absolute;
+    background: rgba(100,200,100,0.5);
+    z-index: 20
+}
+
+.mark_red {
+    position: absolute;
+    background: rgba(200,100,100,0.5);
+    z-index: 20
+}

@@ -206,45 +206,47 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                 var file = database.ref("files").child(childSnapshot.key);
                 var onlineUsers = file.child('userList');
-                onlineUsers.on("child_added", function(snapshot) {
-                    //When a user creates a file or gains access to a file
+
+                var updateUserStatus = function(snapshot) {
                     if (currentKey === childSnapshot.key) {
-                        if (snapshot.val().online === 'true') {
-                            var element = document.createElement("div");
+                        var element = document.getElementById(snapshot.key);
+                        if (element == null) {
+                            element = document.createElement("div");
                             element.setAttribute("id", snapshot.key);
-                            element.classList.add("collabActive");
+                            if (snapshot.val().online === 'true') {
+                                element.classList.add("collabActive");
+                            } else {
+                                element.classList.add("collabInactive");
+                            }
                             element.appendChild(document.createTextNode(snapshot.val().username));
                             onlineUsersContainer.appendChild(element);
+                        } else {
+                            if (snapshot.val().online === 'true') {
+                                element.classList.remove("collabInactive");
+                                element.classList.add("collabActive");
+                            } else {
+                                element.classList.remove("collabActive");
+                                element.classList.add("collabInactive");
+                            }
                         }
                     }
+                }
+
+                //When a user creates a file or gains access to a file
+                onlineUsers.on("child_added", function(snapshot) {
+                    updateUserStatus(snapshot);
                 });
+
+                //When a user is deleted from the file userlist (ie. no longer has access)
                 onlineUsers.on("child_removed", function(snapshot) {
-                    //When a user is deleted from the file userlist (ie. no longer has access)
-                    console.log("removed");
-                    try {
-                        var element = document.getElementById(snapshot.key);
+                    var element = document.getElementById(snapshot.key);
+                    if (element != null) {
                         element.parentNode.removeChild(element);
-                    } catch (error) {
-                        console.log("Attempted to re-remove user from GUI");
                     }
                 });
+
                 onlineUsers.on("child_changed", function(snapshot) {
-                    if (snapshot.val().online === 'true') {
-                        console.log("online status changed to true");
-                        var element = document.createElement("div");
-                        element.setAttribute("id", snapshot.key);
-                        element.classList.add("collabActive");
-                        element.appendChild(document.createTextNode(snapshot.val().username));
-                        onlineUsersContainer.appendChild(element);
-                    } else {
-                        console.log("online status changed to false");
-                        try {
-                            var element = document.getElementById(snapshot.key);
-                            element.parentNode.removeChild(element);
-                        } catch (error) {
-                            console.log("Attempted to re-remove user from GUI");
-                        }
-                    }
+                    updateUserStatus(snapshot);
                 });
 
                 // listener to open this file from database
@@ -261,13 +263,15 @@ firebase.auth().onAuthStateChanged(function(user) {
                         //Update GUI to show already online users
                         file.child('userList').orderByChild("username").once('value', function(snapshot) {
                             snapshot.forEach(function(childSnapshot) {
+                                var element = document.createElement("div");
+                                element.setAttribute("id", childSnapshot.key);
                                 if (childSnapshot.val().online === 'true') {
-                                    var element = document.createElement("div");
-                                    element.setAttribute("id", childSnapshot.key);
                                     element.classList.add("collabActive");
-                                    element.appendChild(document.createTextNode(childSnapshot.val().username));
-                                    onlineUsersContainer.appendChild(element);
+                                } else if (childSnapshot.key != user.uid) {
+                                    element.classList.add("collabInactive");
                                 }
+                                element.appendChild(document.createTextNode(childSnapshot.val().username));
+                                onlineUsersContainer.appendChild(element);
                             });
                         });
                         currentKey = childSnapshot.key;

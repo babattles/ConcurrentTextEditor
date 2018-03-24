@@ -9,7 +9,6 @@ var fileContents = '';
 var currentFileName = '';
 var pathSeperator = requirePath.sep;
 var currentFile;
-var fileNum = 2;
 
 
 var openFile = function() {
@@ -72,6 +71,9 @@ var openFile = function() {
                 });
             }
         });
+
+        //Loads the edits for the file
+        loadEdits();
     });
 };
 
@@ -196,4 +198,7 @@ var closeFile = function() {
     // if (fileNum == 1) {
     //      ipcRenderer.send('disable-close', 'ping');
     // }
+
+    //Updates the edits for the file
+    loadEdits();
 };

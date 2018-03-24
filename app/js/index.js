@@ -1,6 +1,6 @@
 'use strict';
-
 const { ipcRenderer } = require('electron');
+var fileNum = 1;
 
 // Initialize Firebase
 var config = {
@@ -236,11 +236,21 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                 // listener to delete this file from database
                 deleteBtn.addEventListener('click', function() {
+                    global_ignore = true;
                     closeFile();
                     database.ref("/users/" + user.uid + "/fileList").child(childSnapshot.key).remove();
                     database.ref("files").child(childSnapshot.key).remove();
                     // disable close menu option
-                    ipcRenderer.send('disable-close', 'ping');
+
+                    global_ignore = false;                    
+                    //Updates the edits for the file
+                    loadEdits();
+                });
+
+                //Allows you to get the link for a file
+                label.addEventListener('click', function(){
+                    copyLink();
+
                 });
 
                 // make open button
@@ -254,46 +264,47 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                 var file = database.ref("files").child(childSnapshot.key);
                 var onlineUsers = file.child('userList');
-                onlineUsers.on("child_added", function(snapshot) {
-                    //When a user creates a file or gains access to a file
-                    console.log("added");
+
+                var updateUserStatus = function(snapshot) {
                     if (currentKey === childSnapshot.key) {
-                        if (snapshot.val().online === 'true') {
-                            var element = document.createElement("div");
+                        var element = document.getElementById(snapshot.key);
+                        if (element == null) {
+                            element = document.createElement("div");
                             element.setAttribute("id", snapshot.key);
-                            element.classList.add("collabActive");
+                            if (snapshot.val().online === 'true') {
+                                element.classList.add("collabActive");
+                            } else {
+                                element.classList.add("collabInactive");
+                            }
                             element.appendChild(document.createTextNode(snapshot.val().username));
                             onlineUsersContainer.appendChild(element);
+                        } else {
+                            if (snapshot.val().online === 'true') {
+                                element.classList.remove("collabInactive");
+                                element.classList.add("collabActive");
+                            } else {
+                                element.classList.remove("collabActive");
+                                element.classList.add("collabInactive");
+                            }
                         }
                     }
+                }
+
+                //When a user creates a file or gains access to a file
+                onlineUsers.on("child_added", function(snapshot) {
+                    updateUserStatus(snapshot);
                 });
+
+                //When a user is deleted from the file userlist (ie. no longer has access)
                 onlineUsers.on("child_removed", function(snapshot) {
-                    //When a user is deleted from the file userlist (ie. no longer has access)
-                    console.log("removed");
-                    try {
-                        var element = document.getElementById(snapshot.key);
+                    var element = document.getElementById(snapshot.key);
+                    if (element != null) {
                         element.parentNode.removeChild(element);
-                    } catch (error) {
-                        console.log("Attempted to re-remove user from GUI");
                     }
                 });
+
                 onlineUsers.on("child_changed", function(snapshot) {
-                    if (snapshot.val().online === 'true') {
-                        console.log("online status changed to true");
-                        var element = document.createElement("div");
-                        element.setAttribute("id", snapshot.key);
-                        element.classList.add("collabActive");
-                        element.appendChild(document.createTextNode(snapshot.val().username));
-                        onlineUsersContainer.appendChild(element);
-                    } else {
-                        console.log("online status changed to false");
-                        try {
-                            var element = document.getElementById(snapshot.key);
-                            element.parentNode.removeChild(element);
-                        } catch (error) {
-                            console.log("Attempted to re-remove user from GUI");
-                        }
-                    }
+                    updateUserStatus(snapshot);
                 });
 
                 // listener to open this file from database
@@ -310,13 +321,15 @@ firebase.auth().onAuthStateChanged(function(user) {
                         //Update GUI to show already online users
                         file.child('userList').orderByChild("username").once('value', function(snapshot) {
                             snapshot.forEach(function(childSnapshot) {
+                                var element = document.createElement("div");
+                                element.setAttribute("id", childSnapshot.key);
                                 if (childSnapshot.val().online === 'true') {
-                                    var element = document.createElement("div");
-                                    element.setAttribute("id", childSnapshot.key);
                                     element.classList.add("collabActive");
-                                    element.appendChild(document.createTextNode(childSnapshot.val().username));
-                                    onlineUsersContainer.appendChild(element);
+                                } else if (childSnapshot.key != user.uid) {
+                                    element.classList.add("collabInactive");
                                 }
+                                element.appendChild(document.createTextNode(childSnapshot.val().username));
+                                onlineUsersContainer.appendChild(element);
                             });
                         });
                         currentKey = childSnapshot.key;
@@ -327,19 +340,42 @@ firebase.auth().onAuthStateChanged(function(user) {
                         editor.getSession().setMode(mode);
                         var contents = file.child("fileContents").once('value').then(function(snapshot) {
                             global_ignore = true;
-                            editor.setValue(snapshot.val(), -1);
+                            //Create a flag to check if the files is opened
+                            var flag = 1;
+
+                            //Create a new tab
+                            for (i in tabs) {
+                                //Update the flag if the filename exist in tabs[]
+                                if (tabs[i] == childSnapshot.val().fileName) {
+                                    flag = 0;
+                                }
+                            }
+
+                            //Add a new tab
+                            if (flag) {
+                                editor.setValue(snapshot.val(), -1);
+                                fileNum++;
+                                addTab(childSnapshot.val().fileName);
+                            }
+
                             global_ignore = false;
                         });
                         // set the current open file to the new file
                         currentFile = file;
+
                         // set the editRef
                         editRef = currentFile.child("edits");
+
                         // load the file's current edits (clear first, in case coming from another file)
                         clearEdits();
+                        //implements concurrency to update files across all users
+                        checkConcurrency();
                         getEdits(); // Also listens for incoming edits
                         // enable close menu
                         ipcRenderer.send('enable-close', 'ping');
                     }
+                    //Loads the edits for the file
+                    loadEdits();
                 });
 
                 // add new entry to list of files

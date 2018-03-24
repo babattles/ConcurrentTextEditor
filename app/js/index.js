@@ -1,7 +1,8 @@
 'use strict';
 const { ipcRenderer } = require('electron');
 var fileNum = 1;
-
+var fileKey = [];
+fileKey.push(0);
 // Initialize Firebase
 var config = {
     apiKey: "AIzaSyAr4i-0nzmJi9x2bwyJXqQPjsPJfkeN0V0",
@@ -365,7 +366,7 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                         // set the editRef
                         editRef = currentFile.child("edits");
-
+                        fileKey.push(currentKey);
                         // load the file's current edits (clear first, in case coming from another file)
                         clearEdits();
                         //implements concurrency to update files across all users

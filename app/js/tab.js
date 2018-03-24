@@ -98,8 +98,10 @@ var switchTab = function(args) {
     currentFile = file;
  
     editRef = currentFile.child("edits");
+    currentKey = fileKey[target];
     clearEdits();
     getEdits();
+    loadEdits();
 
 
     global_ignore = false;

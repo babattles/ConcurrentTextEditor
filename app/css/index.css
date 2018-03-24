@@ -37,8 +37,9 @@ body {
 }
 .form-item {
     display: block;
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-bottom: 5px;
 }
 
 .form-text {
@@ -63,6 +64,7 @@ body {
     margin-top: 12px;
     position: absolute;
     left: 0px;
+    font-size:12px;
 }
 
 /*Edit list*/
@@ -126,6 +128,16 @@ body {
 
 .collabInactive:hover {
     background-color: #999999;
+}
+
+
+.share-link{
+    padding:5px;
+    border:0px;
+    margin:0px;
+    left: 5px;
+    color: #CCCCCC;
+    background-color: rgba(0,0,0,0);
 }
 
 /*Chat*/
@@ -194,7 +206,7 @@ body {
 #editor {
     position: absolute;
     top: 20px;
-    right: 200px;
+    right: 210px;
     bottom: 0;
     left: 200px;
 }

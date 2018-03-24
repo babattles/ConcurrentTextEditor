@@ -64,6 +64,64 @@ ipcRenderer.on('update-username-reply', function(event, arg) {
     }
 });
 
+
+// "Share Link" Button is clicked
+var ShareListener = document.getElementById("shareLinkButton");
+//accept "enter"
+var newUser = document.getElementById("username");
+newUser.addEventListener("keyup", function(event) {
+        event.preventDefault();
+        if (event.keyCode === 13) {
+            ShareListener.click();
+        }
+    });
+ShareListener.addEventListener('click', function() {
+    //get filename
+    var file = currentKey;
+    var username = newUser.value;
+    //find user
+    database.ref().child('users')
+        .orderByChild('username')
+        .equalTo(username)
+        .once('value', function (snapshot) {
+            var exists = (snapshot.val() !== null);
+            //console.log(snapshot.val());
+            //if user does not already exist, prompt username
+            if (!exists) {
+                alert("User does not exist");
+            } else {
+                var childKey;
+                var childData;
+                snapshot.forEach(function(childSnapshot) {
+                    childKey = childSnapshot.key;
+                    childData = childSnapshot.val();
+                });
+                //console.log(childKey);
+                //console.log(childData);
+
+                database.ref().child('files').child(file).child('fileName')
+                    .once('value', function (snapshot) {
+                        var filename = snapshot.val();
+
+                        //add file to users filelist
+                        //console.log(filename);
+                        firebase.database().ref().child("users")
+                            .child(childKey).child("fileList").child(file).set({ 'fileName': filename});
+                    });
+                
+
+                //add user to files userlist
+                firebase.database().ref().child("files")
+                    .child(file).child("userList").child(childKey).set({'username': username });
+                alert("User added");
+            }          
+        }).catch(function(error) {
+            if (error != null) {
+                console.log(error.message);
+                return;
+            }
+        });
+});
 /**
  * Menu Item Listeners
  */

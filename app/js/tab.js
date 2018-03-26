@@ -16,6 +16,17 @@ $(document).ready(function(){
     });
 });
 
+var testFunction = function() {
+    console.log("testOK");
+    window.open ('comment.html');
+}
+
+var acceptComment = function() {
+    console.log("accepted");
+    var userInput = document.getElementById("userInput").value;
+    console.log(userInput);
+}
+
 //Add a new tab
 var addTab = function(filename) {
 	//Create a new tab 

@@ -35,7 +35,7 @@ function loadEdits() {
 				}
 				let divContent = eU + ':' + eContent;
 				if(editVal.type == 'insert') {
-					editHTML += '<div id="edit-add" class="edit">' + divContent + '</div>\n';						
+					editHTML += '<div id="edit-add" class="edit" onclick=testFunction()>' + divContent + '</div>\n';						
 				} else {
 					editHTML += '<div id="edit-remove" class="edit">' + divContent + '</div>\n';
 				}

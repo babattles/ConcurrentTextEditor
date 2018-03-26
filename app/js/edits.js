@@ -428,13 +428,12 @@ function loadEdits() {
 				}
 				let divContent = '<b>' + editVal.username + '</b>: ' + eContent;
 				if(editVal.type == 'insert') {
-					editHTML += '<div id="edit-add" class="edit" onmouseover="editHover(\''
+					editHTML += '<div id="edit-add" class="edit" onmouseover="editHighlight(\''
 					 + editVal.id + 
 					 '\')">' + divContent + '</div>\n';						
 				} else {
-					editHTML += '<div id="edit-remove" class="edit" onmouseover="editHover(\''
-					 + editVal.id + 
-					 '\')">' + divContent + '</div>\n';
+					editHTML += '<div id="edit-remove" class="edit">' + divContent + '</div>\n';
+					 editHighlight(editVal.id);
 				}
 				if(editVal.child) {
 					childVal = editVal.child;
@@ -447,9 +446,10 @@ function loadEdits() {
 					}
 					let childDiv = '<b>' + childVal.username + '</b>: ' + childContent;
 					if(childVal.type == 'insert') {
-						editHTML += '<div id="edit-add-child" class="edit" onmouseover="editHover(\'' + childVal.id + '\')">' + childDiv + '</div>\n';						
+						editHTML += '<div id="edit-add-child" class="edit" onmouseover="editHighlight(\'' + childVal.id + '\')">' + childDiv + '</div>\n';						
 					} else {
-						editHTML += '<div id="edit-remove-child" class="edit" onmouseover="editHover(\'' + childVal.id + '\')">' + childDiv + '</div>\n';
+						editHTML += '<div id="edit-remove-child" class="edit">' + childDiv + '</div>\n';
+						editHighlight(childVal.id);
 					}
 				}
 			}
@@ -462,7 +462,7 @@ function loadEdits() {
 	});
 }
 
-function editHover(id) {
+function editHighlight(id) {
 	let hoveredEdit;
 	for(i in edits) {
 		if(edits[i].id == id) {

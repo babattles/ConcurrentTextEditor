@@ -1,7 +1,12 @@
-var Range = ace.require("ace/range").Range;
+var f = location.href.split("/").slice(-1); 
+//console.log(f);
+if (f == "index.html") {
+	var Range = ace.require("ace/range").Range;
+}
 
 var edits = [];
 
+var glo_e;
 // Retrieve new edits as they are added to the database (including your own!)
 var getEdits = function () {
 	editRef.on("child_added", function (snapshot, prevChildKey) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
@@ -12,6 +17,7 @@ var getEdits = function () {
 			content: e.content,
 			type: e.type,
 			user: e.user,
+			comment: e.comment,
 			id: snapshot.key,
 		});
 		checkConcurrency(e);
@@ -28,6 +34,7 @@ var getEdits = function () {
 					content: changedEdit.content,
 					type: changedEdit.type,
 					user: changedEdit.user,
+					comment: changedEdit.comment,
 					id: snapshot.key,
 				};
 			}
@@ -70,7 +77,8 @@ var postEdit = function (edit) {
 		'endIndex': edit.end,
 		'content': edit.content,
 		'type': edit.type,
-		'user': edit.user
+		'user': edit.user,
+		'comment': edit.comment
 	});
 	edit.id = newEdit.key;
 }
@@ -78,12 +86,14 @@ var postEdit = function (edit) {
 /* Update your existing edit in the database */
 var updateEdit = function (edit) {
 	var ref = getEditRef(edit);
+	glo_e = ref;
 	return ref.update({
 		content: edit.content,
 		endIndex: edit.end,
 		startIndex: edit.start
 	});
 }
+
 
 /* Delete an edit from the database */
 var deleteEdit = function (edit) {
@@ -253,6 +263,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 				content: stringify(delta.lines),
 				type: delta.action,
 				user: user.uid,
+				comment: "",
 			}
 			postEdit(e);
 			fixIndices(e, endIndex - startIndex, delta.action);
@@ -428,11 +439,11 @@ function loadEdits() {
 				}
 				let divContent = '<b>' + editVal.username + '</b>: ' + eContent;
 				if(editVal.type == 'insert') {
-					editHTML += '<div id="edit-add" class="edit" onmouseover="editHighlight(\''
+					editHTML += '<div id="edit-add" class="edit" onclick="openComment(glo_e)" onmouseover="editHighlight(\''
 					 + editVal.id + 
 					 '\')">' + divContent + '</div>\n';						
 				} else {
-					editHTML += '<div id="edit-remove" class="edit">' + divContent + '</div>\n';
+					editHTML += '<div id="edit-remove" class="edit" onclick="openComment(glo_e)">' + divContent + '</div>\n';
 					 editHighlight(editVal.id);
 				}
 				if(editVal.child) {
@@ -446,9 +457,9 @@ function loadEdits() {
 					}
 					let childDiv = '<b>' + childVal.username + '</b>: ' + childContent;
 					if(childVal.type == 'insert') {
-						editHTML += '<div id="edit-add-child" class="edit" onmouseover="editHighlight(\'' + childVal.id + '\')">' + childDiv + '</div>\n';						
+						editHTML += '<div id="edit-add-child" class="edit" onclick="openComment(glo_e)" onmouseover="editHighlight(\'' + childVal.id + '\')">' + childDiv + '</div>\n';						
 					} else {
-						editHTML += '<div id="edit-remove-child" class="edit">' + childDiv + '</div>\n';
+						editHTML += '<div id="edit-remove-child" class="edit" onclick="openComment(glo_e)">' + childDiv + '</div>\n';
 						editHighlight(childVal.id);
 					}
 				}

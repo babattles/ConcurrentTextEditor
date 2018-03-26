@@ -1,23 +1,24 @@
 var userInput;
 
-var editR;
+var x;
 
-var openComment = function(glo_e) {
-    console.log("testOK");
-    editR = glo_e;
+var openComment = function(edit) {
+    //console.log("testOK");
+    x = edit;
+    console.log(x);
     window.open ('comment.html');
 }
 
-var acceptComment = function() {
-    console.log("accepted");
+var acceptComment = function(x) {
+    //console.log("accepted");
     userInput = document.getElementById("userInput").value;
-    console.log(userInput);
-    updateComment(editR);
+    console.log(x);
+    updateComment(x);
 }
 
-var updateComment = function (edit) {
-	var ref = edit;
-	console.log(userInput);
+var updateComment = function (editRef) {
+	var ref = editRef.id;
+	console.log(ref);
 	return ref.update({
 		comment: userInput
 	});

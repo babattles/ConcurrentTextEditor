@@ -72,10 +72,11 @@ body {
     position: absolute;
     top: 20px;
     right: 0px;
+    max-width: 210px;
 }
 
 #editLabel {
-    padding-left: 20px;
+    padding-left: 30px;
     text-align: center;
     background-color: #1A1A1A;
     color: #CCCCCC;
@@ -84,6 +85,7 @@ body {
 #edit-add {
     padding-left: 5px;
     background-color: #B3FFCC;
+    word-wrap: break-word;
 }
 
 #edit-add:hover{
@@ -93,9 +95,30 @@ body {
 #edit-remove {
     padding-left: 5px;
     background-color: #F1636A;
+    word-wrap: break-word;
 }
 
 #edit-remove:hover{
+    background-color: #C64F64;
+}
+
+#edit-add-child {
+    margin-left: 30px;
+    padding-left: 5px;
+    background-color: #B3FFCC;
+}
+
+#edit-add-child:hover{
+    background-color: #65CB86;
+}
+
+#edit-remove-child {
+    margin-left: 30px;
+    padding-left: 5px;
+    background-color: #F1636A;
+}
+
+#edit-remove-child:hover{
     background-color: #C64F64;
 }
 

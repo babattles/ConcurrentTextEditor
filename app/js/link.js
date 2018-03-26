@@ -34,10 +34,12 @@ function loadEdits() {
 					eContent = editVal.content;
 				}
 				let divContent = eU + ':' + eContent;
+				let acceptButton = '<label class="switch"><input type="checkbox"><span class="slider round">'
+					+'</span></label>';
 				if(editVal.type == 'insert') {
-					editHTML += '<div id="edit-add" class="edit">' + divContent + '</div>\n';						
+					editHTML += '<div id="edit-add" class="edit">' + divContent + acceptButton + '</div>\n';						
 				} else {
-					editHTML += '<div id="edit-remove" class="edit">' + divContent + '</div>\n';
+					editHTML += '<div id="edit-remove" class="edit">' + divContent + acceptButton + '</div>\n';
 				}
 			}
 			$('#edits').empty();

@@ -455,6 +455,8 @@ function loadEdits() {
 			}
 			$('#edits').empty();
 			$('#edits').append(editHTML);
+			parentList = [];
+			childList = [];
 			editHTML = '';	
 		});
 	});

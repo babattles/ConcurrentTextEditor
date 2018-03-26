@@ -16,6 +16,7 @@ $(document).ready(function(){
     });
 });
 
+
 //Add a new tab
 var addTab = function(filename) {
 	//Create a new tab 

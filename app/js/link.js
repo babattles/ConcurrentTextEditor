@@ -10,5 +10,4 @@ function copyLink() {
 			clipboard.writeText(data.val().link);
 		}
 	});
-
 }

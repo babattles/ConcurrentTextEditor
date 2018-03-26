@@ -88,6 +88,7 @@ body {
     word-wrap: break-word;
 }
 
+
 #edit-add:hover{
     background-color: #65CB86;
 }
@@ -235,51 +236,3 @@ body {
 }
 
 
-/*Begion of dropdown manu (syntax)*/
-
-.dropbtn {
-    background-color: #3498DB;
-    color: white;
-    padding: 10px;
-    font-size: 10px;
-    border: none;
-    cursor: pointer;
-}
-
-.dropbtn:hover,
-.dropbtn:focus {
-    background-color: #2980B9;
-}
-
-.dropdown {
-    float: right;
-    position: absolute;
-    display: inline-block;
-}
-
-.dropdown-content {
-    display: none;
-    position: relative;
-    background-color: #f1f1f1;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-    z-index: 999;
-}
-
-.dropdown-content a {
-    color: black;
-    padding: 12px 10px;
-    text-decoration: none;
-    display: block;
-}
-
-.dropdown a:hover {
-    background-color: #ddd
-}
-
-.show {
-    display: block;
-}
-
-
-/*End of dropdown manu (syntax)*/

@@ -346,7 +346,7 @@ var highlight = function (edit) {
 	var startColumn = getRowColumnIndices(edit.start).column;
 	var endRow = getRowColumnIndices(edit.end).row;
 	var endColumn = getRowColumnIndices(edit.end).column;
-	console.log("setting marker at " + startRow + " " + startColumn + " and " + endRow + " " + endColumn);
+	// console.log("setting marker at " + startRow + " " + startColumn + " and " + endRow + " " + endColumn);
 	if (edit.type == "insert") {
 		edit.hid = editor.session.addMarker(new Range(startRow, startColumn, endRow, endColumn), "mark_green", "text");
 	} else if (edit.type == "remove") {
@@ -448,6 +448,8 @@ function loadEdits() {
 				if (editVal.type == 'insert') {
 					editHTML += '<div id="edit-add" class="edit" onclick="openComment(glo_e)" onmouseover="editHighlight(\''
 						+ editVal.id +
+						'\')" onmouseout="editUnhighlight(\''
+						+ editVal.id +
 						'\')">' + divContent + '</div>\n';
 				} else {
 					editHTML += '<div id="edit-remove" class="edit" onclick="openComment(glo_e)">' + divContent + '</div>\n';
@@ -464,7 +466,11 @@ function loadEdits() {
 					}
 					let childDiv = '<b>' + childVal.username + '</b>: ' + childContent;
 					if (childVal.type == 'insert') {
-						editHTML += '<div id="edit-add-child" class="edit" onclick="openComment(glo_e)" onmouseover="editHighlight(\'' + childVal.id + '\')">' + childDiv + '</div>\n';
+						editHTML += '<div id="edit-add-child" class="edit" onclick="openComment(glo_e)" onmouseover="editHighlight(\''
+						 + childVal.id + 
+						 '\')" onmouseout="editUnhighlight(\''
+						 + childVal.id + 
+						 '\')">' + childDiv + '</div>\n';
 					} else {
 						editHTML += '<div id="edit-remove-child" class="edit" onclick="openComment(glo_e)">' + childDiv + '</div>\n';
 						editHighlight(childVal.id);
@@ -488,4 +494,14 @@ function editHighlight(id) {
 		}
 	}
 	highlight(hoveredEdit);
+}
+
+function editUnhighlight(id) {
+	let unHoveredEdit;
+	for (i in edits) {
+		if (edits[i].id == id) {
+			unHoveredEdit = edits[i];
+		}
+	}
+	unhighlight(unHoveredEdit);
 }

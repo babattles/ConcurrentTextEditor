@@ -543,11 +543,17 @@ function loadEdits() {
 							+ onClickLogic
 							+ 'onmouseover="editHighlight(\''+ childVal.id + '\')" '
 							+ 'onmouseout="editUnhighlight(\''+ childVal.id + '\')">' 
-							+ childDiv + '</div>\n';
+							+ childDiv 
+							+ deleteEditBtn
+							+ acceptButton
+							+ '</div>\n';
 					} else {
 						editHTML += '<div id="edit-remove-child" class="edit" '
 							+ onClickLogic
-							+ childDiv + '</div>\n';
+							+ childDiv 
+							+ deleteEditBtn
+							+ acceptButton
+							+ '</div>\n';
 						editHighlight(childVal.id);
 					}
 				}

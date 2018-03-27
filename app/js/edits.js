@@ -534,19 +534,11 @@ function loadEdits() {
 					}
 					let childDiv = '<b>' + childVal.username + '</b>: ' + childContent;
 					if (childVal.type == 'insert') {
-<<<<<<< HEAD
 						editHTML += '<div id="edit-add-child" class="edit"'
 							+ onClickLogic
 							+ 'onmouseover="editHighlight(\''+ childVal.id + '\')" '
 							+ 'onmouseout="editUnhighlight(\''+ childVal.id + '\')">' 
 							+ childDiv + '</div>\n';
-=======
-						editHTML += '<div id="edit-add-child" class="edit" onclick="openComment(glo_e)" onmouseover="editHighlight(\''
-							+ childVal.id +
-							'\')" onmouseout="editUnhighlight(\''
-							+ childVal.id +
-							'\')">' + childDiv + '</div>\n';
->>>>>>> master
 					} else {
 						editHTML += '<div id="edit-remove-child" class="edit" '
 							+ onClickLogic

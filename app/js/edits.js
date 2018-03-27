@@ -10,6 +10,17 @@ var glo_e;
 // Retrieve new edits as they are added to the database (including your own!)
 
 var getEdits = function() {
+	
+	if (delta.action == "remove") {
+		var cursor = editor.getCursorPosition()
+		global_ignore = true;
+		var prefix = editor.session.getValue().substring(0, startIndex);
+		var suffix = editor.session.getValue().substring(endIndex - 1);
+		editor.session.setValue(prefix + stringify(delta.lines) + suffix);
+		editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
+		global_ignore = false;
+	}
+	
     editRef.on("child_added", function(snapshot, prevChildKey) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
         //console.log("child added...");
         var e = snapshot.val();

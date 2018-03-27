@@ -59,6 +59,19 @@ body {
     text-align: center;
 }
 
+/*Comment*/
+#Comment {
+    z-index: 9999;
+    position: absolute;
+    top: 0;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    padding-top: 150px;
+    background-color: #424242;
+    text-align: center;
+}
+
 /*File List*/
 #file-container {
     margin-top: 12px;

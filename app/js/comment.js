@@ -2,32 +2,48 @@ var userInput;
 
 var x;
 
+var name = location.href.split("/").slice(-1); 
+//console.log(f);
+if (name == "comment.html") {
+    var config = {
+    apiKey: "AIzaSyAr4i-0nzmJi9x2bwyJXqQPjsPJfkeN0V0",
+    authDomain: "hivetext-dcadf.firebaseapp.com",
+    databaseURL: "https://hivetext-dcadf.firebaseio.com",
+    projectId: "hivetext-dcadf",
+    storageBucket: "hivetext-dcadf.appspot.com",
+    messagingSenderId: "254482798300"
+    };
+    firebase.initializeApp(config); 
+    var db = firebase.database();
+}
+
+var commentPanel = document.getElementById('Comment');
+var commentInput = document.getElementById('comment-input');
+
+clearComment = function() {
+    commentInput.value = '';
+}
+
 var openComment = function(edit) {
     //console.log("testOK");
     x = edit;
-    console.log(x);
-    window.open ('comment.html?parameter=' + x);
+    //console.log(x);
+    clearComment();
+    commentPanel.classList.toggle("hidden");
+    //var db = firebase.database();
+    //window.open ('comment.html?parameter=' + x);
 }
 
-var acceptComment = function(x) {
-    //console.log("accepted");
-    userInput = document.getElementById("userInput").value;
-    //window.close();
-    console.log(userInput);
+changeCommentBtn.addEventListener("click", function() {
+    commentPanel.classList.toggle("hidden");
+    userInput = document.getElementById("comment-input").value;
+    x.update ({
+         comment: userInput
+    })
+});
 
-    var para = getParameterByName('parameter');
-    //console.log(para);
-    updateComment(para);
-}
 
-var updateComment = function (editRef) {
-	var ref = editRef;
-	console.log(ref);
-    
-	return ref.update({
-		comment: userInput
-	});
-}
+
 
 function getParameterByName(name, url) {
     if (!url) url = window.location.href;

@@ -174,7 +174,7 @@ var setEdit = function(startIndex, endIndex, delta) {
                     edits[index].end = obj.end + (endIndex - startIndex);
                     edits[index].type = delta.action;
                     edits[index].user = user.uid;
-                    updateEdit(edits[index])
+                    //updateEdit(edits[index])
                     fixIndices(edits[index], endIndex - startIndex, delta.action);
                     return true;
                 } else {
@@ -186,7 +186,7 @@ var setEdit = function(startIndex, endIndex, delta) {
                         type: delta.action,
                         user: user.uid,
                         comment: "",
-                        parent: obj.user,
+                        parent: obj.id,
                         addedSize: endIndex - startIndex,
                     }
                     postEdit(e);

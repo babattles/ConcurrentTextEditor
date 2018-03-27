@@ -8,7 +8,6 @@ var edits = [];
 
 var glo_e;
 // Retrieve new edits as they are added to the database (including your own!)
-
 var getEdits = function() {
 	
 	if (delta.action == "remove") {
@@ -368,41 +367,38 @@ var fixIndicesAfterRemovalAccept = function(index, length) {
 }
 
 // This function is called once all users have accepted an edit.
-var acceptEdit = function (editID) {
-	editUnhighlight(editID);
-	var thisEdit = editRef.child(editID);
-	thisEdit.once('value', function (snapshot) {
-		var e = snapshot.val();
-		// console.log("Index before = " + e.startIndex);
-		var index = convertIndex(e.startIndex);
-		// console.log("Index after = " + index)
-		currentFile.once('value', function (childSnapshot) {
-			var f = childSnapshot.val();
-			var fileContent = f.fileContents;
-			// console.log(fileContent);
-			var prefix = fileContent.substring(0, index);
-			// console.log("prefix = " + prefix);
-			var suffix = fileContent.substring(index);
-			// console.log("suffix = " + suffix);
+var acceptEdit = function(editID) {
+    var thisEdit = editRef.child(editID);
+    thisEdit.once('value', function(snapshot) {
+        var e = snapshot.val();
+        // console.log("Index before = " + e.startIndex);
+        var index = convertIndex(e.startIndex);
+        // console.log("Index after = " + index)
+        currentFile.once('value', function(childSnapshot) {
+            var f = childSnapshot.val();
+            var fileContent = f.fileContents;
+            // console.log(fileContent);
+            var prefix = fileContent.substring(0, index);
+            // console.log("prefix = " + prefix);
+            var suffix = fileContent.substring(index);
+            // console.log("suffix = " + suffix);
 
-			if (e.type == 'insert') {
-				currentFile.update({
-					fileContents: prefix + e.content + suffix
-				});
-			} else {
-				suffix = fileContent.substring(e.endIndex, fileContent.length);
-				currentFile.update({
-					fileContents: prefix + suffix
-				});
-				fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
-				global_ignore = true;
-				editor.session.setValue(prefix + suffix);
-				global_ignore = false;
-			}
-			thisEdit.remove();
-			//TODO remove highlighting from the file (once highlighting is implemented)
-		});
-	});
+            if (e.type == 'insert') {
+                currentFile.update({
+                    fileContents: prefix + e.content + suffix
+                });
+            } else {
+                suffix = fileContent.substring(e.endIndex, fileContent.length);
+                currentFile.update({
+                    fileContents: prefix + suffix
+                });
+                fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
+            }
+            thisEdit.remove();
+
+            //TODO remove highlighting from the file (once highlighting is implemented)
+        });
+    });
 }
 
 /* Highlights the provided edit */
@@ -459,7 +455,6 @@ var getRowColumnIndices = function(characterIndex) {
     var column = characterIndex - lastColumnIndices[row - 1] - 1;
     return { row: row, column: column };
 };
-
 
 function loadEdits() {
     if (currentKey == undefined) {
@@ -550,86 +545,6 @@ function loadEdits() {
     });
 }
 
-var deleteEditById = function (editID) {
-	//TODO: delete Child Edits if parent
-	//TODO: red wont unhighlight
-	//TODO: delete from edit list
-	editUnhighlight(editID);
-	var thisEdit = editRef.child(editID);
-	thisEdit.once('value', function (snapshot) {
-		var e = snapshot.val();
-		// console.log("Index before = " + e.startIndex);
-		var index = convertIndex(e.startIndex);
-		// console.log("Index after = " + index)
-		currentFile.once('value', function (childSnapshot) {
-			var f = childSnapshot.val();
-			var fileContent = f.fileContents;
-			// console.log(fileContent);
-			var prefix = fileContent.substring(0, index);
-			// console.log("prefix = " + prefix);
-			var suffix = fileContent.substring(index + 1);
-			// console.log("suffix = " + suffix);
-
-			if (e.type == 'insert') {
-				suffix = fileContent.substring(e.endIndex, fileContent.length);
-				// currentFile.update({
-					// fileContents: prefix + suffix
-				// });
-				global_ignore = true;
-				editor.session.setValue(prefix + suffix);
-				global_ignore = false;
-			} else {
-				// fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
-				// currentFile.update({
-					// fileContents: prefix + e.content + suffix
-				// });
-			}
-			thisEdit.remove();
-
-			//TODO remove highlighting from the file (once highlighting is implemented)
-		});
-	});
-	
-	edits.splice(edits.indexOf(editID), 1);
-
-}
-
-//TODO: Child Edits
-
-//add or remove user from accepted list in edit if toggle is clicked
-function acceptTracker(edit, numUsers){
-	var accept = document.getElementById('edit'+ edit);
-	let user = firebase.auth().currentUser;
-	console.log(accept.checked);
-
-	if (accept.checked == true) {
-		firebase.database().ref().child("files")
- 		   .child(currentKey).child('edits').child(edit).child('accepted').push({'id' : user.uid});
- 		document.getElementById('edit'+ edit).checked = true;
-	} else {
-        firebase.database().ref().child("files").child(currentKey).child('edits').child(edit)
-        	.child('accepted').orderByChild('id')
-        	.equalTo(user.uid)
-        	.once('value', function (snapshot) {
-        		snapshot.forEach(function(childSnapshot) {
-                    var childKey = childSnapshot.key;
-                    var childData = childSnapshot.val();
-                    firebase.database().ref().child("files")
-            			.child(currentKey).child('edits').child(edit)
-            			.child('accepted').child(childKey).remove();
-                });
-            });
-            document.getElementById('edit'+ edit).checked = false;
-	}
-	var numAccepted;
-	firebase.database().ref().child("files").child(currentKey)
-		.child('edits').child(edit).child('accepted').on("value", function(snapshot) {
-			numAccepted = snapshot.numChildren();
-		});
-	if (numAccepted >= numUsers) acceptEdit(edit);
-
-}
-
 function editHighlight(id) {
     let hoveredEdit;
     for (i in edits) {
@@ -641,12 +556,11 @@ function editHighlight(id) {
 }
 
 function editUnhighlight(id) {
-	var unHoveredEdit;
-	for (i in edits) {
-		if (edits[i].id == id) {
-			unHoveredEdit = edits[i];
-		}
-	}
-	unhighlight(unHoveredEdit);
+    let unHoveredEdit;
+    for (i in edits) {
+        if (edits[i].id == id) {
+            unHoveredEdit = edits[i];
+        }
+    }
+    unhighlight(unHoveredEdit);
 }
-

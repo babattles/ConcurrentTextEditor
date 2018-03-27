@@ -74,11 +74,11 @@ var ShareListener = document.getElementById("shareLinkButton");
 //accept "enter"
 var newUser = document.getElementById("username");
 newUser.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        if (event.keyCode === 13) {
-            ShareListener.click();
-        }
-    });
+    event.preventDefault();
+    if (event.keyCode === 13) {
+        ShareListener.click();
+    }
+});
 ShareListener.addEventListener('click', function() {
     //get filename
     var file = currentKey;
@@ -87,7 +87,7 @@ ShareListener.addEventListener('click', function() {
     database.ref().child('users')
         .orderByChild('username')
         .equalTo(username)
-        .once('value', function (snapshot) {
+        .once('value', function(snapshot) {
             var exists = (snapshot.val() !== null);
             //console.log(snapshot.val());
             //if user does not already exist, prompt username
@@ -104,28 +104,27 @@ ShareListener.addEventListener('click', function() {
                 //console.log(childData);
 
                 database.ref().child('files').child(file).child('fileName')
-                    .once('value', function (snapshot) {
+                    .once('value', function(snapshot) {
                         var filename = snapshot.val();
 
                         //add file to users filelist
                         //console.log(filename);
                         firebase.database().ref().child("users")
-                            .child(childKey).child("fileList").child(file).set({ 'fileName': filename});
+                            .child(childKey).child("fileList").child(file).set({ 'fileName': filename });
                     });
-                
+
 
                 //add user to files userlist
                 firebase.database().ref().child("files")
-                    .child(file).child("userList").child(childKey).set({'username': username });
+                    .child(file).child("userList").child(childKey).set({ 'username': username });
                 alert("User added");
-            }          
+            }
         }).catch(function(error) {
             if (error != null) {
                 console.log(error.message);
                 return;
             }
         });
-        newUser.value = '';
 });
 /**
  * Menu Item Listeners
@@ -247,13 +246,13 @@ firebase.auth().onAuthStateChanged(function(user) {
                     database.ref("files").child(childSnapshot.key).remove();
                     // disable close menu option
 
-                    global_ignore = false;                    
+                    global_ignore = false;
                     //Updates the edits for the file
                     loadEdits();
                 });
 
                 //Allows you to get the link for a file
-                label.addEventListener('click', function(){
+                label.addEventListener('click', function() {
                     copyLink();
 
                 });
@@ -373,8 +372,6 @@ firebase.auth().onAuthStateChanged(function(user) {
                         fileKey.push(currentKey);
                         // load the file's current edits (clear first, in case coming from another file)
                         clearEdits();
-                        //implements concurrency to update files across all users
-                        checkConcurrency();
                         getEdits(); // Also listens for incoming edits
                         // enable close menu
                         ipcRenderer.send('enable-close', 'ping');

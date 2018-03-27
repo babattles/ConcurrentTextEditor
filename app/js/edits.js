@@ -5,6 +5,7 @@ if (f == "index.html") {
 }
 
 var edits = [];
+var test;
 
 var glo_e;
 // Retrieve new edits as they are added to the database (including your own!)
@@ -430,6 +431,7 @@ function loadEdits() {
 			}
 			for(var i = 0; i < parentList.length; i++) {
 				editVal = parentList[i];
+				test = getEditRef(edits[i]);
 				let eContent;
 				if(editVal.content.length > 20) {
 					eContent = editVal.content.substring(0, 20);
@@ -439,11 +441,11 @@ function loadEdits() {
 				}
 				let divContent = '<b>' + editVal.username + '</b>: ' + eContent;
 				if(editVal.type == 'insert') {
-					editHTML += '<div id="edit-add" class="edit" onclick="openComment(edits[i])" onmouseover="editHighlight(\''
+					editHTML += '<div id="edit-add" class="edit" onclick="openComment(test)" onmouseover="editHighlight(\''
 					 + editVal.id + 
 					 '\')">' + divContent + '</div>\n';						
 				} else {
-					editHTML += '<div id="edit-remove" class="edit" onclick="openComment(edits[i])">' + divContent + '</div>\n';
+					editHTML += '<div id="edit-remove" class="edit" onclick="openComment(test)">' + divContent + '</div>\n';
 					 editHighlight(editVal.id);
 				}
 				if(editVal.child) {
@@ -457,9 +459,9 @@ function loadEdits() {
 					}
 					let childDiv = '<b>' + childVal.username + '</b>: ' + childContent;
 					if(childVal.type == 'insert') {
-						editHTML += '<div id="edit-add-child" class="edit" onclick="openComment(edits[i])" onmouseover="editHighlight(\'' + childVal.id + '\')">' + childDiv + '</div>\n';						
+						editHTML += '<div id="edit-add-child" class="edit" onclick="openComment(test)" onmouseover="editHighlight(\'' + childVal.id + '\')">' + childDiv + '</div>\n';						
 					} else {
-						editHTML += '<div id="edit-remove-child" class="edit" onclick="openComment(edits[i])">' + childDiv + '</div>\n';
+						editHTML += '<div id="edit-remove-child" class="edit" onclick="openComment(test)">' + childDiv + '</div>\n';
 						editHighlight(childVal.id);
 					}
 				}

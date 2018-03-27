@@ -125,6 +125,7 @@ ShareListener.addEventListener('click', function() {
                 return;
             }
         });
+        newUser.value = '';
 });
 /**
  * Menu Item Listeners

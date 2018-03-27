@@ -500,9 +500,9 @@ function loadEdits() {
 				}
 
 				let acceptButton = '<label class="switch" ><input id="edit'+ editVal.id + '" type="checkbox"'
-					+ 'checked=""'
+					+ 'checked='+false
 					+ ' onclick="acceptTracker(\''+editVal.id+'\', '+numUsers+')">'
-					+'<span class="slider round" ></span></label>';
+					+'<span class="slider round"></span></label>';
 				let onClickLogic = 'onclick="openComment(glo_e);"';
 
 				if (editVal.type == 'insert') {
@@ -555,10 +555,11 @@ function loadEdits() {
 			//set toggle states
 			for (var i = 0; i < parentList.length; i++) {
 				editVal = parentList[i];
-				//TODO: set state of toggle based on whether or not 
+				//BUG: have to unaccept twice
+				//BUG: default showing is true
 				
 				document.getElementById('edit'+editVal.id).checked = false;
-				/*firebase.database().ref().child("files").child(currentKey).child('edits').child(editVal.id)
+				firebase.database().ref().child("files").child(currentKey).child('edits').child(editVal.id)
 					.child('accepted').orderByChild('id')
 					.equalTo(user.uid)
 					.once('value', function (snapshot) {
@@ -570,7 +571,7 @@ function loadEdits() {
 				            console.log(toggled);
 				            toggled = true;
 				        });*/
-				    //});
+				    });
 			}
 		});
 	});
@@ -579,7 +580,7 @@ function loadEdits() {
 var deleteEditById = function (editID) {
 	//TODO: delete Child Edits if parent
 	//TODO: red wont unhighlight
-	//TODO:Green Won't removed itsself from text editor
+	//TODO: Green Won't removed itsself from text editor
 	//TODO: delete from edit list
 	editUnhighlight(editID);
 	var thisEdit = editRef.child(editID);
@@ -631,6 +632,7 @@ function acceptTracker(edit, numUsers){
 		firebase.database().ref().child("files")
  		   .child(currentKey).child('edits').child(edit).child('accepted').push({'id' : user.uid});
  		//accept.checked = true;
+ 		//accept.checked = false;
 	} else {
         firebase.database().ref().child("files").child(currentKey).child('edits').child(edit)
         	.child('accepted').orderByChild('id')
@@ -644,7 +646,7 @@ function acceptTracker(edit, numUsers){
             			.child('accepted').child(childKey).remove();
                 });
             });
-        //accept.checked = false;
+        //accept.checked = true;
 	}
 	var numAccepted;
 	firebase.database().ref().child("files").child(currentKey)
@@ -666,7 +668,7 @@ function editHighlight(id) {
 }
 
 function editUnhighlight(id) {
-	let unHoveredEdit;
+	var unHoveredEdit;
 	for (i in edits) {
 		if (edits[i].id == id) {
 			unHoveredEdit = edits[i];

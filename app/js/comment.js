@@ -12,7 +12,8 @@ var openComment = function(edit) {
 var acceptComment = function(x) {
     //console.log("accepted");
     userInput = document.getElementById("userInput").value;
-    console.log(x);
+    //window.close();
+    console.log(userInput);
     updateComment(x);
 }
 

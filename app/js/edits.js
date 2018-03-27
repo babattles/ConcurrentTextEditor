@@ -10,7 +10,7 @@ var glo_e;
 // Retrieve new edits as they are added to the database (including your own!)
 var getEdits = function () {
 	editRef.on("child_added", function (snapshot, prevChildKey) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
-		//console.log("child added...");
+		console.log("child added...");
 		var e = snapshot.val();
 		edits.push({
 			start: e.startIndex,
@@ -27,23 +27,27 @@ var getEdits = function () {
 
 	// update local edit array when edits are changed on the database
 	editRef.on("child_changed", function (snapshot) {
-		//console.log("CHILD CHANGED!");
+		console.log("CHILD CHANGED!");
 		var changedEdit = snapshot.val();
-		edits.find((obj, index) => {
-			if (obj.id == snapshot.key && (obj.start != changedEdit.startIndex || obj.end != changedEdit.endIndex)) {
-				edits[index] = {
-					start: changedEdit.startIndex,
-					end: changedEdit.endIndex,
-					content: changedEdit.content,
-					type: changedEdit.type,
-					user: changedEdit.user,
-					comment: changedEdit.comment,
-					id: snapshot.key,
-					addedSize: changedEdit.addedSize,
-				};
-			}
-		})
-		checkConcurrency(changedEdit, true);
+		console.log("changedeidt =" + changedEdit.key);
+		if (changedEdit.key != undefined) {
+			var changedEdit = snapshot.val();
+			edits.find((obj, index) => {
+				if (obj.id == snapshot.key && (obj.start != changedEdit.startIndex || obj.end != changedEdit.endIndex)) {
+					edits[index] = {
+						start: changedEdit.startIndex,
+						end: changedEdit.endIndex,
+						content: changedEdit.content,
+						type: changedEdit.type,
+						user: changedEdit.user,
+						comment: changedEdit.comment,
+						id: snapshot.key,
+						addedSize: changedEdit.addedSize,
+					};
+				}
+			})
+			checkConcurrency(changedEdit, true);
+		}
 	});
 }
 
@@ -596,7 +600,7 @@ var deleteEditById = function (editID) {
 			// console.log(fileContent);
 			var prefix = fileContent.substring(0, index);
 			// console.log("prefix = " + prefix);
-			var suffix = fileContent.substring(index);
+			var suffix = fileContent.substring(index + 1);
 			// console.log("suffix = " + suffix);
 
 			if (e.type == 'insert') {

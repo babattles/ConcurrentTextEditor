@@ -174,7 +174,7 @@ var setEdit = function(startIndex, endIndex, delta) {
                     fixIndices(edits[index], endIndex - startIndex, delta.action);
                     return true;
                 } else {
-                    //console.log("child edit here");
+                    console.log("child edit here whose parent is: " + obj.user + "\n");
                     var e = {
                         start: startIndex,
                         end: endIndex,
@@ -187,6 +187,7 @@ var setEdit = function(startIndex, endIndex, delta) {
                     }
                     postEdit(e);
                     fixIndices(e, endIndex - startIndex, delta.action);
+                    return true;
                 }
             } else if (obj.start > startIndex && obj.end < endIndex && delta.action == "remove") { // removed an edit as well as content on both sides
                 //console.log("edit and both sides");

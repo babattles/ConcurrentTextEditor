@@ -26,6 +26,7 @@ var getEdits = function () {
 
 	// update local edit array when edits are changed on the database
 	editRef.on("child_changed", function (snapshot) {
+        console.log("CHILD CHANGED!");
 		var changedEdit = snapshot.val();
 		edits.find((obj, index) => {
 			if (obj.id == snapshot.key && (obj.start != changedEdit.startIndex || obj.end != changedEdit.endIndex)) {
@@ -42,6 +43,32 @@ var getEdits = function () {
 		})
 		checkConcurrency(changedEdit);
 	});
+}
+
+var turnOnChildChanged = function() {
+    // update local edit array when edits are changed on the database
+	editRef.on("child_changed", function (snapshot) {
+        console.log("CHILD CHANGED!");
+		var changedEdit = snapshot.val();
+		edits.find((obj, index) => {
+			if (obj.id == snapshot.key && (obj.start != changedEdit.startIndex || obj.end != changedEdit.endIndex)) {
+				edits[index] = {
+					start: changedEdit.startIndex,
+					end: changedEdit.endIndex,
+					content: changedEdit.content,
+					type: changedEdit.type,
+					user: changedEdit.user,
+					comment: changedEdit.comment,
+					id: snapshot.key,
+				};
+			}
+		})
+		checkConcurrency(changedEdit);
+	});
+}
+
+var turnOffChildChanged = function() {
+    editRef.off("child_changed");
 }
 
 /* helper function */
@@ -431,7 +458,7 @@ function loadEdits() {
 			}
 			for(var i = 0; i < parentList.length; i++) {
 				editVal = parentList[i];
-				test = getEditRef(edits[i]);
+                test = getEditRef(editVal);
 				let eContent;
 				if(editVal.content.length > 20) {
 					eContent = editVal.content.substring(0, 20);

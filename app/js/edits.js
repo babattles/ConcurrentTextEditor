@@ -29,7 +29,7 @@ var getEdits = function () {
 	editRef.on("child_changed", function (snapshot) {
 		console.log("CHILD CHANGED!");
 		var changedEdit = snapshot.val();
-		console.log("changedeidt =" + changedEdit.key);
+		// console.log("changedeidt =" + changedEdit.key);
 		if (changedEdit.key != undefined) {
 			var changedEdit = snapshot.val();
 			edits.find((obj, index) => {
@@ -164,6 +164,16 @@ var fixIndices = function (edit, size, type) {
 /* Take a startIndex, endIndex, and the change, and make an edit */
 var setEdit = function (startIndex, endIndex, delta) {
 	// get the current user
+	if (delta.action == "remove") {
+		var cursor = editor.getCursorPosition()
+		global_ignore = true;
+		var prefix = editor.session.getValue().substring(0, startIndex);
+		var suffix = editor.session.getValue().substring(endIndex - 1);
+		editor.session.setValue(prefix + stringify(delta.lines) + suffix);
+		editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
+		global_ignore = false;
+	}
+
 	var user = firebase.auth().currentUser;
 	if (user) {
 		var bool = 0;
@@ -376,6 +386,9 @@ var acceptEdit = function (editID) {
 
 /* Highlights the provided edit */
 var highlight = function (edit) {
+	if (edit.hid) {
+		return;
+	}
 	var startRow = getRowColumnIndices(edit.start).row;
 	var startColumn = getRowColumnIndices(edit.start).column;
 	var endRow = getRowColumnIndices(edit.end).row;
@@ -392,6 +405,7 @@ var highlight = function (edit) {
 var unhighlight = function (edit) {
 	if (edit.hid) {
 		editor.session.removeMarker(edit.hid);
+		edit.hid = null;
 	}
 }
 

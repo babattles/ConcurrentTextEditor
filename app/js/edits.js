@@ -502,7 +502,6 @@ function loadEdits() {
 				}
 
 				let acceptButton = '<label class="switch" ><input id="edit'+ editVal.id + '" type="checkbox"'
-					+ 'checked='+false
 					+ ' onclick="acceptTracker(\''+editVal.id+'\', '+numUsers+')">'
 					+'<span class="slider round"></span></label>';
 				let onClickLogic = 'onclick="openComment(glo_e);"';
@@ -560,19 +559,19 @@ function loadEdits() {
 				//BUG: have to unaccept twice
 				//BUG: default showing is true
 				
-				document.getElementById('edit'+editVal.id).checked = false;
+				//document.getElementById('edit'+editVal.id).checked = false;
 				firebase.database().ref().child("files").child(currentKey).child('edits').child(editVal.id)
 					.child('accepted').orderByChild('id')
 					.equalTo(user.uid)
 					.once('value', function (snapshot) {
-						document.getElementById('edit'+editVal.id).checked = true;
-						/*snapshot.forEach(function(childSnapshot) {
+						snapshot.forEach(function(childSnapshot) {
 				            var childKey = childSnapshot.key;
 				            var childData = childSnapshot.val();
 				            console.log(childData);
 				            console.log(toggled);
 				            toggled = true;
-				        });*/
+				            document.getElementById('edit'+editVal.id).checked = true;
+				        });
 				    });
 			}
 		});
@@ -582,7 +581,6 @@ function loadEdits() {
 var deleteEditById = function (editID) {
 	//TODO: delete Child Edits if parent
 	//TODO: red wont unhighlight
-	//TODO: Green Won't removed itsself from text editor
 	//TODO: delete from edit list
 	editUnhighlight(editID);
 	var thisEdit = editRef.child(editID);
@@ -597,7 +595,7 @@ var deleteEditById = function (editID) {
 			// console.log(fileContent);
 			var prefix = fileContent.substring(0, index);
 			// console.log("prefix = " + prefix);
-			var suffix = fileContent.substring(index);
+			var suffix = fileContent.substring(index + 1);
 			// console.log("suffix = " + suffix);
 
 			if (e.type == 'insert') {
@@ -619,11 +617,11 @@ var deleteEditById = function (editID) {
 			//TODO remove highlighting from the file (once highlighting is implemented)
 		});
 	});
-	//firebase.database().ref().child("files")
-	//	.child(currentKey).child('edits').child(editID).remove();
+	
+	edits.splice(edits.indexOf(editID), 1);
+
 }
 
-//TODO: on loadedits dynamically toggle switches
 //TODO: Child Edits
 
 //add or remove user from accepted list in edit if toggle is clicked
@@ -636,8 +634,7 @@ function acceptTracker(edit, numUsers){
 		//TODO: WTFFFFFF
 		firebase.database().ref().child("files")
  		   .child(currentKey).child('edits').child(edit).child('accepted').push({'id' : user.uid});
- 		//accept.checked = true;
- 		//accept.checked = false;
+ 		document.getElementById('edit'+ edit).checked = true;
 	} else {
         firebase.database().ref().child("files").child(currentKey).child('edits').child(edit)
         	.child('accepted').orderByChild('id')
@@ -651,7 +648,7 @@ function acceptTracker(edit, numUsers){
             			.child('accepted').child(childKey).remove();
                 });
             });
-        //accept.checked = true;
+            document.getElementById('edit'+ edit).checked = false;
 	}
 	var numAccepted;
 	firebase.database().ref().child("files").child(currentKey)

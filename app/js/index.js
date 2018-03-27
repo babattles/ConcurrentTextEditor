@@ -21,6 +21,9 @@ var editor = document.getElementById("editor");
 var onlineUsersContainer = document.getElementById("online-users");
 var currentKey;
 
+// keep track of user key strokes
+var justTyped = false;
+
 // track the user's current open file in the database
 var currentFile = null;
 // track the user's edits in their current open file
@@ -391,6 +394,7 @@ firebase.auth().onAuthStateChanged(function(user) {
         editor.getSession().on('change', function(delta) {
             // delta.start, delta.end, delta.lines, delta.action
             if (!global_ignore && editRef != null) {
+                justTyped = true;
                 var startIndex = editor.session.doc.positionToIndex(delta.start, 0);
                 var endIndex = editor.session.doc.positionToIndex(delta.end, 0);
                 setEdit(startIndex, endIndex, delta);
@@ -399,6 +403,7 @@ firebase.auth().onAuthStateChanged(function(user) {
                 for (var x = 0; x < edits.length; x++) {
                     console.log(edits[x]);
                 }
+                justTyped = false;
             }
         });
     } else {

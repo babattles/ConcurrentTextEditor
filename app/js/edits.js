@@ -554,30 +554,27 @@ function loadEdits() {
 			}
 			$('#edits').empty();
 			$('#edits').append(editHTML);
-			parentList = [];
-			childList = [];
-			editHTML = '';
+
 			//set toggle states
 			for (var i = 0; i < parentList.length; i++) {
 				editVal = parentList[i];
-				//BUG: have to unaccept twice
-				//BUG: default showing is true
 				
-				//document.getElementById('edit'+editVal.id).checked = false;
+				console.log('when is this displayed');
 				firebase.database().ref().child("files").child(currentKey).child('edits').child(editVal.id)
 					.child('accepted').orderByChild('id')
 					.equalTo(user.uid)
 					.once('value', function (snapshot) {
 						snapshot.forEach(function(childSnapshot) {
-				            var childKey = childSnapshot.key;
-				            var childData = childSnapshot.val();
-				            console.log(childData);
-				            console.log(toggled);
-				            toggled = true;
 				            document.getElementById('edit'+editVal.id).checked = true;
 				        });
 				    });
 			}
+
+			//reset variables
+			parentList = [];
+			childList = [];
+			editHTML = '';
+			
 		});
 	});
 }
@@ -635,7 +632,6 @@ function acceptTracker(edit, numUsers){
 	console.log(accept.checked);
 
 	if (accept.checked == true) {
-		//TODO: WTFFFFFF
 		firebase.database().ref().child("files")
  		   .child(currentKey).child('edits').child(edit).child('accepted').push({'id' : user.uid});
  		document.getElementById('edit'+ edit).checked = true;

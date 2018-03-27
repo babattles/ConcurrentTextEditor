@@ -360,9 +360,11 @@ var acceptEdit = function (editID) {
 					fileContents: prefix + suffix
 				});
 				fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
+				global_ignore = true;
+				editor.session.setValue(prefix + suffix);
+				global_ignore = false;
 			}
 			thisEdit.remove();
-
 			//TODO remove highlighting from the file (once highlighting is implemented)
 		});
 	});
@@ -600,14 +602,17 @@ var deleteEditById = function (editID) {
 
 			if (e.type == 'insert') {
 				suffix = fileContent.substring(e.endIndex, fileContent.length);
-				currentFile.update({
-					fileContents: prefix + suffix
-				});
+				// currentFile.update({
+					// fileContents: prefix + suffix
+				// });
+				global_ignore = true;
+				editor.session.setValue(prefix + suffix);
+				global_ignore = false;
 			} else {
-				fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
-				currentFile.update({
-					fileContents: prefix + e.content + suffix
-				});
+				// fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
+				// currentFile.update({
+					// fileContents: prefix + e.content + suffix
+				// });
 			}
 			thisEdit.remove();
 

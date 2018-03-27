@@ -281,6 +281,13 @@ body {
 }
 /*End of dropdown manu (syntax)*/
 
+.delete{
+    max-width:10%; 
+    height: auto; 
+    position: absolute; 
+    right: 35px;
+}
+
 /*check toggle accept boxes*/
 .switch {
   position: relative;

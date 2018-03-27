@@ -409,6 +409,10 @@ function loadEdits() {
 	var parentList = [];
 	var childList = [];
 
+	//for deletion
+	let user = firebase.auth().currentUser;
+
+	//for acceptance
 	var numUsers; 
 	firebase.database().ref().child("files").child(currentKey)
 		.child('userList').on("value", function(snapshot) {
@@ -457,13 +461,21 @@ function loadEdits() {
 
 				var numAccepted;
 		   		firebase.database().ref().child("files").child(currentKey)
-					.child('edits').child(edits[i].id).child('accepted').on("value", function(snapshot) {
+					.child('edits').child(editVal.id).child('accepted').on("value", function(snapshot) {
 						numAccepted = snapshot.numChildren();
 					});
 
 				let divContent = '<b>' + editVal.username + '</b>: ' + numAccepted+'/'+numUsers;
-				let acceptButton = '<label class="switch" ><input id="edit-'+ i + '" type="checkbox"'
-					+ ' onclick="acceptTracker('+i+', '+numUsers+')"><span class="slider round" ></span></label>';
+				var deleteEditBtn = "";
+				if (user.uid == data.val()[editVal.id].user){
+					deleteEditBtn = '<img class="delete" id="delete-edit-btn"  src="./img/close.png" '
+					+ 'onclick="deleteEditById(\''+editVal.id+'\')">';
+				}
+
+				let acceptButton = '<label class="switch" ><input id="edit'+ editVal.id + '" type="checkbox"'
+					+ 'checked=""'
+					+ ' onclick="acceptTracker(\''+editVal.id+'\', '+numUsers+')">'
+					+'<span class="slider round" ></span></label>';
 				let onClickLogic = 'onclick="openComment(glo_e);"';
 
 				if (editVal.type == 'insert') {
@@ -472,12 +484,14 @@ function loadEdits() {
 						+ 'onmouseover="editHighlight(\''+ editVal.id + '\')" '
 						+ 'onmouseout="editUnhighlight(\''+ editVal.id + '\')">' 
 						+ divContent 
+						+ deleteEditBtn
 						+ acceptButton
 						+ '</div>\n';
 				} else {
 					editHTML += '<div id="edit-remove" class="edit" '
 						+ onClickLogic
 						+ divContent 
+						+ deleteEditBtn
 						+ acceptButton
 						+ '</div>\n';
 					editHighlight(editVal.id);
@@ -511,25 +525,87 @@ function loadEdits() {
 			parentList = [];
 			childList = [];
 			editHTML = '';
+			//set toggle states
+			for (var i = 0; i < parentList.length; i++) {
+				editVal = parentList[i];
+				//TODO: set state of toggle based on whether or not 
+				
+				document.getElementById('edit'+editVal.id).checked = false;
+				/*firebase.database().ref().child("files").child(currentKey).child('edits').child(editVal.id)
+					.child('accepted').orderByChild('id')
+					.equalTo(user.uid)
+					.once('value', function (snapshot) {
+						document.getElementById('edit'+editVal.id).checked = true;
+						/*snapshot.forEach(function(childSnapshot) {
+				            var childKey = childSnapshot.key;
+				            var childData = childSnapshot.val();
+				            console.log(childData);
+				            console.log(toggled);
+				            toggled = true;
+				        });*/
+				    //});
+			}
 		});
 	});
 }
+
+var deleteEditById = function (editID) {
+	//TODO: delete Child Edits if parent
+	//TODO: red wont unhighlight
+	//TODO:Green Won't removed itsself from text editor
+	//TODO: delete from edit list
+	editUnhighlight(editID);
+	var thisEdit = editRef.child(editID);
+	thisEdit.once('value', function (snapshot) {
+		var e = snapshot.val();
+		// console.log("Index before = " + e.startIndex);
+		var index = convertIndex(e.startIndex);
+		// console.log("Index after = " + index)
+		currentFile.once('value', function (childSnapshot) {
+			var f = childSnapshot.val();
+			var fileContent = f.fileContents;
+			// console.log(fileContent);
+			var prefix = fileContent.substring(0, index);
+			// console.log("prefix = " + prefix);
+			var suffix = fileContent.substring(index);
+			// console.log("suffix = " + suffix);
+
+			if (e.type == 'insert') {
+				suffix = fileContent.substring(e.endIndex, fileContent.length);
+				currentFile.update({
+					fileContents: prefix + suffix
+				});
+			} else {
+				fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
+				currentFile.update({
+					fileContents: prefix + e.content + suffix
+				});
+			}
+			thisEdit.remove();
+
+			//TODO remove highlighting from the file (once highlighting is implemented)
+		});
+	});
+	//firebase.database().ref().child("files")
+	//	.child(currentKey).child('edits').child(editID).remove();
+}
+
 //TODO: on loadedits dynamically toggle switches
 //TODO: Child Edits
 
-
 //add or remove user from accepted list in edit if toggle is clicked
-function acceptTracker(editNum, numUsers){
-	var accept = document.getElementById('edit-'+ editNum);
+function acceptTracker(edit, numUsers){
+	var accept = document.getElementById('edit'+ edit);
 	let user = firebase.auth().currentUser;
-	var editKey = edits[editNum].id;
 	console.log(accept.checked);
 
 	if (accept.checked == true) {
+		//TODO: WTFFFFFF
 		firebase.database().ref().child("files")
- 		   .child(currentKey).child('edits').child(editKey).child('accepted').push({'id' : user.uid});
+ 		   .child(currentKey).child('edits').child(edit).child('accepted').push({'id' : user.uid});
+ 		//accept.checked = true;
 	} else {
-        firebase.database().ref().child("files").child(currentKey).child('edits').child(editKey)
+        firebase.database().ref().child("files").child(currentKey).child('edits').child(edit)
         	.child('accepted').orderByChild('id')
         	.equalTo(user.uid)
         	.once('value', function (snapshot) {
@@ -537,17 +613,18 @@ function acceptTracker(editNum, numUsers){
                     var childKey = childSnapshot.key;
                     var childData = childSnapshot.val();
                     firebase.database().ref().child("files")
-            			.child(currentKey).child('edits').child(editKey)
+            			.child(currentKey).child('edits').child(edit)
             			.child('accepted').child(childKey).remove();
                 });
             });
+        //accept.checked = false;
 	}
 	var numAccepted;
 	firebase.database().ref().child("files").child(currentKey)
-		.child('edits').child(editKey).child('accepted').on("value", function(snapshot) {
+		.child('edits').child(edit).child('accepted').on("value", function(snapshot) {
 			numAccepted = snapshot.numChildren();
 		});
-	if (numAccepted == numUsers) acceptEdit(editKey);
+	if (numAccepted >= numUsers) acceptEdit(edit);
 
 }
 

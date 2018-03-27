@@ -394,10 +394,10 @@ firebase.auth().onAuthStateChanged(function(user) {
                 var endIndex = editor.session.doc.positionToIndex(delta.end, 0);
                 setEdit(startIndex, endIndex, delta);
                 // output for debugging
-                console.log("**EDITS**");
-                for (var x = 0; x < edits.length; x++) {
-                    console.log(edits[x]);
-                }
+                //console.log("**EDITS**");
+                //for (var x = 0; x < edits.length; x++) {
+                    //console.log(edits[x]);
+                //}
             }
         });
     } else {

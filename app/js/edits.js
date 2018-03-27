@@ -10,6 +10,7 @@ var glo_e;
 // Retrieve new edits as they are added to the database (including your own!)
 var getEdits = function () {
 	editRef.on("child_added", function (snapshot, prevChildKey) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
+		//console.log("child added...");
 		var e = snapshot.val();
 		edits.push({
 			start: e.startIndex,
@@ -19,12 +20,14 @@ var getEdits = function () {
 			user: e.user,
 			comment: e.comment,
 			id: snapshot.key,
+			addedSize: 0,
 		});
-		checkConcurrency(e);
+		checkConcurrency(e, false);
 	});
 
 	// update local edit array when edits are changed on the database
 	editRef.on("child_changed", function (snapshot) {
+		//console.log("CHILD CHANGED!");
 		var changedEdit = snapshot.val();
 		edits.find((obj, index) => {
 			if (obj.id == snapshot.key && (obj.start != changedEdit.startIndex || obj.end != changedEdit.endIndex)) {
@@ -36,10 +39,11 @@ var getEdits = function () {
 					user: changedEdit.user,
 					comment: changedEdit.comment,
 					id: snapshot.key,
+					addedSize: changedEdit.addedSize,
 				};
 			}
 		})
-		checkConcurrency(changedEdit);
+		checkConcurrency(changedEdit, true);
 	});
 }
 
@@ -61,6 +65,7 @@ var stringify = function (lines) {
 /* Helper - Clear all edits */
 var clearEdits = function () {
 	edits.splice(0, edits.length);
+	//justTyped = false; = false;
 }
 
 /* Helper - Get the database reference for an edit */
@@ -78,19 +83,21 @@ var postEdit = function (edit) {
 		'content': edit.content,
 		'type': edit.type,
 		'user': edit.user,
-		'comment': edit.comment
+		'comment': edit.comment,
+		'addedSize': edit.addedSize,
 	});
 	edit.id = newEdit.key;
 }
 
 /* Update your existing edit in the database */
-var updateEdit = function (edit) {
+var updateEdit = function (edit, size) {
 	var ref = getEditRef(edit);
 	glo_e = ref;
 	return ref.update({
 		content: edit.content,
 		endIndex: edit.end,
-		startIndex: edit.start
+		startIndex: edit.start,
+		addedSize: size,
 	});
 }
 
@@ -106,6 +113,7 @@ var deleteEdit = function (edit) {
 // size is the amount to increase all other edits by
 var fixIndices = function (edit, size, type) {
 	editRef.once('value', function (snapshot) {
+		justTyped = true;
 		snapshot.forEach(function (child) {
 			var e = child.val();
 			if (e.startIndex > edit.end) {
@@ -113,22 +121,40 @@ var fixIndices = function (edit, size, type) {
 					child.ref.update({
 						startIndex: e.startIndex + size,
 						endIndex: e.endIndex + size,
+						addedSize: 0,
 					});
 				} else if (type == "remove") {
 					child.ref.update({
 						startIndex: e.startIndex - size,
 						endIndex: e.endIndex - size,
+						addedSize: 0,
 					});
 				}
+			} else if (child.key == edit.id) { // add the addedSize property for concurrency
+				if (type == "insert") {
+					child.ref.update({
+						content: edit.content,
+						endIndex: edit.end,
+						startIndex: edit.start,
+						addedSize: size,
+					});
+					edit.addedSize = size;
+				} else if (type == "remove") {
+					child.ref.update({
+						content: edit.content,
+						endIndex: edit.end,
+						startIndex: edit.start,
+						addedSize: 0 - size,
+					});
+					edit.addedSize = 0 - size;
+				}
+			} else {
+				child.ref.update({
+					addedSize: 0,
+				});
 			}
 		});
 	});
-}
-
-/* Rewrite a "remove" type edit */
-// TODO: Highlight this as a color (red)
-var rewriteRemoved = function (edit) {
-
 }
 
 /* Take a startIndex, endIndex, and the change, and make an edit */
@@ -145,7 +171,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 				edits[index].end = obj.end + (endIndex - startIndex);
 				edits[index].type = delta.action;
 				edits[index].user = user.uid;
-				updateEdit(edits[index]);
+				//updateEdit(edits[index], endIndex - startIndex);
 				fixIndices(edits[index], endIndex - startIndex, delta.action);
 				return true; // stop searching
 			} else if (obj.start == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the beginning of an existing edit
@@ -155,7 +181,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 				edits[index].content = stringify(delta.lines) + obj.content;
 				edits[index].type = delta.action;
 				edits[index].user = user.uid;
-				updateEdit(edits[index]);
+				//updateEdit(edits[index]);
 				fixIndices(edits[index], endIndex - startIndex, delta.action);
 				return true;
 			} else if (obj.end == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the end of an existing edit
@@ -165,7 +191,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 				edits[index].content = obj.content + stringify(delta.lines);
 				edits[index].type = delta.action;
 				edits[index].user = user.uid;
-				updateEdit(edits[index]);
+				//updateEdit(edits[index]);
 				fixIndices(edits[index], endIndex - startIndex, delta.action);
 				return true;
 			} else if (obj.start > startIndex && obj.end < endIndex && delta.action == "remove") { // removed an edit as well as content on both sides
@@ -203,7 +229,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 					edits[index].content = obj.content.substring(0, startIndex - obj.start);
 					edits[index].type = "insert";
 					edits[index].user = user.uid;
-					updateEdit(edits[index]);
+					//updateEdit(edits[index]);
 					fixIndices(edits[index], obj.end - startIndex, delta.action);
 				}
 				postEdit(e);
@@ -229,7 +255,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 					edits[index].end = obj.end;
 					edits[index].type = "insert";
 					edits[index].user = user.uid;
-					updateEdit(edits[index]);
+					//updateEdit(edits[index]);
 					fixIndices(edits[index], startIndex - obj.start, delta.action);
 				}
 				postEdit(e);
@@ -248,7 +274,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 					edits[index].end = obj.end - (endIndex - startIndex);
 					edits[index].type = "insert";
 					edits[index].user = user.uid;
-					updateEdit(edits[index]);
+					//updateEdit(edits[index]);
 					fixIndices(edits[index], endIndex - startIndex, delta.action);
 				}
 				return true;
@@ -264,6 +290,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 				type: delta.action,
 				user: user.uid,
 				comment: "",
+				addedSize: endIndex - startIndex,
 			}
 			postEdit(e);
 			fixIndices(e, endIndex - startIndex, delta.action);
@@ -467,10 +494,10 @@ function loadEdits() {
 					let childDiv = '<b>' + childVal.username + '</b>: ' + childContent;
 					if (childVal.type == 'insert') {
 						editHTML += '<div id="edit-add-child" class="edit" onclick="openComment(glo_e)" onmouseover="editHighlight(\''
-						 + childVal.id + 
-						 '\')" onmouseout="editUnhighlight(\''
-						 + childVal.id + 
-						 '\')">' + childDiv + '</div>\n';
+							+ childVal.id +
+							'\')" onmouseout="editUnhighlight(\''
+							+ childVal.id +
+							'\')">' + childDiv + '</div>\n';
 					} else {
 						editHTML += '<div id="edit-remove-child" class="edit" onclick="openComment(glo_e)">' + childDiv + '</div>\n';
 						editHighlight(childVal.id);

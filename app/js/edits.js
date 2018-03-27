@@ -142,7 +142,32 @@ var setEdit = function(startIndex, endIndex, delta) {
     if (user) {
         var bool = 0;
         bool = edits.find((obj, index) => {
-            if (obj.start == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the beginning of an existing edit
+            if (obj.start < startIndex && startIndex < obj.end && delta.action == "insert" && obj.type == "insert") { // new addition was within an existing edit
+                if (user.uid == obj.user) {
+                    edits[index].content = obj.content.substring(0, startIndex - obj.start) + stringify(delta.lines) + obj.content.substring(startIndex - obj.start, obj.content.length);
+                    edits[index].start = obj.start;
+                    edits[index].end = obj.end + (endIndex - startIndex);
+                    edits[index].type = delta.action;
+                    edits[index].user = user.uid;
+                    //updateEdit(edits[index])
+                    fixIndices(edits[index], endIndex - startIndex, delta.action);
+                    return true;
+                } else {
+                    var e = {
+                        start: startIndex,
+                        end: endIndex,
+                        content: stringify(delta.lines),
+                        type: delta.action,
+                        user: user.uid,
+                        comment: "",
+                        parent: obj.user,
+                        addedSize: endIndex - startIndex,
+                    }
+                    postEdit(e);
+                    fixIndices(e, endIndex - startIndex, delta.action);
+                    return true;
+                }
+            } else if (obj.start == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the beginning of an existing edit
                 //console.log("added to beginning");
                 edits[index].start = startIndex;
                 edits[index].end = obj.end + (endIndex - startIndex);
@@ -162,33 +187,6 @@ var setEdit = function(startIndex, endIndex, delta) {
                 //updateEdit(edits[index]);
                 fixIndices(edits[index], endIndex - startIndex, delta.action);
                 return true;
-            } else if (obj.start < startIndex && startIndex < obj.end && delta.action == "insert" && obj.type == "insert") { // new addition was within an existing edit
-                console.log("Current user: " + user.uid + "\nEdit created by: " + obj.user);
-                if (user.uid == obj.user) {
-                    edits[index].content = obj.content.substring(0, startIndex - obj.start) + stringify(delta.lines) + obj.content.substring(startIndex - obj.start, obj.content.length);
-                    edits[index].start = obj.start;
-                    edits[index].end = obj.end + (endIndex - startIndex);
-                    edits[index].type = delta.action;
-                    edits[index].user = user.uid;
-                    //updateEdit(edits[index])
-                    fixIndices(edits[index], endIndex - startIndex, delta.action);
-                    return true;
-                } else {
-                    console.log("child edit here whose parent is: " + obj.user + "\n");
-                    var e = {
-                        start: startIndex,
-                        end: endIndex,
-                        content: stringify(delta.lines),
-                        type: delta.action,
-                        user: user.uid,
-                        comment: "",
-                        parent: obj.user,
-                        addedSize: endIndex - startIndex,
-                    }
-                    postEdit(e);
-                    fixIndices(e, endIndex - startIndex, delta.action);
-                    return true;
-                }
             } else if (obj.start > startIndex && obj.end < endIndex && delta.action == "remove") { // removed an edit as well as content on both sides
                 //console.log("edit and both sides");
                 deleteEdit(edits[index]);

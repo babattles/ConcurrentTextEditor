@@ -1,7 +1,12 @@
-var Range = ace.require("ace/range").Range;
+var f = location.href.split("/").slice(-1);
+//console.log(f);
+if (f == "index.html") {
+	var Range = ace.require("ace/range").Range;
+}
 
 var edits = [];
 
+var glo_e;
 // Retrieve new edits as they are added to the database (including your own!)
 var getEdits = function () {
 	editRef.on("child_added", function (snapshot, prevChildKey) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
@@ -12,6 +17,7 @@ var getEdits = function () {
 			content: e.content,
 			type: e.type,
 			user: e.user,
+			comment: e.comment,
 			id: snapshot.key,
 		});
 		checkConcurrency(e);
@@ -28,6 +34,7 @@ var getEdits = function () {
 					content: changedEdit.content,
 					type: changedEdit.type,
 					user: changedEdit.user,
+					comment: changedEdit.comment,
 					id: snapshot.key,
 				};
 			}
@@ -70,7 +77,8 @@ var postEdit = function (edit) {
 		'endIndex': edit.end,
 		'content': edit.content,
 		'type': edit.type,
-		'user': edit.user
+		'user': edit.user,
+		'comment': edit.comment
 	});
 	edit.id = newEdit.key;
 }
@@ -78,12 +86,14 @@ var postEdit = function (edit) {
 /* Update your existing edit in the database */
 var updateEdit = function (edit) {
 	var ref = getEditRef(edit);
+	glo_e = ref;
 	return ref.update({
 		content: edit.content,
 		endIndex: edit.end,
 		startIndex: edit.start
 	});
 }
+
 
 /* Delete an edit from the database */
 var deleteEdit = function (edit) {
@@ -253,6 +263,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 				content: stringify(delta.lines),
 				type: delta.action,
 				user: user.uid,
+				comment: "",
 			}
 			postEdit(e);
 			fixIndices(e, endIndex - startIndex, delta.action);
@@ -262,7 +273,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 
 // Takes an index and reduces it by the sum of the lengths of
 // unaccepted lengths before the index
-var convertIndex = function(index) {
+var convertIndex = function (index) {
 	var newIndex = index;
 	editRef.once('value', function (snapshot) {
 		snapshot.forEach(function (child) {
@@ -280,7 +291,7 @@ var convertIndex = function(index) {
 
 // Reduces start and end indices by the lenght of an edit removed
 // for all edits that appear after the edit being removed
-var fixIndicesAfterRemovalAccept = function(index, length) {
+var fixIndicesAfterRemovalAccept = function (index, length) {
 	editRef.once('value', function (snapshot) {
 		snapshot.forEach(function (child) {
 			var e = child.val();
@@ -295,7 +306,7 @@ var fixIndicesAfterRemovalAccept = function(index, length) {
 }
 
 // This function is called once all users have accepted an edit.
-var acceptEdit = function(editID) {
+var acceptEdit = function (editID) {
 	var thisEdit = editRef.child(editID);
 	thisEdit.once('value', function (snapshot) {
 		var e = snapshot.val();
@@ -330,16 +341,23 @@ var acceptEdit = function(editID) {
 }
 
 /* Highlights the provided edit */
-var highlight = function(edit) {
+var highlight = function (edit) {
 	var startRow = getRowColumnIndices(edit.start).row;
 	var startColumn = getRowColumnIndices(edit.start).column;
 	var endRow = getRowColumnIndices(edit.end).row;
 	var endColumn = getRowColumnIndices(edit.end).column;
-	console.log("setting marker at " + startRow + " " + startColumn + " and " + endRow + " " + endColumn);
+	// console.log("setting marker at " + startRow + " " + startColumn + " and " + endRow + " " + endColumn);
 	if (edit.type == "insert") {
-		editor.session.addMarker(new Range(startRow, startColumn, endRow, endColumn), "mark_green", "text");
+		edit.hid = editor.session.addMarker(new Range(startRow, startColumn, endRow, endColumn), "mark_green", "text");
 	} else if (edit.type == "remove") {
-		editor.session.addMarker(new Range(startRow, startColumn, endRow, endColumn), "mark_red", "text");
+		edit.hid = editor.session.addMarker(new Range(startRow, startColumn, endRow, endColumn), "mark_red", "text");
+	}
+}
+
+/* Unhighlight the provided edit */
+var unhighlight = function (edit) {
+	if (edit.hid) {
+		editor.session.removeMarker(edit.hid);
 	}
 }
 
@@ -376,3 +394,114 @@ var getRowColumnIndices = function (characterIndex) {
 	var column = characterIndex - lastColumnIndices[row - 1] - 1;
 	return { row: row, column: column };
 };
+
+function loadEdits() {
+	if (currentKey == undefined) {
+		console.log('No File Selected');
+		return;
+	}
+	$('#edits').empty();
+	let editHTML = '';
+	let fileEdits = database.ref('files/' + currentKey + '/edits');
+	let userNames = database.ref('users');
+	var parentList = [];
+	var childList = [];
+	userNames.on('value', function (userData) {
+		fileEdits.on('value', function (data) {
+			for (i in data.val()) {
+				if (!data.val()[i].parent) {
+					parentList.push({
+						'id': i,
+						'username': userData.val()[data.val()[i].user].username,
+						'content': data.val()[i].content,
+						'type': data.val()[i].type
+					});
+
+				} else {
+					childList.push({
+						'id': i,
+						'username': userData.val()[data.val()[i].user].username,
+						'content': data.val()[i].content,
+						'type': data.val()[i].type,
+						'parent': data.val()[i].parent
+					});
+				}
+			}
+			for (i in childList) {
+				for (j in parentList) {
+					if (parentList[j].id == childList[i].parent) {
+						parentList[j].child = childList[i];
+						break;
+					}
+				}
+			}
+			for (var i = 0; i < parentList.length; i++) {
+				editVal = parentList[i];
+				let eContent;
+				if (editVal.content.length > 20) {
+					eContent = editVal.content.substring(0, 20);
+				}
+				else {
+					eContent = editVal.content;
+				}
+				let divContent = '<b>' + editVal.username + '</b>: ' + eContent;
+				if (editVal.type == 'insert') {
+					editHTML += '<div id="edit-add" class="edit" onclick="openComment(glo_e)" onmouseover="editHighlight(\''
+						+ editVal.id +
+						'\')" onmouseout="editUnhighlight(\''
+						+ editVal.id +
+						'\')">' + divContent + '</div>\n';
+				} else {
+					editHTML += '<div id="edit-remove" class="edit" onclick="openComment(glo_e)">' + divContent + '</div>\n';
+					editHighlight(editVal.id);
+				}
+				if (editVal.child) {
+					childVal = editVal.child;
+					let childContent;
+					if (childVal.content.length > 20) {
+						childContent = childVal.content.substring(0, 20);
+					}
+					else {
+						childContent = childVal.content;
+					}
+					let childDiv = '<b>' + childVal.username + '</b>: ' + childContent;
+					if (childVal.type == 'insert') {
+						editHTML += '<div id="edit-add-child" class="edit" onclick="openComment(glo_e)" onmouseover="editHighlight(\''
+						 + childVal.id + 
+						 '\')" onmouseout="editUnhighlight(\''
+						 + childVal.id + 
+						 '\')">' + childDiv + '</div>\n';
+					} else {
+						editHTML += '<div id="edit-remove-child" class="edit" onclick="openComment(glo_e)">' + childDiv + '</div>\n';
+						editHighlight(childVal.id);
+					}
+				}
+			}
+			$('#edits').empty();
+			$('#edits').append(editHTML);
+			parentList = [];
+			childList = [];
+			editHTML = '';
+		});
+	});
+}
+
+function editHighlight(id) {
+	let hoveredEdit;
+	for (i in edits) {
+		if (edits[i].id == id) {
+			hoveredEdit = edits[i];
+		}
+	}
+	highlight(hoveredEdit);
+}
+
+function editUnhighlight(id) {
+	let unHoveredEdit;
+	for (i in edits) {
+		if (edits[i].id == id) {
+			unHoveredEdit = edits[i];
+		}
+	}
+	unhighlight(unHoveredEdit);
+}

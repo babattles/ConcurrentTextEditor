@@ -16,6 +16,7 @@ $(document).ready(function(){
     });
 });
 
+
 //Add a new tab
 var addTab = function(filename) {
 	//Create a new tab 
@@ -80,7 +81,7 @@ var switchTab = function(args) {
     lastTab = tabs[target];
 
     currTab = lastTab;
-   	console.log(currTab);
+   	//console.log(currTab);
    	
 
     if(target != -1) {
@@ -90,6 +91,20 @@ var switchTab = function(args) {
     //Reset editor
     editor.setValue(sessions[target]);
     editor.clearSelection();
+
+    console.log(fileKey[target]);
+    
+    var file = database.ref("files").child(fileKey[target]);
+    //console.log(file);
+    currentFile = file;
+ 
+    editRef = currentFile.child("edits");
+    currentKey = fileKey[target];
+    clearEdits();
+    getEdits();
+    loadEdits();
+
+
     global_ignore = false;
 }
 

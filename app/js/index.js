@@ -97,8 +97,6 @@ ShareListener.addEventListener('click', function() {
                     childKey = childSnapshot.key;
                     childData = childSnapshot.val();
                 });
-                //console.log(childKey);
-                //console.log(childData);
 
                 database.ref().child('files').child(file).child('fileName')
                     .once('value', function (snapshot) {

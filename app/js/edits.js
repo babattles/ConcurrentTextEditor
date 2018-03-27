@@ -178,7 +178,7 @@ var setEdit = function(startIndex, endIndex, delta) {
                     fixIndices(edits[index], endIndex - startIndex, delta.action);
                     return true;
                 } else {
-                    console.log("why tho");
+                    //console.log("why tho");
                     var e = {
                         start: startIndex,
                         end: endIndex,

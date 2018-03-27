@@ -159,6 +159,15 @@ var fixIndices = function (edit, size, type) {
 
 /* Take a startIndex, endIndex, and the change, and make an edit */
 var setEdit = function (startIndex, endIndex, delta) {
+	if (delta.action == "remove") {
+		var cursor = editor.getCursorPosition()
+		global_ignore = true;
+		var prefix = editor.session.getValue().substring(0, startIndex);
+		var suffix = editor.session.getValue().substring(endIndex - 1);
+		editor.session.setValue(prefix + stringify(delta.lines) + suffix);
+		editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
+		global_ignore = false;
+	}
 	// get the current user
 	var user = firebase.auth().currentUser;
 	if (user) {

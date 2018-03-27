@@ -10,7 +10,7 @@ var glo_e;
 // Retrieve new edits as they are added to the database (including your own!)
 var getEdits = function () {
 	editRef.on("child_added", function (snapshot, prevChildKey) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
-		console.log("child added...");
+		// console.log("child added...");
 		var e = snapshot.val();
 		edits.push({
 			start: e.startIndex,
@@ -27,9 +27,9 @@ var getEdits = function () {
 
 	// update local edit array when edits are changed on the database
 	editRef.on("child_changed", function (snapshot) {
-		console.log("CHILD CHANGED!");
+		// console.log("CHILD CHANGED!");
 		var changedEdit = snapshot.val();
-		console.log("changedeidt =" + changedEdit.key);
+		// console.log("changedeidt =" + changedEdit.key);
 		if (changedEdit.key != undefined) {
 			var changedEdit = snapshot.val();
 			edits.find((obj, index) => {
@@ -376,11 +376,14 @@ var acceptEdit = function (editID) {
 
 /* Highlights the provided edit */
 var highlight = function (edit) {
+	if (edit.hid) {
+		return;
+	}
 	var startRow = getRowColumnIndices(edit.start).row;
 	var startColumn = getRowColumnIndices(edit.start).column;
 	var endRow = getRowColumnIndices(edit.end).row;
 	var endColumn = getRowColumnIndices(edit.end).column;
-	// console.log("setting marker at " + startRow + " " + startColumn + " and " + endRow + " " + endColumn);
+	console.log("setting marker at " + startRow + " " + startColumn + " and " + endRow + " " + endColumn);
 	if (edit.type == "insert") {
 		edit.hid = editor.session.addMarker(new Range(startRow, startColumn, endRow, endColumn), "mark_green", "text");
 	} else if (edit.type == "remove") {
@@ -392,6 +395,7 @@ var highlight = function (edit) {
 var unhighlight = function (edit) {
 	if (edit.hid) {
 		editor.session.removeMarker(edit.hid);
+		edit.hid = null;
 	}
 }
 
@@ -565,7 +569,7 @@ function loadEdits() {
 			for (var i = 0; i < parentList.length; i++) {
 				editVal = parentList[i];
 				
-				console.log('when is this displayed');
+				// console.log('when is this displayed');
 				firebase.database().ref().child("files").child(currentKey).child('edits').child(editVal.id)
 					.child('accepted').orderByChild('id')
 					.equalTo(user.uid)
@@ -635,7 +639,7 @@ var deleteEditById = function (editID) {
 function acceptTracker(edit, numUsers){
 	var accept = document.getElementById('edit'+ edit);
 	let user = firebase.auth().currentUser;
-	console.log(accept.checked);
+	// console.log(accept.checked);
 
 	if (accept.checked == true) {
 		firebase.database().ref().child("files")

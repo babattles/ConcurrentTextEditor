@@ -209,16 +209,6 @@ var setEdit = function (startIndex, endIndex, delta) {
     removeTypedText(startIndex, endIndex, delta);
     
     // get the current user
-    if (delta.action == "remove") {
-        var cursor = editor.getCursorPosition()
-        global_ignore = true;
-        var prefix = editor.session.getValue().substring(0, startIndex);
-        var suffix = editor.session.getValue().substring(endIndex - 1);
-        editor.session.setValue(prefix + stringify(delta.lines) + suffix);
-        editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
-        global_ignore = false;
-    }
-
     var user = firebase.auth().currentUser;
     if (user) {
         var bool = 0;
@@ -263,6 +253,14 @@ var setEdit = function (startIndex, endIndex, delta) {
                 return true;
             } else if (obj.end == startIndex && obj.type == "remove" && delta.action == "remove") { // coalesce removal left
                 //console.log("coalesce removal left");
+                var cursor = editor.getCursorPosition()
+                global_ignore = true;
+                var prefix = editor.session.getValue().substring(0, startIndex);
+                var suffix = editor.session.getValue().substring(endIndex - 1);
+                editor.session.setValue(prefix + stringify(delta.lines) + suffix);
+                editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
+                global_ignore = false;
+
                 edits[index].start = obj.start;
                 edits[index].end = endIndex;
                 edits[index].content = obj.content + stringify(delta.lines);
@@ -272,6 +270,14 @@ var setEdit = function (startIndex, endIndex, delta) {
                 fixIndices(edits[index], endIndex - startIndex, "insert");
                 return true;
             } else if (obj.start > startIndex && obj.end < endIndex && delta.action == "remove") { // removed an edit as well as content on both sides
+                var cursor = editor.getCursorPosition()
+                global_ignore = true;
+                var prefix = editor.session.getValue().substring(0, startIndex);
+                var suffix = editor.session.getValue().substring(endIndex - 1);
+                editor.session.setValue(prefix + stringify(delta.lines) + suffix);
+                editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
+                global_ignore = false;
+                
                 //console.log("edit and both sides");
                 deleteEdit(edits[index]);
                 edits.splice(index, 1);

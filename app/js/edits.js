@@ -31,7 +31,7 @@ var getEdits = function () {
         var changedEdit = snapshot.val();
         console.log(changedEdit.content);
         edits.find((obj, index) => {
-            if (obj.id == snapshot.key /*&& (obj.start != changedEdit.startIndex || obj.end != changedEdit.endIndex)*/) {
+            if (obj.id == snapshot.key && (obj.start != changedEdit.startIndex || obj.end != changedEdit.endIndex)) {
                 console.log("updating edits[index]");
                 edits[index] = {
                     start: changedEdit.startIndex,
@@ -43,9 +43,9 @@ var getEdits = function () {
                     id: snapshot.key,
                     addedSize: changedEdit.addedSize,
                 };
+                updateFile(changedEdit, true);
             }
         });
-        updateFile(changedEdit, true);
     });
 }
 
@@ -163,15 +163,12 @@ var fixIndices = function (edit, size, type) {
             snapshot.forEach(function (child) {
                 var e = child.val();
                 if (e.startIndex > edit.end) {
-
                     child.ref.update({
                         startIndex: e.startIndex - size,
                         endIndex: e.endIndex - size,
                         addedSize: 0,
                     });
-
                 } else if (child.key == edit.id) { // add the addedSize property for concurrency
-
                     child.ref.update({
                         content: edit.content,
                         endIndex: edit.end,
@@ -179,12 +176,7 @@ var fixIndices = function (edit, size, type) {
                         addedSize: 0 - size,
                     });
                     edit.addedSize = 0 - size;
-
-                } /*else {
-                    child.ref.update({
-                        addedSize: 0,
-                    });
-                }*/
+                }
             });
         });
     }

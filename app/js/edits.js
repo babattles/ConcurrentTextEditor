@@ -182,8 +182,32 @@ var fixIndices = function (edit, size, type) {
     }
 }
 
+var removeTypedText = function(startIndex, endIndex, delta) {
+    if (delta.action == "insert") {
+        global_ignore = true;
+        var cursor = editor.getCursorPosition();
+        var prefix = editor.session.getValue().slice(0, startIndex);
+        var suffix = editor.session.getValue().slice(endIndex);
+        console.log("Prefix = " + prefix);
+        console.log("Suffix = " + suffix);
+        editor.session.setValue(prefix + suffix);
+        editor.selection.moveTo(cursor.row, cursor.column);
+        global_ignore = false;
+    } else {
+        global_ignore = true;
+        var cursor = editor.getCursorPosition();
+        var prefix = editor.session.getValue().slice(0, startIndex);
+        var suffix = editor.session.getValue().slice(endIndex - 1);
+        editor.session.setValue(prefix + stringify(delta.lines) + suffix);
+        editor.selection.moveTo(cursor.row, cursor.column);
+        global_ignore = false;
+    }
+}
+
 /* Take a startIndex, endIndex, and the change, and make an edit */
 var setEdit = function (startIndex, endIndex, delta) {
+    removeTypedText(startIndex, endIndex, delta);
+    
     // get the current user
     if (delta.action == "remove") {
         var cursor = editor.getCursorPosition()

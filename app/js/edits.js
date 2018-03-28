@@ -231,7 +231,7 @@ var setEdit = function (startIndex, endIndex, delta) {
             } else if (obj.start == endIndex && obj.type == "remove" && delta.action == "remove") { // coalesce removal right
                 //console.log("coalesce removal right");
                 edits[index].start = startIndex;
-                edits[index].end = obj.end + (endIndex - startIndex);
+                edits[index].end = obj.end;
                 edits[index].content = stringify(delta.lines) + obj.content;
                 edits[index].type = delta.action;
                 edits[index].user = user.uid;

@@ -373,8 +373,6 @@ firebase.auth().onAuthStateChanged(function(user) {
                         fileKey.push(currentKey);
                         // load the file's current edits (clear first, in case coming from another file)
                         clearEdits();
-                        //implements concurrency to update files across all users
-                        checkConcurrency();
                         getEdits(); // Also listens for incoming edits
                         // enable close menu
                         ipcRenderer.send('enable-close', 'ping');
@@ -395,7 +393,7 @@ firebase.auth().onAuthStateChanged(function(user) {
         editor.getSession().on('change', function(delta) {
             // delta.start, delta.end, delta.lines, delta.action
             if (!global_ignore && editRef != null) {
-                justTyped = true;
+                //justTyped = true;
                 var startIndex = editor.session.doc.positionToIndex(delta.start, 0);
                 var endIndex = editor.session.doc.positionToIndex(delta.end, 0);
                 setEdit(startIndex, endIndex, delta);
@@ -404,7 +402,7 @@ firebase.auth().onAuthStateChanged(function(user) {
                 for (var x = 0; x < edits.length; x++) {
                     console.log(edits[x]);
                 }
-                justTyped = false;
+                //justTyped = false;
             }
         });
     } else {

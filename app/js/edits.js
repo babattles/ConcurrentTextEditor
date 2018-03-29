@@ -610,6 +610,20 @@ function loadEdits() {
     userNames.on('value', function (userData) {
         fileEdits.on('value', function (data) {
             for (i in data.val()) {
+                // Load contents of edit into editor
+                // console.log("Loading edit " + i + " into editor");
+                // global_ignore = true;
+                // var cursor = editor.getCursorPosition();
+                // var prefix = editor.session.getValue().slice(0, data.val()[i].content.startIndex);
+                // var suffix = editor.session.getValue().slice(data.val()[i].content.startIndex);
+                // // var suffix = editor.session.getValue().slice(data.val()[i].content.endIndex - (data.val()[i].content.endIndex - data.val()[i].content.startIndex));
+                // console.log(prefix);
+                // console.log(data.val()[i].content);
+                // editor.session.setValue(prefix + data.val()[i].content + suffix);
+                // editor.selection.moveTo(cursor.row, cursor.column);
+                // global_ignore = false;
+
+
                 if (!data.val()[i].parent) {
                     parentList.push({
                         'id': i,

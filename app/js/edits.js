@@ -30,11 +30,6 @@ var getEdits = function () {
         var editID = parsedContent.slice(0, parsedContent.indexOf(";"));
         parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
         updateEditor(startIndex, endIndex, type, editType, editID, parsedContent);
-        console.log("startIndex = " + startIndex);
-        console.log("endIndex = " + endIndex);
-        console.log("type = " + type);
-        console.log("editType = " + editType);
-        console.log("lines = " + parsedContent);
     });
 
     editRef.on("child_added", function (snapshot, prevChildKey) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
@@ -558,10 +553,16 @@ var acceptEdit = function (editID) {
                 editor.session.setValue(prefix + suffix);
                 global_ignore = false;
             }
-            //TODO remove highlighting from the file (once highlighting is implemented)
         });
     });
-    thisEdit.remove();
+    //Delete edit from edits[]
+    for (i in edits) {
+        if (edits[i].id == thisEdit.key) {
+            thisEdit.remove();
+            edits.splice(i, 1);
+            return;
+        }
+    }
 }
 
 /* Highlights the provided edit */
@@ -649,9 +650,9 @@ function loadEdits() {
     userNames.on('value', function (userData) {
         fileEdits.on('value', function (data) {
             for (i in data.val()) {
-                if (data.val()[i].hasBeenAccepted) {
-                    continue;
-                }
+                // if (data.val()[i].hasBeenAccepted) {
+                //     continue;
+                // }
                 if (!data.val()[i].parent) {
                     parentList.push({
                         'id': i,
@@ -802,7 +803,16 @@ var deleteEditById = function (editID) {
         });
     });
 
-    edits.splice(edits.indexOf(editID), 1);
+
+
+    // Delete edit from edits[]             edits.splice(edits.indexOf(editID), 1)  seemed to cause erorrs
+    for (i in edits) {
+        if (edits[i].id == thisEdit.key) {
+            thisEdit.remove();
+            edits.splice(i, 1);
+            return;
+        }
+    }
 
 }
 

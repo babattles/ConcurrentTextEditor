@@ -1,7 +1,6 @@
 var updateEditor = function(startIndex, endIndex, action, editType, editID, lines) {
     console.log("In updateFile");
     if (editType == "remove") {
-        // console.log("removing Hightling");
         editUnhighlight(editID);
     }
     if (action == "insert") {
@@ -32,7 +31,6 @@ var updateEditor = function(startIndex, endIndex, action, editType, editID, line
         }
     }
     if (editType == "remove") {
-        // console.log("adding Hightling");
         editHighlight(editID);
     }
 }

@@ -25,10 +25,13 @@ var getEdits = function () {
         parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
         var type = parsedContent.slice(0, parsedContent.indexOf(";"));
         parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-        updateFile(startIndex, endIndex, type, lines);
+        var editType = parsedContent.slice(0, parsedContent.indexOf(";"));
+        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+        updateEditor(startIndex, endIndex, type, editType, parsedContent);
         console.log("startIndex = " + startIndex);
         console.log("endIndex = " + endIndex);
         console.log("type = " + type);
+        console.log("editType = " + editType);
         console.log("lines = " + parsedContent);
     });
 
@@ -230,7 +233,7 @@ var setEdit = function (startIndex, endIndex, delta) {
     removeTypedText(startIndex, endIndex, delta);
     
     currentFile.child("delta").set({
-        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + stringify(delta.lines)
+        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + "insert" + ";" + stringify(delta.lines)
     });
 
     // get the current user
@@ -635,7 +638,7 @@ function loadEdits() {
                         + deleteEditBtn
                         + acceptButton
                         + '</div>\n';
-                    editHighlight(editVal.id);
+                    // editHighlight(editVal.id);
                 }
                 if (editVal.child) {
                     childVal = editVal.child;
@@ -657,7 +660,7 @@ function loadEdits() {
                         editHTML += '<div id="edit-remove-child" class="edit" '
                             + onClickLogic
                             + childDiv + '</div>\n';
-                        editHighlight(childVal.id);
+                        // editHighlight(childVal.id);
                     }
                 }
             }

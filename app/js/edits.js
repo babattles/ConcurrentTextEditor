@@ -9,8 +9,31 @@ var edits = [];
 var glo_e;
 // Retrieve new edits as they are added to the database (including your own!)
 var getEdits = function () {
+
+    currentFile.child("delta").on("child_added", function() {
+        console.log("delta added");
+        //apply most recent delta
+    });
+
+    currentFile.child("delta").on("child_changed", function(snapshot) {
+        // console.log(snapshot.ref.parent);
+        var parsedContent = snapshot.val();
+        console.log("parsedContent = " + parsedContent);
+        var startIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
+        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+        var endIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
+        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+        var type = parsedContent.slice(0, parsedContent.indexOf(";"));
+        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+        updateFile(startIndex, endIndex, type, lines);
+        console.log("startIndex = " + startIndex);
+        console.log("endIndex = " + endIndex);
+        console.log("type = " + type);
+        console.log("lines = " + parsedContent);
+    });
+
     editRef.on("child_added", function (snapshot, prevChildKey) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
-        console.log("child added...");
+        // console.log("child added...");
         var e = snapshot.val();
         edits.push({
             start: e.startIndex,
@@ -22,17 +45,16 @@ var getEdits = function () {
             id: snapshot.key,
             addedSize: 0,
         });
-        updateFile(e, false);
     });
 
     // update local edit array when edits are changed on the database
     editRef.on("child_changed", function (snapshot) {
-        console.log("CHILD CHANGED!");
+        // console.log("CHILD CHANGED!");
         var changedEdit = snapshot.val();
-        console.log(changedEdit.content);
+        // console.log(changedEdit.content);
         edits.find((obj, index) => {
             if (obj.id == snapshot.key && (obj.start != changedEdit.startIndex || obj.end != changedEdit.endIndex)) {
-                console.log("updating edits[index]");
+                // console.log("updating edits[index]");
                 edits[index] = {
                     start: changedEdit.startIndex,
                     end: changedEdit.endIndex,
@@ -43,7 +65,6 @@ var getEdits = function () {
                     id: snapshot.key,
                     addedSize: changedEdit.addedSize,
                 };
-                updateFile(changedEdit, true);
             }
         });
     });
@@ -188,8 +209,8 @@ var removeTypedText = function(startIndex, endIndex, delta) {
         var cursor = editor.getCursorPosition();
         var prefix = editor.session.getValue().slice(0, startIndex);
         var suffix = editor.session.getValue().slice(endIndex);
-        console.log("Prefix = " + prefix);
-        console.log("Suffix = " + suffix);
+        // console.log("Prefix = " + prefix);
+        // console.log("Suffix = " + suffix);
         editor.session.setValue(prefix + suffix);
         editor.selection.moveTo(cursor.row, cursor.column);
         global_ignore = false;
@@ -197,7 +218,7 @@ var removeTypedText = function(startIndex, endIndex, delta) {
         global_ignore = true;
         var cursor = editor.getCursorPosition();
         var prefix = editor.session.getValue().slice(0, startIndex);
-        var suffix = editor.session.getValue().slice(endIndex - 1);
+        var suffix = editor.session.getValue().slice(startIndex);
         editor.session.setValue(prefix + stringify(delta.lines) + suffix);
         editor.selection.moveTo(cursor.row, cursor.column);
         global_ignore = false;
@@ -208,6 +229,10 @@ var removeTypedText = function(startIndex, endIndex, delta) {
 var setEdit = function (startIndex, endIndex, delta) {
     removeTypedText(startIndex, endIndex, delta);
     
+    currentFile.child("delta").set({
+        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + stringify(delta.lines)
+    });
+
     // get the current user
     var user = firebase.auth().currentUser;
     if (user) {
@@ -277,7 +302,7 @@ var setEdit = function (startIndex, endIndex, delta) {
                 editor.session.setValue(prefix + stringify(delta.lines) + suffix);
                 editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
                 global_ignore = false;
-                
+
                 //console.log("edit and both sides");
                 deleteEdit(edits[index]);
                 edits.splice(index, 1);

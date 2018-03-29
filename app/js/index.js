@@ -388,7 +388,6 @@ firebase.auth().onAuthStateChanged(function(user) {
                             if (data.val()[i].type == "insert") {
                                 global_ignore = true;
                                 var cursor = editor.getCursorPosition();
-                                console.log(data.val()[i].content.startIndex);
                                 var prefix = editor.session.getValue().slice(0, data.val()[i].startIndex);
                                 var suffix = editor.session.getValue().slice(data.val()[i].startIndex);
                                 editor.session.setValue(prefix + data.val()[i].content + suffix);

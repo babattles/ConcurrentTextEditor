@@ -150,7 +150,7 @@ var fixIndices = function (edit, size, type) {
             justTyped = true;
             snapshot.forEach(function (child) {
                 var e = child.val();
-                if (e.startIndex > edit.end) {
+                if (e.startIndex > edit.end - size) {
                     if (type == "insert") {
                         child.ref.update({
                             startIndex: e.startIndex + size,
@@ -194,7 +194,7 @@ var fixIndices = function (edit, size, type) {
             justTyped = true;
             snapshot.forEach(function (child) {
                 var e = child.val();
-                if (e.startIndex > edit.end) {
+                if (e.startIndex > edit.end - size) {
                     child.ref.update({
                         startIndex: e.startIndex - size,
                         endIndex: e.endIndex - size,

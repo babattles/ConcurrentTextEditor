@@ -4,7 +4,7 @@ var updateEditor = function(startIndex, endIndex, action, editType, lines) {
         global_ignore = true;
         var cursor = editor.getCursorPosition();
         var prefix = editor.session.getValue().slice(0, startIndex);
-        var suffix = editor.session.getValue().slice(endIndex - 1);
+        var suffix = editor.session.getValue().slice(endIndex - (endIndex - startIndex));
         editor.session.setValue(prefix + lines + suffix);
         editor.selection.moveTo(cursor.row, cursor.column);
         global_ignore = false;

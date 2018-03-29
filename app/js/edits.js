@@ -333,7 +333,7 @@ var setEdit = function (startIndex, endIndex, delta) {
                 var cursor = editor.getCursorPosition()
                 global_ignore = true;
                 var prefix = editor.session.getValue().substring(0, startIndex);
-                var suffix = editor.session.getValue().substring(endIndex - 1);
+                var suffix = editor.session.getValue().substring(endIndex);
                 editor.session.setValue(prefix + stringify(delta.lines) + suffix);
                 editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
                 global_ignore = false;

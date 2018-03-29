@@ -1,5 +1,9 @@
-var updateEditor = function(startIndex, endIndex, action, editType, lines) {
+var updateEditor = function(startIndex, endIndex, action, editType, editID, lines) {
     console.log("In updateFile");
+    if (editType == "remove") {
+        console.log("removing Hightling");
+        editUnhighlight(editID);
+    }
     if (action == "insert") {
         global_ignore = true;
         var cursor = editor.getCursorPosition();
@@ -27,5 +31,9 @@ var updateEditor = function(startIndex, endIndex, action, editType, lines) {
             editor.selection.moveTo(cursor.row, cursor.column);
             global_ignore = false;
         }
+    }
+    if (editType == "remove") {
+        console.log("adding Hightling");
+        editHighlight(editID);
     }
 }

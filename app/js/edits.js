@@ -27,7 +27,9 @@ var getEdits = function () {
         parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
         var editType = parsedContent.slice(0, parsedContent.indexOf(";"));
         parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-        updateEditor(startIndex, endIndex, type, editType, parsedContent);
+        var editID = parsedContent.slice(0, parsedContent.indexOf(";"));
+        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+        updateEditor(startIndex, endIndex, type, editType, editID, parsedContent);
         console.log("startIndex = " + startIndex);
         console.log("endIndex = " + endIndex);
         console.log("type = " + type);
@@ -54,6 +56,9 @@ var getEdits = function () {
     editRef.on("child_changed", function (snapshot) {
         // console.log("CHILD CHANGED!");
         var changedEdit = snapshot.val();
+        if (changedEdit.type == "remove") {
+            editUnhighlight(snapshot.key);
+        }
         // console.log(changedEdit.content);
         edits.find((obj, index) => {
             if (obj.id == snapshot.key && (obj.start != changedEdit.startIndex || obj.end != changedEdit.endIndex)) {
@@ -70,6 +75,9 @@ var getEdits = function () {
                 };
             }
         });
+        if (changedEdit.type == "remove") {
+            editHighlight(snapshot.key);
+        }
     });
 }
 
@@ -240,7 +248,7 @@ var setEdit = function (startIndex, endIndex, delta) {
             if (obj.start < startIndex && startIndex < obj.end && delta.action == "insert" && obj.type == "insert") { // new addition was within an existing edit
 
                 currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + stringify(delta.lines)
+                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
                 });
                 
                 //console.log("added within");
@@ -255,7 +263,7 @@ var setEdit = function (startIndex, endIndex, delta) {
             } else if (obj.start == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the beginning of an existing edit
 
                 currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + stringify(delta.lines)
+                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
                 });
 
                 //console.log("added to beginning");
@@ -270,7 +278,7 @@ var setEdit = function (startIndex, endIndex, delta) {
             } else if (obj.end == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the end of an existing edit
 
                 currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + stringify(delta.lines)
+                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
                 });
 
                 //console.log("added to end");
@@ -293,7 +301,7 @@ var setEdit = function (startIndex, endIndex, delta) {
             } else if (obj.end == startIndex && obj.type == "remove" && delta.action == "remove") { // coalesce removal left
 
                 currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + stringify(delta.lines)
+                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
                 });
 
                 //console.log("coalesce removal left");
@@ -316,7 +324,7 @@ var setEdit = function (startIndex, endIndex, delta) {
             } else if (obj.start > startIndex && obj.end < endIndex && delta.action == "remove") { // removed an edit as well as content on both sides
 
                 currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + stringify(delta.lines)
+                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
                 });
 
                 var cursor = editor.getCursorPosition()
@@ -344,7 +352,7 @@ var setEdit = function (startIndex, endIndex, delta) {
                 //console.log("remove edit and right side");
                 
                 currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + stringify(delta.lines)
+                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
                 });
                 
                 var e = {
@@ -375,7 +383,7 @@ var setEdit = function (startIndex, endIndex, delta) {
                 //console.log("remove edit and left");
 
                 currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + stringify(delta.lines)
+                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
                 });
 
                 var e = {
@@ -407,7 +415,7 @@ var setEdit = function (startIndex, endIndex, delta) {
 
 
                 currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + stringify(delta.lines)
+                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
                 });
 
                 if (obj.start == startIndex && obj.end == endIndex) { // you're deleting the last of an edit
@@ -432,10 +440,6 @@ var setEdit = function (startIndex, endIndex, delta) {
         if (!bool) {
             console.log("no parent");
 
-            currentFile.child("delta").set({
-                'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + delta.action + ";" + stringify(delta.lines)
-            });
-
             var e = {
                 start: startIndex,
                 end: endIndex,
@@ -446,6 +450,10 @@ var setEdit = function (startIndex, endIndex, delta) {
                 addedSize: endIndex - startIndex,
             }
             postEdit(e);
+
+            currentFile.child("delta").set({
+                'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + delta.action + ";" + e.id + ";" + stringify(delta.lines)
+            });
             if (delta.action == "insert") {
                 fixIndices(e, endIndex - startIndex, delta.action);
             }
@@ -610,20 +618,6 @@ function loadEdits() {
     userNames.on('value', function (userData) {
         fileEdits.on('value', function (data) {
             for (i in data.val()) {
-                // Load contents of edit into editor
-                // console.log("Loading edit " + i + " into editor");
-                // global_ignore = true;
-                // var cursor = editor.getCursorPosition();
-                // var prefix = editor.session.getValue().slice(0, data.val()[i].content.startIndex);
-                // var suffix = editor.session.getValue().slice(data.val()[i].content.startIndex);
-                // // var suffix = editor.session.getValue().slice(data.val()[i].content.endIndex - (data.val()[i].content.endIndex - data.val()[i].content.startIndex));
-                // console.log(prefix);
-                // console.log(data.val()[i].content);
-                // editor.session.setValue(prefix + data.val()[i].content + suffix);
-                // editor.selection.moveTo(cursor.row, cursor.column);
-                // global_ignore = false;
-
-
                 if (!data.val()[i].parent) {
                     parentList.push({
                         'id': i,

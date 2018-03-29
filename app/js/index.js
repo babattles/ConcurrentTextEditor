@@ -394,6 +394,8 @@ firebase.auth().onAuthStateChanged(function(user) {
                                 editor.session.setValue(prefix + data.val()[i].content + suffix);
                                 editor.selection.moveTo(cursor.row, cursor.column);
                                 global_ignore = false;
+                            } else {
+                                editHighlight(i);
                             }
                         }
                     });

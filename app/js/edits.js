@@ -52,6 +52,36 @@ var getEdits = function () {
         });
     });
 
+    editRef.on("child_removed", function (snapshot) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
+        // console.log("child added...");
+        var e = snapshot.val();
+        if (e.type == "insert" && !e.hasBeenAccepted) {
+            global_ignore = true;
+            var cursor = editor.getCursorPosition();
+            var prefix = editor.session.getValue().slice(0, e.startIndex);
+            var suffix = editor.session.getValue().slice(e.endIndex);
+            // console.log("Prefix = " + prefix);
+            // console.log("Suffix = " + suffix);
+            editor.session.setValue(prefix + suffix);
+            editor.selection.moveTo(cursor.row, cursor.column);
+            global_ignore = false;
+        } else if (e.type == "remove" && e.hasBeenAccepted) {
+            console.log("removing highlight for " + snapshot.key);
+            editUnhighlight(snapshot.key);
+            global_ignore = true;
+            var cursor = editor.getCursorPosition();
+            var prefix = editor.session.getValue().slice(0, e.startIndex);
+            var suffix = editor.session.getValue().slice(e.endIndex);
+            // console.log("Prefix = " + prefix);
+            // console.log("Suffix = " + suffix);
+            editor.session.setValue(prefix + suffix);
+            editor.selection.moveTo(cursor.row, cursor.column);
+            global_ignore = false;
+        } else if (e.type == "remove" && !e.hasBeenAccepted) {
+            editUnhighlight(snapshot.key);
+        }
+    });
+
     // update local edit array when edits are changed on the database
     editRef.on("child_changed", function (snapshot) {
         // console.log("CHILD CHANGED!");
@@ -499,6 +529,7 @@ var fixIndicesAfterRemovalAccept = function (index, length) {
 var acceptEdit = function (editID) {
     editUnhighlight(editID);
     var thisEdit = editRef.child(editID);
+    thisEdit.update({hasBeenAccepted: "true"});
     thisEdit.once('value', function (snapshot) {
         var e = snapshot.val();
         // console.log("Index before = " + e.startIndex);
@@ -522,15 +553,15 @@ var acceptEdit = function (editID) {
                 currentFile.update({
                     fileContents: prefix + suffix
                 });
-                fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
+                // fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
                 global_ignore = true;
                 editor.session.setValue(prefix + suffix);
                 global_ignore = false;
             }
-            thisEdit.remove();
             //TODO remove highlighting from the file (once highlighting is implemented)
         });
     });
+    thisEdit.remove();
 }
 
 /* Highlights the provided edit */
@@ -618,6 +649,9 @@ function loadEdits() {
     userNames.on('value', function (userData) {
         fileEdits.on('value', function (data) {
             for (i in data.val()) {
+                if (data.val()[i].hasBeenAccepted) {
+                    continue;
+                }
                 if (!data.val()[i].parent) {
                     parentList.push({
                         'id': i,
@@ -753,29 +787,18 @@ var deleteEditById = function (editID) {
         currentFile.once('value', function (childSnapshot) {
             var f = childSnapshot.val();
             var fileContent = f.fileContents;
-            // console.log(fileContent);
-            var prefix = fileContent.substring(0, index);
-            // console.log("prefix = " + prefix);
-            var suffix = fileContent.substring(index + 1);
-            // console.log("suffix = " + suffix);
-
+            var prefix = fileContent.slice(0, index);
+            var suffix = fileContent.slice(index + 1);
             if (e.type == 'insert') {
-                suffix = fileContent.substring(e.endIndex, fileContent.length);
-                // currentFile.update({
-                // fileContents: prefix + suffix
-                // });
-                global_ignore = true;
-                editor.session.setValue(prefix + suffix);
-                global_ignore = false;
+                suffix = fileContent.slice(e.endIndex);
+                // global_ignore = true;
+                // editor.session.setValue(prefix + suffix);
+                // global_ignore = false;
             } else {
-                // fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
-                // currentFile.update({
-                // fileContents: prefix + e.content + suffix
-                // });
+                //fixIndicesAfterInsertDelete is same thing as this?
+                fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
             }
             thisEdit.remove();
-
-            //TODO remove highlighting from the file (once highlighting is implemented)
         });
     });
 

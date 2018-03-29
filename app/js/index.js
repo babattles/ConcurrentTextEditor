@@ -379,7 +379,6 @@ firebase.auth().onAuthStateChanged(function(user) {
                     }
                     //Loads the edits for the file
                     loadEdits();
-
                     let fileEdits = database.ref('files/' + currentKey + '/edits');
                     // fileEdits.on('value', function (data) {
                     fileEdits.once('value', function (data) {

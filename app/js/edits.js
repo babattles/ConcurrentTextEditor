@@ -47,7 +47,7 @@ var getEdits = function () {
     });
 
     editRef.on("child_removed", function (snapshot) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
-        // console.log("child added...");
+        console.log("child removed...");
         var e = snapshot.val();
         if (e.type == "insert" && !e.hasBeenAccepted) {
             global_ignore = true;
@@ -232,13 +232,11 @@ var fixIndices = function (edit, size, type) {
             snapshot.forEach(function (child) {
                 var e = child.val();
                 if (e.startIndex > edit.end - size) {
-                    /*
                     child.ref.update({
                         startIndex: e.startIndex - size,
                         endIndex: e.endIndex - size,
                         addedSize: 0,
                     });
-                    */
                 } else if (child.key == edit.id) { // add the addedSize property for concurrency
                     child.ref.update({
                         content: edit.content,
@@ -341,7 +339,7 @@ var setEdit = function (startIndex, endIndex, delta) {
                     'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
                 });
 
-                //console.log("coalesce removal left");
+                console.log("coalesce removal left");
                 var cursor = editor.getCursorPosition()
                 global_ignore = true;
                 var prefix = editor.session.getValue().substring(0, startIndex);
@@ -371,7 +369,7 @@ var setEdit = function (startIndex, endIndex, delta) {
                 editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
                 global_ignore = false;
 
-                //console.log("edit and both sides");
+                console.log("edit and both sides");
                 deleteEdit(edits[index]);
                 edits.splice(index, 1);
                 var e = {
@@ -385,7 +383,7 @@ var setEdit = function (startIndex, endIndex, delta) {
                 fixIndices(edits[index], obj.end - obj.start, delta.action);
                 return true;
             } else if (obj.start <= startIndex && obj.end < endIndex && startIndex <= obj.end && delta.action == "remove") { // removed some or all of an edit as well as content on the right side
-                //console.log("remove edit and right side");
+                console.log("remove edit and right side");
 
                 currentFile.child("delta").set({
                     'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
@@ -415,7 +413,7 @@ var setEdit = function (startIndex, endIndex, delta) {
                 postEdit(e);
                 return true;
             } else if (obj.start > startIndex && obj.end >= endIndex && endIndex > obj.start && delta.action == "remove") { // removed some or all of an edit as well as content on the left side
-                //console.log("remove edit and left");
+                console.log("remove edit and left");
 
                 currentFile.child("delta").set({
                     'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
@@ -445,7 +443,7 @@ var setEdit = function (startIndex, endIndex, delta) {
                 postEdit(e);
                 return true;
             } else if (obj.start <= startIndex && endIndex <= obj.end && delta.action == "remove" && obj.type == "insert") { // removed something from within an edit
-                // console.log("remove from within");
+                console.log("remove from within");
 
                 currentFile.child("delta").set({
                     'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)

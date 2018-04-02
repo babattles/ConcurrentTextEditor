@@ -232,12 +232,13 @@ var fixIndices = function (edit, size, type) {
             snapshot.forEach(function (child) {
                 var e = child.val();
                 if (e.startIndex > edit.end - size) {
-
+                    /*
                     child.ref.update({
                         startIndex: e.startIndex - size,
                         endIndex: e.endIndex - size,
                         addedSize: 0,
                     });
+                    */
                 } else if (child.key == edit.id) { // add the addedSize property for concurrency
                     child.ref.update({
                         content: edit.content,
@@ -332,7 +333,7 @@ var setEdit = function (startIndex, endIndex, delta) {
                 edits[index].content = stringify(delta.lines) + obj.content;
                 edits[index].type = delta.action;
                 edits[index].user = user.uid;
-                fixIndices(edits[index], endIndex - startIndex, "insert");
+                fixIndices(edits[index], endIndex - startIndex, "remove");
                 return true;
             } else if (obj.end == startIndex && obj.type == "remove" && delta.action == "remove") { // coalesce removal left
 
@@ -354,7 +355,7 @@ var setEdit = function (startIndex, endIndex, delta) {
                 edits[index].content = obj.content + stringify(delta.lines);
                 edits[index].type = delta.action;
                 edits[index].user = user.uid;
-                fixIndices(edits[index], endIndex - startIndex, "insert");
+                fixIndices(edits[index], endIndex - startIndex, "remove");
                 return true;
             } else if (obj.start > startIndex && obj.end < endIndex && delta.action == "remove") { // removed an edit as well as content on both sides
 

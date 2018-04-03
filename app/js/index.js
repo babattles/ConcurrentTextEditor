@@ -379,7 +379,25 @@ firebase.auth().onAuthStateChanged(function(user) {
                     }
                     //Loads the edits for the file
                     loadEdits();
-                });
+                    let fileEdits = database.ref('files/' + currentKey + '/edits');
+                    // fileEdits.on('value', function (data) {
+                    fileEdits.once('value', function (data) {
+                        for (i in data.val()) {
+                            // Load contents of edit into editor
+                            if (data.val()[i].type == "insert") {
+                                global_ignore = true;
+                                var cursor = editor.getCursorPosition();
+                                var prefix = editor.session.getValue().slice(0, data.val()[i].startIndex);
+                                var suffix = editor.session.getValue().slice(data.val()[i].startIndex);
+                                editor.session.setValue(prefix + data.val()[i].content + suffix);
+                                editor.selection.moveTo(cursor.row, cursor.column);
+                                global_ignore = false;
+                            } else {
+                                editHighlight(i);
+                            }
+                        }
+                    });
+                }); 
 
                 // add new entry to list of files
                 div.appendChild(label);

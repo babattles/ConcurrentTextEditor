@@ -273,6 +273,17 @@ var removeTypedText = function (startIndex, endIndex, delta) {
     }
 }
 
+var updateRemoval = function(edit, size) {
+    childRef = editRef.child(edit.id);
+    childRef.update({
+        content: edit.content,
+        endIndex: edit.end,
+        startIndex: edit.start,
+        addedSize: 0 - size,
+    });
+    edit.addedSize = 0 - size;
+}
+
 /* Take a startIndex, endIndex, and the change, and make an edit */
 var setEdit = function (startIndex, endIndex, delta) {
     removeTypedText(startIndex, endIndex, delta);
@@ -331,7 +342,8 @@ var setEdit = function (startIndex, endIndex, delta) {
                 edits[index].content = stringify(delta.lines) + obj.content;
                 edits[index].type = delta.action;
                 edits[index].user = user.uid;
-                fixIndices(edits[index], endIndex - startIndex, "remove");
+                updateRemoval(edits[index], endIndex - startIndex);
+                //fixIndices(edits[index], endIndex - startIndex, "remove");
                 return true;
             } else if (obj.end == startIndex && obj.type == "remove" && delta.action == "remove") { // coalesce removal left
 
@@ -353,7 +365,8 @@ var setEdit = function (startIndex, endIndex, delta) {
                 edits[index].content = obj.content + stringify(delta.lines);
                 edits[index].type = delta.action;
                 edits[index].user = user.uid;
-                fixIndices(edits[index], endIndex - startIndex, "remove");
+                updateRemoval(edits[index], endIndex - startIndex);
+                //fixIndices(edits[index], endIndex - startIndex, "remove");
                 return true;
             } else if (obj.start > startIndex && obj.end < endIndex && delta.action == "remove") { // removed an edit as well as content on both sides
 

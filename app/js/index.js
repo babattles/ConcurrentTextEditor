@@ -368,6 +368,9 @@ firebase.auth().onAuthStateChanged(function(user) {
                         // set the current open file to the new file
                         currentFile = file;
 
+                        // trigger a change to load file's chat messages
+                        loadMessages();
+
                         // set the editRef
                         editRef = currentFile.child("edits");
                         fileKey.push(currentKey);

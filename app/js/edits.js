@@ -712,7 +712,8 @@ function loadEdits() {
                 let acceptButton = '<label class="switch" ><input id="edit' + editVal.id + '" type="checkbox"'
                     + ' onclick="acceptTracker(\'' + editVal.id + '\', ' + numUsers + ')">'
                     + '<span class="slider round"></span></label>';
-                let onClickLogic = 'onclick="openComment(glo_e);"';
+
+                let onClickLogic = 'onclick="openComment(getEditRef(editVal));"';
 
                 if (editVal.type == 'insert') {
                     editHTML += '<div id="edit-add" class="edit" '

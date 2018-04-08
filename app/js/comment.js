@@ -11,12 +11,17 @@ clearComment = function() {
 
 var openComment = function(glo_e) {
     //does not open comment box when accept toggle is clicked
-    if (!e) var e = window.event;
-    if (!e.target.matches('.edit')){
-        return;
-    }
+    x = edit;
+    //console.log(x);
     clearComment();
     commentPanel.classList.toggle("hidden");
+    x.once('value', function(snapshot) {
+        if (snapshot.val().comment) {
+        comment_span.innerHTML = "Comment: " + snapshot.val().comment;
+        } else {
+            comment_span.innerHTML = "Comment: ";
+        }
+    });
 }
 
 changeCommentBtn.addEventListener("click", function() {

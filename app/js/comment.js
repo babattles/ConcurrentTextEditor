@@ -4,12 +4,13 @@ var editR;
 
 var commentPanel = document.getElementById('Comment');
 var commentInput = document.getElementById('comment-input');
+var comment_span = document.getElementById('comment-span');
 
 clearComment = function() {
     commentInput.value = '';
 }
 
-var openComment = function(glo_e) {
+var openComment = function(edit) {
     //does not open comment box when accept toggle is clicked
     x = edit;
     //console.log(x);

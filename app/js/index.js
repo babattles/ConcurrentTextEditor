@@ -156,6 +156,8 @@ ipcRenderer.on('close-file', function(event, arg) {
 ipcRenderer.on('view-live-file', function(event, arg) {
     fileMode = "live";
     loadEditsIntoEditor();
+    unhighlightAllRemovals();
+    highlightAllRemovals();
 });
 
 // Listen for Close File Menu Select
@@ -169,6 +171,7 @@ ipcRenderer.on('view-base-file', function(event, arg) {
         editor.session.setValue(fileContent);
         editor.selection.moveTo(cursor.row, cursor.column);
         global_ignore = false;
+        unhighlightAllRemovals();
     });
 });
 

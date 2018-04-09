@@ -897,3 +897,21 @@ function loadEditsIntoEditor() {
         }
     });
 }
+
+function unhighlightAllRemovals() {
+    for (i in edits) {
+        if (edits[i].type == "remove") {
+            console.log("going to un");
+            unhighlight(edits[i]);
+        }
+    }
+}
+
+function highlightAllRemovals() {
+    for (i in edits) {
+        if (edits[i].type == "remove") {
+            unhighlight(edits[i]);
+            highlight(edits[i]);
+        }
+    }
+}

@@ -314,6 +314,11 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                 // listener to open this file from database
                 openBtn.addEventListener('click', function() {
+                    if(editor.getReadOnly()){
+                        editor.setReadOnly(false);
+                        // console.log(editor.getReadOnly());
+                    }
+                    editor.setReadOnly(false);
                     if (currentKey != childSnapshot.key) {
                         //Set online status of old file to false
                         if (currentKey != null && currentKey != '') {
@@ -380,6 +385,16 @@ firebase.auth().onAuthStateChanged(function(user) {
                         // enable close menu
                         ipcRenderer.send('enable-close', 'ping');
                     }
+
+                    //Sets file to read only if they don't have edit access
+                    var userPerms = database.ref("files/" + currentKey + "/userList/" + user.uid);
+                    userPerms.on('value', function(data){
+                        if(data.val().readOnly == true) {
+                            editor.setReadOnly(true);
+                            // console.log('test');
+                        }
+                    });
+
                     //Loads the edits for the file
                     loadEdits();
                     let fileEdits = database.ref('files/' + currentKey + '/edits');

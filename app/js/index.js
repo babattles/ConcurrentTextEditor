@@ -32,6 +32,8 @@ var editRef = null;
 // state to track if a file is being opened
 var global_ignore = false;
 
+var fileMode = "live";
+
 // variable to track the current user globally
 var global_user;
 
@@ -148,6 +150,16 @@ ipcRenderer.on('save-file-as', function(event, arg) {
 // Listen for Close File Menu Select
 ipcRenderer.on('close-file', function(event, arg) {
     closeFile();
+});
+
+// Listen for Close File Menu Select
+ipcRenderer.on('view-live-file', function(event, arg) {
+    fileMode = "live";
+});
+
+// Listen for Close File Menu Select
+ipcRenderer.on('view-base-file', function(event, arg) {
+    fileMode = "base";
 });
 
 // Listen for Increase Font Size Menu Select

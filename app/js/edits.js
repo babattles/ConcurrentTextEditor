@@ -15,20 +15,22 @@ var getEdits = function () {
     });
 
     currentFile.child("delta").on("child_changed", function (snapshot) {
-        // console.log(snapshot.ref.parent);
-        var parsedContent = snapshot.val();
-        // console.log("parsedContent = " + parsedContent);
-        var startIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
-        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-        var endIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
-        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-        var type = parsedContent.slice(0, parsedContent.indexOf(";"));
-        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-        var editType = parsedContent.slice(0, parsedContent.indexOf(";"));
-        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-        var editID = parsedContent.slice(0, parsedContent.indexOf(";"));
-        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-        updateEditor(startIndex, endIndex, type, editType, editID, parsedContent);
+        if (fileMode == "live") {
+            // console.log(snapshot.ref.parent);
+            var parsedContent = snapshot.val();
+            // console.log("parsedContent = " + parsedContent);
+            var startIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
+            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+            var endIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
+            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+            var type = parsedContent.slice(0, parsedContent.indexOf(";"));
+            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+            var editType = parsedContent.slice(0, parsedContent.indexOf(";"));
+            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+            var editID = parsedContent.slice(0, parsedContent.indexOf(";"));
+            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+            updateEditor(startIndex, endIndex, type, editType, editID, parsedContent);
+        }
     });
 
     editRef.on("child_added", function (snapshot, prevChildKey) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
@@ -53,7 +55,7 @@ var getEdits = function () {
             global_ignore = true;
             var cursor = editor.getCursorPosition();
             var prefix = editor.session.getValue().slice(0, e.startIndex);
-            var suffix = editor.session.getValue().slice(e.endIndex - 1);
+            var suffix = editor.session.getValue().slice(e.endIndex);
             // console.log("Prefix = " + prefix);
             // console.log("Suffix = " + suffix);
             editor.session.setValue(prefix + suffix);
@@ -559,7 +561,9 @@ var acceptEdit = function (editID) {
                 });
                 // fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
                 global_ignore = true;
+                var cursor = editor.getCursorPosition();
                 editor.session.setValue(prefix + suffix);
+                editor.selection.moveTo(cursor.row, cursor.column);
                 global_ignore = false;
             }
         });
@@ -576,7 +580,7 @@ var acceptEdit = function (editID) {
 
 /* Highlights the provided edit */
 var highlight = function (edit) {
-    if (edit.hid) {
+    if (edit.hid || fileMode == "base") {
         return;
     }
     var startRow = getRowColumnIndices(edit.start).row;
@@ -873,4 +877,23 @@ function editUnhighlight(id) {
         }
     }
     unhighlight(unHoveredEdit);
+}
+
+function loadEditsIntoEditor() {
+    editRef.once('value', function(data) {
+        for (i in data.val()) {
+            // Load contents of edit into editor
+            if (data.val()[i].type == "insert") {
+                global_ignore = true;
+                var cursor = editor.getCursorPosition();
+                var prefix = editor.session.getValue().slice(0, data.val()[i].startIndex);
+                var suffix = editor.session.getValue().slice(data.val()[i].startIndex);
+                editor.session.setValue(prefix + data.val()[i].content + suffix);
+                editor.selection.moveTo(cursor.row, cursor.column);
+                global_ignore = false;
+            } else {
+                editHighlight(i);
+            }
+        }
+    });
 }

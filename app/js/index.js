@@ -155,11 +155,21 @@ ipcRenderer.on('close-file', function(event, arg) {
 // Listen for Close File Menu Select
 ipcRenderer.on('view-live-file', function(event, arg) {
     fileMode = "live";
+    loadEditsIntoEditor();
 });
 
 // Listen for Close File Menu Select
 ipcRenderer.on('view-base-file', function(event, arg) {
     fileMode = "base";
+    currentFile.on('value', function (childSnapshot) {
+        var f = childSnapshot.val();
+        var fileContent = f.fileContents;
+        global_ignore = true;
+        var cursor = editor.getCursorPosition();
+        editor.session.setValue(fileContent);
+        editor.selection.moveTo(cursor.row, cursor.column);
+        global_ignore = false;
+    });
 });
 
 // Listen for Increase Font Size Menu Select

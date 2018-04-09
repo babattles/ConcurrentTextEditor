@@ -13,15 +13,17 @@ $(document).ready(function(){
             return false;
         }
     });
+
+    $("#channel").change(function() {
+        loadMessages();
+    });
 });
 
 var messageRef = null;
 
 // Loads 10 most recent messages from database on file load
 var loadMessages = function() {
-    messageRef = currentFile.child("messages");
-
-    // Do more
+    messageRef = currentFile.child("messages").child(document.getElementById('channel').value);
 }
 
 // Function that posts the message to the database

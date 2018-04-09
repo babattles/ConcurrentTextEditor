@@ -15,20 +15,22 @@ var getEdits = function () {
     });
 
     currentFile.child("delta").on("child_changed", function (snapshot) {
-        // console.log(snapshot.ref.parent);
-        var parsedContent = snapshot.val();
-        // console.log("parsedContent = " + parsedContent);
-        var startIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
-        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-        var endIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
-        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-        var type = parsedContent.slice(0, parsedContent.indexOf(";"));
-        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-        var editType = parsedContent.slice(0, parsedContent.indexOf(";"));
-        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-        var editID = parsedContent.slice(0, parsedContent.indexOf(";"));
-        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-        updateEditor(startIndex, endIndex, type, editType, editID, parsedContent);
+        if (fileMode == "live") {
+            // console.log(snapshot.ref.parent);
+            var parsedContent = snapshot.val();
+            // console.log("parsedContent = " + parsedContent);
+            var startIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
+            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+            var endIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
+            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+            var type = parsedContent.slice(0, parsedContent.indexOf(";"));
+            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+            var editType = parsedContent.slice(0, parsedContent.indexOf(";"));
+            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+            var editID = parsedContent.slice(0, parsedContent.indexOf(";"));
+            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+            updateEditor(startIndex, endIndex, type, editType, editID, parsedContent);
+        }
     });
 
     editRef.on("child_added", function (snapshot, prevChildKey) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
@@ -53,7 +55,7 @@ var getEdits = function () {
             global_ignore = true;
             var cursor = editor.getCursorPosition();
             var prefix = editor.session.getValue().slice(0, e.startIndex);
-            var suffix = editor.session.getValue().slice(e.endIndex - 1);
+            var suffix = editor.session.getValue().slice(e.endIndex);
             // console.log("Prefix = " + prefix);
             // console.log("Suffix = " + suffix);
             editor.session.setValue(prefix + suffix);
@@ -285,216 +287,217 @@ var updateRemoval = function(edit, size) {
 }
 
 /* Take a startIndex, endIndex, and the change, and make an edit */
-var setEdit = function (startIndex, endIndex, delta) {
+var setEdit = function(startIndex, endIndex, delta) {
     removeTypedText(startIndex, endIndex, delta);
+    if (fileMode == "live") {
+        // get the current user
+        var user = firebase.auth().currentUser;
+        if (user) {
+            var bool = 0;
+            bool = edits.find((obj, index) => {
+                if (obj.start < startIndex && startIndex < obj.end && delta.action == "insert" && obj.type == "insert") { // new addition was within an existing edit
 
-    // get the current user
-    var user = firebase.auth().currentUser;
-    if (user) {
-        var bool = 0;
-        bool = edits.find((obj, index) => {
-            if (obj.start < startIndex && startIndex < obj.end && delta.action == "insert" && obj.type == "insert") { // new addition was within an existing edit
+                    currentFile.child("delta").set({
+                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    });
 
-                currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
-                });
-
-                //console.log("added within");
-                edits[index].content = obj.content.substring(0, startIndex - obj.start) + stringify(delta.lines) + obj.content.substring(startIndex - obj.start, obj.content.length);
-                edits[index].start = obj.start;
-                edits[index].end = obj.end + (endIndex - startIndex);
-                edits[index].type = delta.action;
-                edits[index].user = user.uid;
-                fixIndices(edits[index], endIndex - startIndex, delta.action);
-                return true; // stop searching
-            } else if (obj.start == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the beginning of an existing edit
-
-                currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
-                });
-
-                //console.log("added to beginning");
-                edits[index].start = startIndex;
-                edits[index].end = obj.end + (endIndex - startIndex);
-                edits[index].content = stringify(delta.lines) + obj.content;
-                edits[index].type = delta.action;
-                edits[index].user = user.uid;
-                fixIndices(edits[index], endIndex - startIndex, delta.action);
-                return true;
-            } else if (obj.end == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the end of an existing edit
-
-                currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
-                });
-
-                //console.log("added to end");
-                edits[index].start = obj.start;
-                edits[index].end = endIndex;
-                edits[index].content = obj.content + stringify(delta.lines);
-                edits[index].type = delta.action;
-                edits[index].user = user.uid;
-                fixIndices(edits[index], endIndex - startIndex, delta.action);
-                return true;
-            } else if (obj.start == endIndex && obj.type == "remove" && delta.action == "remove") { // coalesce removal right
-                //console.log("coalesce removal right");
-                edits[index].start = startIndex;
-                edits[index].end = obj.end;
-                edits[index].content = stringify(delta.lines) + obj.content;
-                edits[index].type = delta.action;
-                edits[index].user = user.uid;
-                updateRemoval(edits[index], endIndex - startIndex);
-                //fixIndices(edits[index], endIndex - startIndex, "remove");
-                return true;
-            } else if (obj.end == startIndex && obj.type == "remove" && delta.action == "remove") { // coalesce removal left
-
-                currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
-                });
-
-                console.log("coalesce removal left");
-                var cursor = editor.getCursorPosition()
-                global_ignore = true;
-                var prefix = editor.session.getValue().substring(0, startIndex);
-                var suffix = editor.session.getValue().substring(endIndex);
-                editor.session.setValue(prefix + stringify(delta.lines) + suffix);
-                editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
-                global_ignore = false;
-
-                edits[index].start = obj.start;
-                edits[index].end = endIndex;
-                edits[index].content = obj.content + stringify(delta.lines);
-                edits[index].type = delta.action;
-                edits[index].user = user.uid;
-                updateRemoval(edits[index], endIndex - startIndex);
-                //fixIndices(edits[index], endIndex - startIndex, "remove");
-                return true;
-            } else if (obj.start > startIndex && obj.end < endIndex && delta.action == "remove") { // removed an edit as well as content on both sides
-
-                currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
-                });
-
-                var cursor = editor.getCursorPosition()
-                global_ignore = true;
-                var prefix = editor.session.getValue().substring(0, startIndex);
-                var suffix = editor.session.getValue().substring(endIndex - 1);
-                editor.session.setValue(prefix + stringify(delta.lines) + suffix);
-                editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
-                global_ignore = false;
-
-                console.log("edit and both sides");
-                deleteEdit(edits[index]);
-                edits.splice(index, 1);
-                var e = {
-                    start: startIndex,
-                    end: endIndex - (obj.end - obj.start),
-                    content: stringify(delta.lines).substring(0, obj.start - startIndex) + stringify(delta.lines).substring(obj.end - startIndex, stringify(delta.lines).length),
-                    type: delta.action,
-                    user: user.uid,
-                };
-                postEdit(e);
-                fixIndices(edits[index], obj.end - obj.start, delta.action);
-                return true;
-            } else if (obj.start <= startIndex && obj.end < endIndex && startIndex <= obj.end && delta.action == "remove") { // removed some or all of an edit as well as content on the right side
-                console.log("remove edit and right side");
-
-                currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
-                });
-
-                var e = {
-                    start: obj.end,
-                    end: endIndex,
-                    content: stringify(delta.lines).substring(obj.end - obj.start, endIndex - startIndex),
-                    type: delta.action,
-                    user: user.uid,
-                };
-                if (obj.start == startIndex) {
-                    //console.log("removing whole edit");
-                    fixIndices(edits[index], edits[index].end - edits[index].start, delta.action);
-                    deleteEdit(edits[index]);
-                    edits.splice(index, 1);
-                } else {
-                    //console.log("edit to the right ->");
+                    //console.log("added within");
+                    edits[index].content = obj.content.substring(0, startIndex - obj.start) + stringify(delta.lines) + obj.content.substring(startIndex - obj.start, obj.content.length);
                     edits[index].start = obj.start;
-                    edits[index].end = startIndex;
-                    edits[index].content = obj.content.substring(0, startIndex - obj.start);
-                    edits[index].type = "insert";
+                    edits[index].end = obj.end + (endIndex - startIndex);
+                    edits[index].type = delta.action;
                     edits[index].user = user.uid;
-                    fixIndices(edits[index], obj.end - startIndex, delta.action);
-                }
-                postEdit(e);
-                return true;
-            } else if (obj.start > startIndex && obj.end >= endIndex && endIndex > obj.start && delta.action == "remove") { // removed some or all of an edit as well as content on the left side
-                console.log("remove edit and left");
+                    fixIndices(edits[index], endIndex - startIndex, delta.action);
+                    return true; // stop searching
+                } else if (obj.start == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the beginning of an existing edit
 
-                currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
-                });
+                    currentFile.child("delta").set({
+                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    });
 
-                var e = {
-                    start: startIndex,
-                    end: obj.start,
-                    content: stringify(delta.lines).substring(0, obj.start - startIndex),
-                    type: delta.action,
-                    user: user.uid,
-                };
-                if (obj.end == endIndex) {
-                    //console.log("removing whole edit");
-                    fixIndices(edits[index], edits[index].end - edits[index].start, delta.action);
-                    deleteEdit(edits[index]);
-                    edits.splice(index, 1);
-                } else {
-                    //console.log("edit to the left <-");
-                    edits[index].content = obj.content.substring(endIndex - obj.start, obj.content.length);
-                    edits[index].start = endIndex;
+                    //console.log("added to beginning");
+                    edits[index].start = startIndex;
+                    edits[index].end = obj.end + (endIndex - startIndex);
+                    edits[index].content = stringify(delta.lines) + obj.content;
+                    edits[index].type = delta.action;
+                    edits[index].user = user.uid;
+                    fixIndices(edits[index], endIndex - startIndex, delta.action);
+                    return true;
+                } else if (obj.end == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the end of an existing edit
+
+                    currentFile.child("delta").set({
+                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    });
+
+                    //console.log("added to end");
+                    edits[index].start = obj.start;
+                    edits[index].end = endIndex;
+                    edits[index].content = obj.content + stringify(delta.lines);
+                    edits[index].type = delta.action;
+                    edits[index].user = user.uid;
+                    fixIndices(edits[index], endIndex - startIndex, delta.action);
+                    return true;
+                } else if (obj.start == endIndex && obj.type == "remove" && delta.action == "remove") { // coalesce removal right
+                    //console.log("coalesce removal right");
+                    edits[index].start = startIndex;
                     edits[index].end = obj.end;
-                    edits[index].type = "insert";
+                    edits[index].content = stringify(delta.lines) + obj.content;
+                    edits[index].type = delta.action;
                     edits[index].user = user.uid;
-                    fixIndices(edits[index], endIndex - startIndex, delta.action);
+                    updateRemoval(edits[index], endIndex - startIndex);
+                    //fixIndices(edits[index], endIndex - startIndex, "remove");
+                    return true;
+                } else if (obj.end == startIndex && obj.type == "remove" && delta.action == "remove") { // coalesce removal left
+
+                    currentFile.child("delta").set({
+                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    });
+
+                    console.log("coalesce removal left");
+                    var cursor = editor.getCursorPosition()
+                    global_ignore = true;
+                    var prefix = editor.session.getValue().substring(0, startIndex);
+                    var suffix = editor.session.getValue().substring(endIndex);
+                    editor.session.setValue(prefix + stringify(delta.lines) + suffix);
+                    editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
+                    global_ignore = false;
+
+                    edits[index].start = obj.start;
+                    edits[index].end = endIndex;
+                    edits[index].content = obj.content + stringify(delta.lines);
+                    edits[index].type = delta.action;
+                    edits[index].user = user.uid;
+                    updateRemoval(edits[index], endIndex - startIndex);
+                    //fixIndices(edits[index], endIndex - startIndex, "remove");
+                    return true;
+                } else if (obj.start > startIndex && obj.end < endIndex && delta.action == "remove") { // removed an edit as well as content on both sides
+
+                    currentFile.child("delta").set({
+                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    });
+
+                    var cursor = editor.getCursorPosition()
+                    global_ignore = true;
+                    var prefix = editor.session.getValue().substring(0, startIndex);
+                    var suffix = editor.session.getValue().substring(endIndex - 1);
+                    editor.session.setValue(prefix + stringify(delta.lines) + suffix);
+                    editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
+                    global_ignore = false;
+
+                    console.log("edit and both sides");
+                    deleteEdit(edits[index]);
+                    edits.splice(index, 1);
+                    var e = {
+                        start: startIndex,
+                        end: endIndex - (obj.end - obj.start),
+                        content: stringify(delta.lines).substring(0, obj.start - startIndex) + stringify(delta.lines).substring(obj.end - startIndex, stringify(delta.lines).length),
+                        type: delta.action,
+                        user: user.uid,
+                    };
+                    postEdit(e);
+                    fixIndices(edits[index], obj.end - obj.start, delta.action);
+                    return true;
+                } else if (obj.start <= startIndex && obj.end < endIndex && startIndex <= obj.end && delta.action == "remove") { // removed some or all of an edit as well as content on the right side
+                    console.log("remove edit and right side");
+
+                    currentFile.child("delta").set({
+                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    });
+
+                    var e = {
+                        start: obj.end,
+                        end: endIndex,
+                        content: stringify(delta.lines).substring(obj.end - obj.start, endIndex - startIndex),
+                        type: delta.action,
+                        user: user.uid,
+                    };
+                    if (obj.start == startIndex) {
+                        //console.log("removing whole edit");
+                        fixIndices(edits[index], edits[index].end - edits[index].start, delta.action);
+                        deleteEdit(edits[index]);
+                        edits.splice(index, 1);
+                    } else {
+                        //console.log("edit to the right ->");
+                        edits[index].start = obj.start;
+                        edits[index].end = startIndex;
+                        edits[index].content = obj.content.substring(0, startIndex - obj.start);
+                        edits[index].type = "insert";
+                        edits[index].user = user.uid;
+                        fixIndices(edits[index], obj.end - startIndex, delta.action);
+                    }
+                    postEdit(e);
+                    return true;
+                } else if (obj.start > startIndex && obj.end >= endIndex && endIndex > obj.start && delta.action == "remove") { // removed some or all of an edit as well as content on the left side
+                    console.log("remove edit and left");
+
+                    currentFile.child("delta").set({
+                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    });
+
+                    var e = {
+                        start: startIndex,
+                        end: obj.start,
+                        content: stringify(delta.lines).substring(0, obj.start - startIndex),
+                        type: delta.action,
+                        user: user.uid,
+                    };
+                    if (obj.end == endIndex) {
+                        //console.log("removing whole edit");
+                        fixIndices(edits[index], edits[index].end - edits[index].start, delta.action);
+                        deleteEdit(edits[index]);
+                        edits.splice(index, 1);
+                    } else {
+                        //console.log("edit to the left <-");
+                        edits[index].content = obj.content.substring(endIndex - obj.start, obj.content.length);
+                        edits[index].start = endIndex;
+                        edits[index].end = obj.end;
+                        edits[index].type = "insert";
+                        edits[index].user = user.uid;
+                        fixIndices(edits[index], endIndex - startIndex, delta.action);
+                    }
+                    postEdit(e);
+                    return true;
+                } else if (obj.start <= startIndex && endIndex <= obj.end && delta.action == "remove" && obj.type == "insert") { // removed something from within an edit
+                    console.log("remove from within");
+
+                    currentFile.child("delta").set({
+                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    });
+
+                    if (obj.start == startIndex && obj.end == endIndex) { // you're deleting the last of an edit
+                        deleteEdit(edits[index], edits[index].end - edits[index].start, delta.action);
+                        edits.splice(index, 1);
+                    } else {
+                        // console.log("Not really an insert");
+                        edits[index].content = obj.content.substring(0, startIndex - obj.start) + obj.content.substring(endIndex - obj.start, obj.content.length);
+                        edits[index].start = obj.start;
+                        edits[index].end = obj.end - (endIndex - startIndex);
+                        edits[index].type = "insert";
+                        edits[index].user = user.uid;
+                        fixIndices(edits[index], endIndex - startIndex, delta.action);
+                    }
+                    return true;
+                }
+            });
+            // never found parent edit, so add edit to edits
+            if (!bool) {
+                // console.log("no parent");
+                var e = {
+                    start: startIndex,
+                    end: endIndex,
+                    content: stringify(delta.lines),
+                    type: delta.action,
+                    user: user.uid,
+                    comment: "",
+                    addedSize: endIndex - startIndex,
                 }
                 postEdit(e);
-                return true;
-            } else if (obj.start <= startIndex && endIndex <= obj.end && delta.action == "remove" && obj.type == "insert") { // removed something from within an edit
-                console.log("remove from within");
-
                 currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + delta.action + ";" + e.id + ";" + stringify(delta.lines)
                 });
-
-                if (obj.start == startIndex && obj.end == endIndex) { // you're deleting the last of an edit
-                    deleteEdit(edits[index], edits[index].end - edits[index].start, delta.action);
-                    edits.splice(index, 1);
-                } else {
-                    // console.log("Not really an insert");
-                    edits[index].content = obj.content.substring(0, startIndex - obj.start) + obj.content.substring(endIndex - obj.start, obj.content.length);
-                    edits[index].start = obj.start;
-                    edits[index].end = obj.end - (endIndex - startIndex);
-                    edits[index].type = "insert";
-                    edits[index].user = user.uid;
-                    fixIndices(edits[index], endIndex - startIndex, delta.action);
+                if (delta.action == "insert") {
+                    fixIndices(e, endIndex - startIndex, delta.action);
                 }
-                return true;
-            }
-        });
-        // never found parent edit, so add edit to edits
-        if (!bool) {
-            // console.log("no parent");
-            var e = {
-                start: startIndex,
-                end: endIndex,
-                content: stringify(delta.lines),
-                type: delta.action,
-                user: user.uid,
-                comment: "",
-                addedSize: endIndex - startIndex,
-            }
-            postEdit(e);
-            currentFile.child("delta").set({
-                'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + delta.action + ";" + e.id + ";" + stringify(delta.lines)
-            });
-            if (delta.action == "insert") {
-                fixIndices(e, endIndex - startIndex, delta.action);
             }
         }
     }
@@ -558,7 +561,9 @@ var acceptEdit = function (editID) {
                 });
                 // fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
                 global_ignore = true;
+                var cursor = editor.getCursorPosition();
                 editor.session.setValue(prefix + suffix);
+                editor.selection.moveTo(cursor.row, cursor.column);
                 global_ignore = false;
             }
         });
@@ -575,7 +580,7 @@ var acceptEdit = function (editID) {
 
 /* Highlights the provided edit */
 var highlight = function (edit) {
-    if (edit.hid) {
+    if (edit.hid || fileMode == "base") {
         return;
     }
     var startRow = getRowColumnIndices(edit.start).row;
@@ -801,14 +806,11 @@ var deleteEditById = function (editID) {
                 // editor.session.setValue(prefix + suffix);
                 // global_ignore = false;
             } else {
-                //fixIndicesAfterInsertDelete is same thing as this?
                 fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
             }
             thisEdit.remove();
         });
     });
-
-
 
     // Delete edit from edits[]             edits.splice(edits.indexOf(editID), 1)  seemed to cause erorrs
     for (i in edits) {
@@ -875,4 +877,23 @@ function editUnhighlight(id) {
         }
     }
     unhighlight(unHoveredEdit);
+}
+
+function loadEditsIntoEditor() {
+    editRef.once('value', function(data) {
+        for (i in data.val()) {
+            // Load contents of edit into editor
+            if (data.val()[i].type == "insert") {
+                global_ignore = true;
+                var cursor = editor.getCursorPosition();
+                var prefix = editor.session.getValue().slice(0, data.val()[i].startIndex);
+                var suffix = editor.session.getValue().slice(data.val()[i].startIndex);
+                editor.session.setValue(prefix + data.val()[i].content + suffix);
+                editor.selection.moveTo(cursor.row, cursor.column);
+                global_ignore = false;
+            } else {
+                editHighlight(i);
+            }
+        }
+    });
 }

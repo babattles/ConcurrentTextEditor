@@ -24,6 +24,10 @@ var messageRef = null;
 // Loads 10 most recent messages from database on file load
 var loadMessages = function() {
     messageRef = currentFile.child("messages").child(document.getElementById('channel').value);
+    var messages = document.getElementById("chat");
+    messageRef.on("child_added", function(snapshot) {
+
+    });
 }
 
 // Loads the channels
@@ -45,7 +49,7 @@ var postMessage = function(content) {
     if (messageRef) {
         messageRef.push({
             content: content,
-            user: global_user.uid,
+            user: global_username,
         });
     }
 }

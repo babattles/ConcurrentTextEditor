@@ -34,6 +34,7 @@ var global_ignore = false;
 
 // variable to track the current user globally
 var global_user;
+var global_username;
 
 // Authenticate Button is clicked
 var AuthListener = document.getElementById("authBtn");
@@ -201,6 +202,7 @@ firebase.auth().onAuthStateChanged(function(user) {
         // update user settings button with username
         database.ref().child("users").child(user.uid).child("username").once("value").then(function(snapshot) {
             userSettingsBtn.innerHTML = snapshot.val();
+            global_username = snapshot.val();
         });
 
         // hide/show buttons

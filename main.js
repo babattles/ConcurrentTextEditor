@@ -174,13 +174,33 @@ function createWindow() {
             ]
         },
         {
+            label: 'View',
+            submenu: [{
+                    label: 'View Base File',
+                    click: () => {
+                        if (win) {
+                            win.webContents.send('view-base-file', 'ping');
+                            toggleFileMode();
+                        }
+                    }
+                },
+                {
+                    label: 'View Live File',
+                    click: () => {
+                        if (win) {
+                            win.webContents.send('view-live-file', 'ping');
+                            toggleFileMode();
+                        }
+                    }
+                },
+            ]
+        }, {
             label: 'Help',
             submenu: [{
                 label: 'Learn More',
                 click() { require('electron').shell.openExternal('https://github.com/babattles/HiveText') }
             }]
-        }
-    ];
+        }];
     if (process.platform === 'darwin') {
         template.unshift({
             label: 'HiveText',
@@ -275,6 +295,7 @@ function createWindow() {
     }));
 
     menu.items[1].submenu.items[3].enabled = false;
+    menu.items[4].submenu.items[1].enabled = false;
 
     enableClose = function() {
         menu.items[1].submenu.items[3].enabled = true;
@@ -284,6 +305,11 @@ function createWindow() {
         menu.items[1].submenu.items[3].enabled = false;
     }
 
+
+    toggleFileMode = function() {
+        menu.items[4].submenu.items[0].enabled = !menu.items[4].submenu.items[0].enabled;
+        menu.items[4].submenu.items[1].enabled = !menu.items[4].submenu.items[1].enabled;
+    }
     /**
      * Uncomment line below to enable developer tools when opening this window
      */

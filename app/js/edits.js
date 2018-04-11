@@ -6,6 +6,7 @@ if (f == "index.html") {
 var edits = [];
 
 var glo_e;
+var x_insert = false;
 // Retrieve new edits as they are added to the database (including your own!)
 var getEdits = function () {
 
@@ -49,20 +50,24 @@ var getEdits = function () {
     });
 
     editRef.on("child_removed", function (snapshot) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
-        console.log("child removed...");
+        //console.log("child removed...");
         var e = snapshot.val();
-        if (e.type == "insert" && !e.hasBeenAccepted) {
+        if (e.type == "insert" && !e.hasBeenAccepted) { // insert
             global_ignore = true;
             var cursor = editor.getCursorPosition();
             var prefix = editor.session.getValue().slice(0, e.startIndex);
-            var suffix = editor.session.getValue().slice(e.endIndex);
-            // console.log("Prefix = " + prefix);
-            // console.log("Suffix = " + suffix);
+            if (x_insert) {
+                var suffix = editor.session.getValue().slice(e.endIndex);
+                x_insert = false;
+            } else {
+                var suffix = editor.session.getValue().slice(e.endIndex - 1);
+            }
+            //console.log("Prefix = " + prefix);
+            //console.log("Suffix = " + suffix);
             editor.session.setValue(prefix + suffix);
             editor.selection.moveTo(cursor.row, cursor.column);
             global_ignore = false;
         } else if (e.type == "remove" && e.hasBeenAccepted) {
-            // console.log("removing highlight for " + snapshot.key);
             editUnhighlight(snapshot.key);
             global_ignore = true;
             var cursor = editor.getCursorPosition();
@@ -403,6 +408,7 @@ var setEdit = function(startIndex, endIndex, delta) {
                     currentFile.child("delta").set({
                         'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
                     });
+
 
                     var e = {
                         start: obj.end,
@@ -801,26 +807,23 @@ var deleteEditById = function (editID) {
             var prefix = fileContent.slice(0, index);
             var suffix = fileContent.slice(index + 1);
             if (e.type == 'insert') {
-                suffix = fileContent.slice(e.endIndex);
-                // global_ignore = true;
-                // editor.session.setValue(prefix + suffix);
-                // global_ignore = false;
+                x_insert = true;
+                fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
+                thisEdit.remove();
             } else {
                 fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
+                thisEdit.remove();
             }
-            thisEdit.remove();
         });
     });
 
-    // Delete edit from edits[]             edits.splice(edits.indexOf(editID), 1)  seemed to cause erorrs
+    // Delete edit from edits[]
     for (i in edits) {
         if (edits[i].id == thisEdit.key) {
-            thisEdit.remove();
             edits.splice(i, 1);
             return;
         }
     }
-
 }
 
 //TODO: Child Edits

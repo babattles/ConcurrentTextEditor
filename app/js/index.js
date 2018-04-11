@@ -36,6 +36,7 @@ var fileMode = "live";
 
 // variable to track the current user globally
 var global_user;
+var global_username;
 
 // Authenticate Button is clicked
 var AuthListener = document.getElementById("authBtn");
@@ -223,6 +224,7 @@ firebase.auth().onAuthStateChanged(function(user) {
         // update user settings button with username
         database.ref().child("users").child(user.uid).child("username").once("value").then(function(snapshot) {
             userSettingsBtn.innerHTML = snapshot.val();
+            global_username = snapshot.val();
         });
 
         // hide/show buttons
@@ -395,8 +397,8 @@ firebase.auth().onAuthStateChanged(function(user) {
                         // set the current open file to the new file
                         currentFile = file;
 
-                        // trigger a change to load file's chat messages
-                        loadMessages();
+                        // trigger a change to load file's chat channels and messages
+                        loadChannels();
 
                         // set the editRef
                         editRef = currentFile.child("edits");

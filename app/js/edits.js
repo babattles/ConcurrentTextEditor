@@ -6,6 +6,7 @@ if (f == "index.html") {
 var edits = [];
 
 var glo_e;
+var x_insert = false;
 // Retrieve new edits as they are added to the database (including your own!)
 var getEdits = function () {
 
@@ -15,9 +16,7 @@ var getEdits = function () {
     });
 
     currentFile.child("delta").on("child_changed", function (snapshot) {
-        // console.log(snapshot.ref.parent);
         var parsedContent = snapshot.val();
-        // console.log("parsedContent = " + parsedContent);
         var startIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
         parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
         var endIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
@@ -47,20 +46,24 @@ var getEdits = function () {
     });
 
     editRef.on("child_removed", function (snapshot) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
-        console.log("child removed...");
+        //console.log("child removed...");
         var e = snapshot.val();
-        if (e.type == "insert" && !e.hasBeenAccepted) {
+        if (e.type == "insert" && !e.hasBeenAccepted) { // insert
             global_ignore = true;
             var cursor = editor.getCursorPosition();
             var prefix = editor.session.getValue().slice(0, e.startIndex);
-            var suffix = editor.session.getValue().slice(e.endIndex - 1);
-            // console.log("Prefix = " + prefix);
-            // console.log("Suffix = " + suffix);
+            if (x_insert) {
+                var suffix = editor.session.getValue().slice(e.endIndex);
+                x_insert = false;
+            } else {
+                var suffix = editor.session.getValue().slice(e.endIndex - 1);
+            }
+            //console.log("Prefix = " + prefix);
+            //console.log("Suffix = " + suffix);
             editor.session.setValue(prefix + suffix);
             editor.selection.moveTo(cursor.row, cursor.column);
             global_ignore = false;
         } else if (e.type == "remove" && e.hasBeenAccepted) {
-            // console.log("removing highlight for " + snapshot.key);
             editUnhighlight(snapshot.key);
             global_ignore = true;
             var cursor = editor.getCursorPosition();
@@ -339,7 +342,7 @@ var setEdit = function (startIndex, endIndex, delta) {
                     'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
                 });
 
-                console.log("coalesce removal left");
+                //console.log("coalesce removal left");
                 var cursor = editor.getCursorPosition()
                 global_ignore = true;
                 var prefix = editor.session.getValue().substring(0, startIndex);
@@ -369,7 +372,7 @@ var setEdit = function (startIndex, endIndex, delta) {
                 editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
                 global_ignore = false;
 
-                console.log("edit and both sides");
+                //console.log("edit and both sides");
                 deleteEdit(edits[index]);
                 edits.splice(index, 1);
                 var e = {
@@ -383,7 +386,7 @@ var setEdit = function (startIndex, endIndex, delta) {
                 fixIndices(edits[index], obj.end - obj.start, delta.action);
                 return true;
             } else if (obj.start <= startIndex && obj.end < endIndex && startIndex <= obj.end && delta.action == "remove") { // removed some or all of an edit as well as content on the right side
-                console.log("remove edit and right side");
+                //console.log("remove edit and right side");
 
                 currentFile.child("delta").set({
                     'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
@@ -413,7 +416,7 @@ var setEdit = function (startIndex, endIndex, delta) {
                 postEdit(e);
                 return true;
             } else if (obj.start > startIndex && obj.end >= endIndex && endIndex > obj.start && delta.action == "remove") { // removed some or all of an edit as well as content on the left side
-                console.log("remove edit and left");
+                //console.log("remove edit and left");
 
                 currentFile.child("delta").set({
                     'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
@@ -443,7 +446,7 @@ var setEdit = function (startIndex, endIndex, delta) {
                 postEdit(e);
                 return true;
             } else if (obj.start <= startIndex && endIndex <= obj.end && delta.action == "remove" && obj.type == "insert") { // removed something from within an edit
-                console.log("remove from within");
+                //console.log("remove from within");
 
                 currentFile.child("delta").set({
                     'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
@@ -783,29 +786,24 @@ var deleteEditById = function (editID) {
             var prefix = fileContent.slice(0, index);
             var suffix = fileContent.slice(index + 1);
             if (e.type == 'insert') {
-                suffix = fileContent.slice(e.endIndex);
-                // global_ignore = true;
-                // editor.session.setValue(prefix + suffix);
-                // global_ignore = false;
+                x_insert = true;
+                fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
+                thisEdit.remove();
             } else {
                 //fixIndicesAfterInsertDelete is same thing as this?
                 fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
+                thisEdit.remove();
             }
-            thisEdit.remove();
         });
     });
 
-
-
-    // Delete edit from edits[]             edits.splice(edits.indexOf(editID), 1)  seemed to cause erorrs
+    // Delete edit from edits[]
     for (i in edits) {
         if (edits[i].id == thisEdit.key) {
-            thisEdit.remove();
             edits.splice(i, 1);
             return;
         }
     }
-
 }
 
 //TODO: Child Edits

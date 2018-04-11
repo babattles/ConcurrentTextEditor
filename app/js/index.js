@@ -32,6 +32,8 @@ var editRef = null;
 // state to track if a file is being opened
 var global_ignore = false;
 
+var fileMode = "live";
+
 // variable to track the current user globally
 var global_user;
 var global_username;
@@ -149,6 +151,26 @@ ipcRenderer.on('save-file-as', function(event, arg) {
 // Listen for Close File Menu Select
 ipcRenderer.on('close-file', function(event, arg) {
     closeFile();
+});
+
+// Listen for Close File Menu Select
+ipcRenderer.on('view-live-file', function(event, arg) {
+    fileMode = "live";
+    loadEditsIntoEditor();
+});
+
+// Listen for Close File Menu Select
+ipcRenderer.on('view-base-file', function(event, arg) {
+    fileMode = "base";
+    currentFile.on('value', function (childSnapshot) {
+        var f = childSnapshot.val();
+        var fileContent = f.fileContents;
+        global_ignore = true;
+        var cursor = editor.getCursorPosition();
+        editor.session.setValue(fileContent);
+        editor.selection.moveTo(cursor.row, cursor.column);
+        global_ignore = false;
+    });
 });
 
 // Listen for Increase Font Size Menu Select
@@ -316,6 +338,11 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                 // listener to open this file from database
                 openBtn.addEventListener('click', function() {
+                    if(editor.getReadOnly()){
+                        editor.setReadOnly(false);
+                        // console.log(editor.getReadOnly());
+                    }
+                    editor.setReadOnly(false);
                     if (currentKey != childSnapshot.key) {
                         //Set online status of old file to false
                         if (currentKey != null && currentKey != '') {
@@ -382,6 +409,16 @@ firebase.auth().onAuthStateChanged(function(user) {
                         // enable close menu
                         ipcRenderer.send('enable-close', 'ping');
                     }
+
+                    //Sets file to read only if they don't have edit access
+                    var userPerms = database.ref("files/" + currentKey + "/userList/" + user.uid);
+                    userPerms.on('value', function(data){
+                        if(data.val().readOnly == true) {
+                            editor.setReadOnly(true);
+                            // console.log('test');
+                        }
+                    });
+
                     //Loads the edits for the file
                     loadEdits();
                     let fileEdits = database.ref('files/' + currentKey + '/edits');

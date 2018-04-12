@@ -1,26 +1,38 @@
-var updateFile = function(edit, useSize) {
-    if (edit) {
-        var editor = ace.edit("editor");
-        var currentEdit = edit;
-        if (!justTyped && justTyped !== undefined) {
-            // console.log("ADDED SIZE = " + currentEdit.addedSize);
-            // var cursorPosition = editor.getCursorPosition();
-            var oldContents = editor.getSession().getValue();
-            var newContents;
-            if (useSize) {
-                if (currentEdit.addedSize < 0) {
-                    newContents = oldContents.slice(0, currentEdit.startIndex) + currentEdit.content + oldContents.slice(currentEdit.endIndex - currentEdit.addedSize);
-                } else {
-                    newContents = oldContents.slice(0, currentEdit.startIndex) + currentEdit.content + oldContents.slice(currentEdit.endIndex - currentEdit.addedSize);
-                }
-            } else {
-                alreadyAdded = false;
-                newContents = oldContents.slice(0, currentEdit.startIndex) + currentEdit.content + oldContents.slice(currentEdit.startIndex);
-            }
+var updateEditor = function(startIndex, endIndex, action, editType, editID, lines) {
+    if (fileMode == "live") {
+        console.log("In updateFile");
+        if (editType == "remove") {
+            editUnhighlight(editID);
+        }
+        if (action == "insert") {
             global_ignore = true;
-            editor.getSession().setValue(newContents);
-            // editor.setCursorPosition(cursorPosition.row, cursorPosition.row);
+            var cursor = editor.getCursorPosition();
+            var prefix = editor.session.getValue().slice(0, startIndex);
+            var suffix = editor.session.getValue().slice(endIndex - (endIndex - startIndex));
+            editor.session.setValue(prefix + lines + suffix);
+            editor.selection.moveTo(cursor.row, cursor.column);
             global_ignore = false;
+        } else {
+            if (editType == "insert") {
+                global_ignore = true;
+                var cursor = editor.getCursorPosition();
+                var prefix = editor.session.getValue().slice(0, startIndex);
+                var suffix = editor.session.getValue().slice(endIndex);
+                editor.session.setValue(prefix + suffix);
+                editor.selection.moveTo(cursor.row, cursor.column);
+                global_ignore = false;
+            } else {
+                var cursor = editor.getCursorPosition();
+                global_ignore = true;
+                var prefix = editor.session.getValue().slice(0, startIndex);
+                var suffix = editor.session.getValue().slice(endIndex);
+                editor.session.setValue(prefix + lines + suffix);
+                editor.selection.moveTo(cursor.row, cursor.column);
+                global_ignore = false;
+            }
+        }
+        if (editType == "remove") {
+            editHighlight(editID);
         }
     }
 }

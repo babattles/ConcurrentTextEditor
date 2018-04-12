@@ -9,5 +9,7 @@
   "scripts": {
     "start": "./node_modules/.bin/electron ."
   },
-  "dependencies": {}
+  "dependencies": {
+    "npm": "^5.8.0"
+  }
 }

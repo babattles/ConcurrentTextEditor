@@ -15,9 +15,12 @@
         };
     </script>
     <!-- Bootstrap Components -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
     <!-- Firebase Component -->
     <script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
 
@@ -37,16 +40,19 @@
     </div>
 
     <!-- Share file with other users -->
-
     <!-- List of collaborators -->
     <div id="collab-container">
         <!-- Share file with other users -->
-        <div><button class='share-link' id='shareLinkButton'><img src='./img/share-post-symbol.png' style=" max-width:100%;height:'auto';">&nbsp;Share File With Others</button></div>
+        <div>
+            <button class='share-link' id='shareLinkButton'>
+                <img src='./img/share-post-symbol.png' style=" max-width:100%;height:'auto';">&nbsp;Share File With Others</button>
+        </div>
         <input type='text' placeholder='Username...' class='form-item' id='username'>
         <div id="collabLabel" style="white-space:pre">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Collaborators&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
         <div id="online-users">
-    </div></div>
-    
+        </div>
+    </div>
+
 
     <!-- List of User's Files -->
     <div id="file-container">
@@ -55,15 +61,11 @@
 
     <!-- Chat Box -->
     <div id="chat-container">
-        <div id="chatLabel">Chat</div>
-        <div id="chat">George: Sup guys
-            <br>Arun: Sup
-            <br>Bryan: We should do work
-            <br>Alex: Probably
-            <br>Paramesh: Chatting is fun
-            <br>Guangqi: Yeah
-            <br>
-            <br>
+        <div id="chatLabel">Chat
+        </div>
+        <select id="channel">
+        </select>
+        <div id="chat">
         </div>
         <textarea id="chatInput" rows="1" cols="26"></textarea>
     </div>
@@ -74,6 +76,7 @@
             <div class="rTableRow">
                 <!-- <div id="new-tab" class="rTableCell">+</div> -->
                 <div id="tabs"></div>
+
                 <body onload="addTab('untitled');">
             </div>
         </div>
@@ -95,6 +98,14 @@
         <input type="password" class="form-item" placeholder="Confirm New Password" name="new_password_input2" id="new-password-input2">
         <button id="changePasswordBtn" class="btn form-item ">Change Password</button>
     </div>
+         
+    <div id="Comment" class=". hidden">
+        <span class="form-item form-text">Input Comment:</span>            
+        <span class="form-item form-text" id="comment-span">Comment: </span>
+         <input type="text" class="form-item" placeholder="New Comment:" name="comment_field" id="comment-input">            
+         <button id="changeCommentBtn" class="btn form-item">Accept Comment</button>
+    </div>
+
     <footer id="auth_footer" role="auth_footer">
         <button class='btn btn-success' id='authBtn'>Authenticate</button>
         <button class='btn btn-danger' id='logoutBtn'>Logout</button>
@@ -114,5 +125,6 @@
     <script>
         // Here we can require other files to use in this process
     </script>
-</body>
+    </body>
+
 </html>

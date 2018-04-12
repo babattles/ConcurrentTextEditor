@@ -32,8 +32,11 @@ var editRef = null;
 // state to track if a file is being opened
 var global_ignore = false;
 
+var fileMode = "live";
+
 // variable to track the current user globally
 var global_user;
+var global_username;
 
 // Authenticate Button is clicked
 var AuthListener = document.getElementById("authBtn");
@@ -74,11 +77,11 @@ var ShareListener = document.getElementById("shareLinkButton");
 //accept "enter"
 var newUser = document.getElementById("username");
 newUser.addEventListener("keyup", function(event) {
-    event.preventDefault();
-    if (event.keyCode === 13) {
-        ShareListener.click();
-    }
-});
+        event.preventDefault();
+        if (event.keyCode === 13) {
+            ShareListener.click();
+        }
+    });
 ShareListener.addEventListener('click', function() {
     //get filename
     var file = currentKey;
@@ -87,7 +90,7 @@ ShareListener.addEventListener('click', function() {
     database.ref().child('users')
         .orderByChild('username')
         .equalTo(username)
-        .once('value', function(snapshot) {
+        .once('value', function (snapshot) {
             var exists = (snapshot.val() !== null);
             //console.log(snapshot.val());
             //if user does not already exist, prompt username
@@ -104,27 +107,28 @@ ShareListener.addEventListener('click', function() {
                 //console.log(childData);
 
                 database.ref().child('files').child(file).child('fileName')
-                    .once('value', function(snapshot) {
+                    .once('value', function (snapshot) {
                         var filename = snapshot.val();
 
                         //add file to users filelist
                         //console.log(filename);
                         firebase.database().ref().child("users")
-                            .child(childKey).child("fileList").child(file).set({ 'fileName': filename });
+                            .child(childKey).child("fileList").child(file).set({ 'fileName': filename});
                     });
-
+                
 
                 //add user to files userlist
                 firebase.database().ref().child("files")
-                    .child(file).child("userList").child(childKey).set({ 'username': username });
+                    .child(file).child("userList").child(childKey).set({'username': username });
                 alert("User added");
-            }
+            }          
         }).catch(function(error) {
             if (error != null) {
                 console.log(error.message);
                 return;
             }
         });
+        newUser.value = '';
 });
 /**
  * Menu Item Listeners
@@ -147,6 +151,26 @@ ipcRenderer.on('save-file-as', function(event, arg) {
 // Listen for Close File Menu Select
 ipcRenderer.on('close-file', function(event, arg) {
     closeFile();
+});
+
+// Listen for Close File Menu Select
+ipcRenderer.on('view-live-file', function(event, arg) {
+    fileMode = "live";
+    loadEditsIntoEditor();
+});
+
+// Listen for Close File Menu Select
+ipcRenderer.on('view-base-file', function(event, arg) {
+    fileMode = "base";
+    currentFile.on('value', function (childSnapshot) {
+        var f = childSnapshot.val();
+        var fileContent = f.fileContents;
+        global_ignore = true;
+        var cursor = editor.getCursorPosition();
+        editor.session.setValue(fileContent);
+        editor.selection.moveTo(cursor.row, cursor.column);
+        global_ignore = false;
+    });
 });
 
 // Listen for Increase Font Size Menu Select
@@ -200,6 +224,7 @@ firebase.auth().onAuthStateChanged(function(user) {
         // update user settings button with username
         database.ref().child("users").child(user.uid).child("username").once("value").then(function(snapshot) {
             userSettingsBtn.innerHTML = snapshot.val();
+            global_username = snapshot.val();
         });
 
         // hide/show buttons
@@ -246,13 +271,13 @@ firebase.auth().onAuthStateChanged(function(user) {
                     database.ref("files").child(childSnapshot.key).remove();
                     // disable close menu option
 
-                    global_ignore = false;
+                    global_ignore = false;                    
                     //Updates the edits for the file
                     loadEdits();
                 });
 
                 //Allows you to get the link for a file
-                label.addEventListener('click', function() {
+                label.addEventListener('click', function(){
                     copyLink();
 
                 });
@@ -313,6 +338,11 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                 // listener to open this file from database
                 openBtn.addEventListener('click', function() {
+                    if(editor.getReadOnly()){
+                        editor.setReadOnly(false);
+                        // console.log(editor.getReadOnly());
+                    }
+                    editor.setReadOnly(false);
                     if (currentKey != childSnapshot.key) {
                         //Set online status of old file to false
                         if (currentKey != null && currentKey != '') {
@@ -367,6 +397,9 @@ firebase.auth().onAuthStateChanged(function(user) {
                         // set the current open file to the new file
                         currentFile = file;
 
+                        // trigger a change to load file's chat channels and messages
+                        loadChannels();
+
                         // set the editRef
                         editRef = currentFile.child("edits");
                         fileKey.push(currentKey);
@@ -376,9 +409,37 @@ firebase.auth().onAuthStateChanged(function(user) {
                         // enable close menu
                         ipcRenderer.send('enable-close', 'ping');
                     }
+
+                    //Sets file to read only if they don't have edit access
+                    var userPerms = database.ref("files/" + currentKey + "/userList/" + user.uid);
+                    userPerms.on('value', function(data){
+                        if(data.val().readOnly == true) {
+                            editor.setReadOnly(true);
+                            // console.log('test');
+                        }
+                    });
+
                     //Loads the edits for the file
                     loadEdits();
-                });
+                    let fileEdits = database.ref('files/' + currentKey + '/edits');
+                    // fileEdits.on('value', function (data) {
+                    fileEdits.once('value', function (data) {
+                        for (i in data.val()) {
+                            // Load contents of edit into editor
+                            if (data.val()[i].type == "insert") {
+                                global_ignore = true;
+                                var cursor = editor.getCursorPosition();
+                                var prefix = editor.session.getValue().slice(0, data.val()[i].startIndex);
+                                var suffix = editor.session.getValue().slice(data.val()[i].startIndex);
+                                editor.session.setValue(prefix + data.val()[i].content + suffix);
+                                editor.selection.moveTo(cursor.row, cursor.column);
+                                global_ignore = false;
+                            } else {
+                                editHighlight(i);
+                            }
+                        }
+                    });
+                }); 
 
                 // add new entry to list of files
                 div.appendChild(label);

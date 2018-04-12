@@ -122,7 +122,6 @@ body {
 #edit-remove-child:hover{
     background-color: #C64F64;
 }
-
 /*Collaborator List*/
 #collab-container {
     position: absolute;
@@ -233,6 +232,133 @@ body {
     right: 210px;
     bottom: 0;
     left: 200px;
+}
+
+/*Begion of dropdown manu (syntax)*/
+
+.dropbtn {
+    background-color: #3498DB;
+    color: white;
+    padding: 10px;
+    font-size: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+.dropbtn:hover,
+.dropbtn:focus {
+    background-color: #2980B9;
+}
+
+.dropdown {
+    float: right;
+    position: absolute;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: relative;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 10px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown a:hover {
+    background-color: #ddd
+}
+
+.show {
+    display: block;
+}
+/*End of dropdown manu (syntax)*/
+
+.delete{
+    max-width:10%; 
+    height: auto; 
+    position: absolute; 
+    right: 35px;
+}
+
+/*check toggle accept boxes*/
+.switch {
+  position: relative;
+  display: inline-block;
+  float: right;
+  width: 30px;
+  height: 15px;
+  top: 5px;
+  right: 2px;
+}
+
+.switch input {display:none;}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 15px;
+  width: 15px;
+  left: 0px;
+  bottom: 0px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(15px);
+  -ms-transform: translateX(15px);
+  transform: translateX(15px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 15px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/*Comment*/
+#Comment {
+    z-index: 9999;
+    position: absolute;
+    top: 0;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    padding-top: 150px;
+    background-color: #424242;
+    text-align: center;
 }
 
 

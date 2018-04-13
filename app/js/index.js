@@ -219,6 +219,10 @@ firebase.auth().onAuthStateChanged(function(user) {
     global_user = user;
     var authBtn = document.getElementById("authBtn");
     var logoutBtn = document.getElementById("logoutBtn");
+
+    // Set editor to use LF line endings
+    editor.session.setNewLineMode("unix");
+    
     if (user) {
         // User is signed in.
         // update user settings button with username

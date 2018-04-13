@@ -31,7 +31,7 @@ var openFile = function() {
             // set the state (so opening a file doesn't stage an edit)
             global_ignore = true;
 
-            fileContents = data;
+            fileContents = data.replace(/\r\n/g, '\n');
             // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
             editor.setValue(data, -1);
 
@@ -99,6 +99,7 @@ var openFile = function() {
 
 //open a file when dragged into ace
 var openFileDrag = function (pathDrag) {
+    editor.setReadOnly(false);
     path = pathDrag;
     currentFileName = path.substring(path.lastIndexOf(pathSeperator) + 1, path.length);;
 

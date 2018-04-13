@@ -26,6 +26,7 @@
 
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/edits.css">
+    <link rel="stylesheet" href="css/chatbox.css">
 
     <!-- ACE Component -->
     <script src="../ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
@@ -64,8 +65,11 @@
         <div id="chatLabel">Chat
         </div>
         <select id="channel">
+            <option value=""></option>
         </select>
-        <div id="chat">
+        <button id="seeMore" class="btn-success more">Load more...</button>
+        <button id="addChannel" class="btn-danger addChannel">+</button>
+        <div id="chat" class="chat">
         </div>
         <textarea id="chatInput" rows="1" cols="26"></textarea>
     </div>
@@ -122,9 +126,6 @@
     <script src="js/link.js"></script>
     <script src="js/aceStart.js"></script>
     <script src="../ace-builds/src-noconflict/ext-modelist.js"></script>
-    <script>
-        // Here we can require other files to use in this process
-    </script>
     </body>
 
 </html>

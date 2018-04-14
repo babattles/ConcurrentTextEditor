@@ -77,11 +77,11 @@ var ShareListener = document.getElementById("shareLinkButton");
 //accept "enter"
 var newUser = document.getElementById("username");
 newUser.addEventListener("keyup", function(event) {
-        event.preventDefault();
-        if (event.keyCode === 13) {
-            ShareListener.click();
-        }
-    });
+    event.preventDefault();
+    if (event.keyCode === 13) {
+        ShareListener.click();
+    }
+});
 ShareListener.addEventListener('click', function() {
     //get filename
     var file = currentKey;
@@ -90,7 +90,7 @@ ShareListener.addEventListener('click', function() {
     database.ref().child('users')
         .orderByChild('username')
         .equalTo(username)
-        .once('value', function (snapshot) {
+        .once('value', function(snapshot) {
             var exists = (snapshot.val() !== null);
             //console.log(snapshot.val());
             //if user does not already exist, prompt username
@@ -107,28 +107,28 @@ ShareListener.addEventListener('click', function() {
                 //console.log(childData);
 
                 database.ref().child('files').child(file).child('fileName')
-                    .once('value', function (snapshot) {
+                    .once('value', function(snapshot) {
                         var filename = snapshot.val();
 
                         //add file to users filelist
                         //console.log(filename);
                         firebase.database().ref().child("users")
-                            .child(childKey).child("fileList").child(file).set({ 'fileName': filename});
+                            .child(childKey).child("fileList").child(file).set({ 'fileName': filename });
                     });
-                
+
 
                 //add user to files userlist
                 firebase.database().ref().child("files")
-                    .child(file).child("userList").child(childKey).set({'username': username });
+                    .child(file).child("userList").child(childKey).set({ 'username': username });
                 alert("User added");
-            }          
+            }
         }).catch(function(error) {
             if (error != null) {
                 console.log(error.message);
                 return;
             }
         });
-        newUser.value = '';
+    newUser.value = '';
 });
 /**
  * Menu Item Listeners
@@ -156,6 +156,7 @@ ipcRenderer.on('close-file', function(event, arg) {
 // Listen for Close File Menu Select
 ipcRenderer.on('view-live-file', function(event, arg) {
     fileMode = "live";
+    console.log("back to live");
     loadEditsIntoEditor();
     unhighlightAllRemovals();
     highlightAllRemovals();
@@ -164,7 +165,7 @@ ipcRenderer.on('view-live-file', function(event, arg) {
 // Listen for Close File Menu Select
 ipcRenderer.on('view-base-file', function(event, arg) {
     fileMode = "base";
-    currentFile.on('value', function (childSnapshot) {
+    currentFile.on('value', function(childSnapshot) {
         var f = childSnapshot.val();
         var fileContent = f.fileContents;
         global_ignore = true;
@@ -225,7 +226,7 @@ firebase.auth().onAuthStateChanged(function(user) {
 
     // Set editor to use LF line endings
     editor.session.setNewLineMode("unix");
-    
+
     if (user) {
         // User is signed in.
         // update user settings button with username
@@ -278,13 +279,13 @@ firebase.auth().onAuthStateChanged(function(user) {
                     database.ref("files").child(childSnapshot.key).remove();
                     // disable close menu option
 
-                    global_ignore = false;                    
+                    global_ignore = false;
                     //Updates the edits for the file
                     loadEdits();
                 });
 
                 //Allows you to get the link for a file
-                label.addEventListener('click', function(){
+                label.addEventListener('click', function() {
                     copyLink();
 
                 });
@@ -345,7 +346,7 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                 // listener to open this file from database
                 openBtn.addEventListener('click', function() {
-                    if(editor.getReadOnly()){
+                    if (editor.getReadOnly()) {
                         editor.setReadOnly(false);
                         // console.log(editor.getReadOnly());
                     }
@@ -370,6 +371,14 @@ firebase.auth().onAuthStateChanged(function(user) {
                                     element.classList.add("collabInactive");
                                 }
                                 element.appendChild(document.createTextNode(childSnapshot.val().username));
+                                element.addEventListener("mouseover", function(event) {
+                                    unhighlightAllRemovals();
+                                    highlightEditsByUser(childSnapshot.key);
+                                });
+                                element.addEventListener("mouseout", function(event) {
+                                    unhighlightEditsByUser(childSnapshot.key);
+                                    highlightAllRemovals();
+                                });
                                 onlineUsersContainer.appendChild(element);
                             });
                         });
@@ -419,10 +428,10 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                     //Sets file to read only if they don't have edit access
                     var userPerms = database.ref("files/" + currentKey + "/userList/" + user.uid);
-                    userPerms.on('value', function(data){
-                        if(data.val().readOnly == true) {
+                    userPerms.on('value', function(data) {
+                        if (data.val().readOnly == true) {
                             editor.setReadOnly(true);
-                            // console.log('test');
+                            console.log('setting read only to true');
                         }
                     });
 
@@ -430,7 +439,7 @@ firebase.auth().onAuthStateChanged(function(user) {
                     loadEdits();
                     let fileEdits = database.ref('files/' + currentKey + '/edits');
                     // fileEdits.on('value', function (data) {
-                    fileEdits.once('value', function (data) {
+                    fileEdits.once('value', function(data) {
                         for (i in data.val()) {
                             // Load contents of edit into editor
                             if (data.val()[i].type == "insert") {
@@ -446,7 +455,7 @@ firebase.auth().onAuthStateChanged(function(user) {
                             }
                         }
                     });
-                }); 
+                });
 
                 // add new entry to list of files
                 div.appendChild(label);

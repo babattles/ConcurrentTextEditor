@@ -16,6 +16,7 @@ var getEdits = function () {
     });
 
     currentFile.child("delta").on("child_changed", function (snapshot) {
+        console.log("delta changed");
         if (fileMode == "live") {
             // console.log(snapshot.ref.parent);
             var parsedContent = snapshot.val();
@@ -31,6 +32,8 @@ var getEdits = function () {
             var editID = parsedContent.slice(0, parsedContent.indexOf(";"));
             parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
             updateEditor(startIndex, endIndex, type, editType, editID, parsedContent);
+        } else {
+            console.log("filemode not live (delta on changed)");
         }
     });
 
@@ -497,6 +500,7 @@ var setEdit = function(startIndex, endIndex, delta) {
                     comment: "",
                     addedSize: endIndex - startIndex,
                 }
+                edits.push(e);
                 postEdit(e);
                 currentFile.child("delta").set({
                     'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + delta.action + ";" + e.id + ";" + stringify(delta.lines)
@@ -506,6 +510,8 @@ var setEdit = function(startIndex, endIndex, delta) {
                 }
             }
         }
+    } else {
+        console.log("fileMode is not live");
     }
 }
 
@@ -904,7 +910,6 @@ function loadEditsIntoEditor() {
 function unhighlightAllRemovals() {
     for (i in edits) {
         if (edits[i].type == "remove") {
-            console.log("going to un");
             unhighlight(edits[i]);
         }
     }
@@ -915,6 +920,24 @@ function highlightAllRemovals() {
         if (edits[i].type == "remove") {
             unhighlight(edits[i]);
             highlight(edits[i]);
+        }
+    }
+}
+
+highlightEditsByUser = function(userId) {
+    for (i in edits) {
+        console.log(edits[i].user);
+        console.log(userId);
+        if (edits[i].user == userId) {
+            highlight(edits[i]);
+        }
+    }
+}
+
+unhighlightEditsByUser = function(userId) {
+    for (i in edits) {
+        if (edits[i].user == userId) {
+            unhighlight(edits[i]);
         }
     }
 }

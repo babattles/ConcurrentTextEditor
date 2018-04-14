@@ -1,20 +1,24 @@
 var admin = function(id) {
-    console.log("ID " + id + " has been right-clicked on...");
-    $.contextMenu({
-        selector: '*',
-        items: {
-            "item_one": { name: "Item_one", icon: "./path1" },
-            "item_two": { name: "item_two", icon: "./path2" }
+    const remote = require('electron').remote;
+    const Menu = remote.Menu;
+    const MenuItem = remote.MenuItem;
+    var menu = new Menu();
+    menu.append(new MenuItem({
+        label: 'Force accept edit',
+        click: function() {
+            console.log('accepting edit: ' + id);
+            acceptEdit(id);
         }
-    });
-    let items = [
-        { title: 'Add Sites' },
-        { title: 'Reset Login' },
-        { title: 'Help' },
-        { title: 'Disabled' },
-        { title: 'Invisible' },
-        {},
-        { title: 'Logout' }
-    ];
-    console.log(items);
+    }));
+    menu.append(new MenuItem({
+        type: 'separator'
+    }));
+    menu.append(new MenuItem({
+        label: 'Veto edit',
+        click: function() {
+            console.log('deleting edit: ' + id);
+            deleteEditById(id);
+        }
+    }));
+    menu.popup(remote.getCurrentWindow());
 };

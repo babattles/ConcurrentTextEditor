@@ -222,7 +222,7 @@ firebase.auth().onAuthStateChanged(function(user) {
 
     // Set editor to use LF line endings
     editor.session.setNewLineMode("unix");
-    
+
     if (user) {
         // User is signed in.
         // update user settings button with username
@@ -310,6 +310,12 @@ firebase.auth().onAuthStateChanged(function(user) {
                                 element.classList.add("collabInactive");
                             }
                             element.appendChild(document.createTextNode(snapshot.val().username));
+
+                            //event listener for right click on collaborators(make users admins)
+                            element.addEventListener("oncontextmenu", function() {
+                                console.log("context menu clicked");
+                            });
+
                             onlineUsersContainer.appendChild(element);
                         } else {
                             if (snapshot.val().online === 'true') {

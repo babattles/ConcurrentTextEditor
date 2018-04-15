@@ -64,7 +64,7 @@ var switchTab = function(args) {
     //Store the content of current editor to previous tab before switching
     for (i in tabs) {
     	if(tabs[i] == lastTab) {
-    		//var buff = editor.getValue();
+    		var buff = editor.getValue();
             //console.log(fileKey[i]);
             //console.log(buff);
             firebase.database().ref().child("users")

@@ -12,7 +12,7 @@ var admin = function(id) {
                     console.log('accepting edit: ' + id);
                     acceptEdit(id);
                 } else {
-                    console.log("You are not an admin...\n");
+                    alert("You are not an admin...");
                 }
             });
         }
@@ -29,7 +29,7 @@ var admin = function(id) {
                     console.log('deleting edit: ' + id);
                     deleteEditById(id);
                 } else {
-                    console.log("You are not an admin...\n");
+                    alert("You are not an admin...");
                 }
             });
         }
@@ -53,7 +53,7 @@ var makeAdmin = function(userid) {
                         console.log(userData.val().username + " has been made admin ");
                     });
                 } else {
-                    console.log("You are not an admin...\n");
+                    alert("You are not an admin...");
                 }
             });
         }

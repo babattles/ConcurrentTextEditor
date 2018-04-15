@@ -117,7 +117,8 @@ var getEdits = function() {
         if (changedEdit.type == "remove") {
             editHighlight(snapshot.key);
         }
-    });
+    });   
+
 }
 
 /* helper function */
@@ -197,6 +198,8 @@ var deleteEdit = function(edit, size, type) {
 // edit is the updated/new edit
 // size is the amount to increase all other edits by
 var fixIndices = function(edit, size, type) {
+	//reset accepted count on edit on change
+	editRef.child(edit.id).child('accepted').remove();
     if (type == "insert") {
         editRef.once('value', function(snapshot) {
             justTyped = true;
@@ -289,6 +292,8 @@ var removeTypedText = function(startIndex, endIndex, delta) {
 }
 
 var updateRemoval = function(edit, size) {
+	//reset accepted count on edit on change
+	editRef.child(edit.id).child('accepted').remove();
     childRef = editRef.child(edit.id);
     childRef.update({
         content: edit.content,
@@ -825,8 +830,6 @@ var deleteEditById = function(editID) {
         });
     });
 }
-
-//TODO: Child Edits
 
 //add or remove user from accepted list in edit if toggle is clicked
 function acceptTracker(edit, numUsers) {

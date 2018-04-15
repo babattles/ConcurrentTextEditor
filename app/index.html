@@ -41,6 +41,7 @@
     <!-- List of collaborators -->
     <div id="collab-container">
         <!-- Share file with other users -->
+        <button class="btn-success" id="searchBtn">Search</button>
         <div>
             <button class='share-link' id='shareLinkButton'>
                 <img src='./img/share-post-symbol.png' style=" max-width:100%;height:'auto';">&nbsp;Share File With Others</button>
@@ -100,6 +101,15 @@
         <button id="changePasswordBtn" class="btn form-item ">Change Password</button>
     </div>
 
+    <div id="searchWindow" class=". hidden">
+        <span class="form-item form-text">Search by: </span>
+        <input id="radioEmail" type="radio" name="type" value="email"> Email<br>
+        <input id="radioUsername" type="radio" name="type" value="username"> Username<br>
+        <input type="text" class="form-item" placeholder="Email or Username to search" name="searchInput" id="searchInput">
+        <button id="submitSearchBtn" class="btn-success">Search</button>
+        <button id="searchCloseBtn" class="btn-danger">Close</button>
+    </div>
+
     <div id="Comment" class=". hidden">
         <span class="form-item form-text">Input Comment:</span>
         <span class="form-item form-text" id="comment-span">Comment: </span>
@@ -123,6 +133,7 @@
     <script src="js/comment.js"></script>
     <script src="js/link.js"></script>
     <script src="js/aceStart.js"></script>
+    <script src="js/search.js"></script>
     <script src="../ace-builds/src-noconflict/ext-modelist.js"></script>
     </body>
 

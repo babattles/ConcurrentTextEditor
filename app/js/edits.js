@@ -6,32 +6,36 @@ if (f == "index.html") {
 var edits = [];
 
 var glo_e;
+var x_insert = false;
 // Retrieve new edits as they are added to the database (including your own!)
-var getEdits = function () {
+var getEdits = function() {
 
-    currentFile.child("delta").on("child_added", function () {
-        console.log("delta added");
-        //apply most recent delta
+    currentFile.child("delta").on("child_added", function() {
+        //For the current implementation, this not needed, but I'm going to leave the function just in case it's needed later.
     });
 
-    currentFile.child("delta").on("child_changed", function (snapshot) {
-        // console.log(snapshot.ref.parent);
-        var parsedContent = snapshot.val();
-        // console.log("parsedContent = " + parsedContent);
-        var startIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
-        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-        var endIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
-        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-        var type = parsedContent.slice(0, parsedContent.indexOf(";"));
-        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-        var editType = parsedContent.slice(0, parsedContent.indexOf(";"));
-        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-        var editID = parsedContent.slice(0, parsedContent.indexOf(";"));
-        parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-        updateEditor(startIndex, endIndex, type, editType, editID, parsedContent);
+    currentFile.child("delta").on("child_changed", function(snapshot) {
+        if (fileMode == "live") {
+            // console.log(snapshot.ref.parent);
+            var parsedContent = snapshot.val();
+            // console.log("parsedContent = " + parsedContent);
+            var startIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
+            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+            var endIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
+            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+            var type = parsedContent.slice(0, parsedContent.indexOf(";"));
+            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+            var editType = parsedContent.slice(0, parsedContent.indexOf(";"));
+            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+            var editID = parsedContent.slice(0, parsedContent.indexOf(";"));
+            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+            updateEditor(startIndex, endIndex, type, editType, editID, parsedContent);
+        } else {
+            console.log("filemode not live (delta on changed)");
+        }
     });
 
-    editRef.on("child_added", function (snapshot, prevChildKey) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
+    editRef.on("child_added", function(snapshot, prevChildKey) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
         // console.log("child added...");
         var e = snapshot.val();
         edits.push({
@@ -46,21 +50,32 @@ var getEdits = function () {
         });
     });
 
-    editRef.on("child_removed", function (snapshot) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
-        console.log("child removed...");
+    editRef.on("child_removed", function(snapshot) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
+        //console.log("child removed...");
         var e = snapshot.val();
-        if (e.type == "insert" && !e.hasBeenAccepted) {
+        // Delete edit from edits[]
+        for (i in edits) {
+            if (edits[i].id == snapshot.key) {
+                console.log("Deleted from local edits array");
+                edits.splice(i, 1);
+            }
+        }
+        if (e.type == "insert" && !e.hasBeenAccepted) { // insert
             global_ignore = true;
             var cursor = editor.getCursorPosition();
             var prefix = editor.session.getValue().slice(0, e.startIndex);
-            var suffix = editor.session.getValue().slice(e.endIndex - 1);
-            // console.log("Prefix = " + prefix);
-            // console.log("Suffix = " + suffix);
+            if (x_insert) {
+                var suffix = editor.session.getValue().slice(e.endIndex);
+                x_insert = false;
+            } else {
+                var suffix = editor.session.getValue().slice(e.endIndex);
+            }
+            //console.log("Prefix = " + prefix);
+            //console.log("Suffix = " + suffix);
             editor.session.setValue(prefix + suffix);
             editor.selection.moveTo(cursor.row, cursor.column);
             global_ignore = false;
         } else if (e.type == "remove" && e.hasBeenAccepted) {
-            // console.log("removing highlight for " + snapshot.key);
             editUnhighlight(snapshot.key);
             global_ignore = true;
             var cursor = editor.getCursorPosition();
@@ -77,7 +92,7 @@ var getEdits = function () {
     });
 
     // update local edit array when edits are changed on the database
-    editRef.on("child_changed", function (snapshot) {
+    editRef.on("child_changed", function(snapshot) {
         // console.log("CHILD CHANGED!");
         var changedEdit = snapshot.val();
         if (changedEdit.type == "remove") {
@@ -102,12 +117,13 @@ var getEdits = function () {
         if (changedEdit.type == "remove") {
             editHighlight(snapshot.key);
         }
-    });
+    });   
+
 }
 
 /* helper function */
 // Returns an array of strings as a single multi-line string
-var stringify = function (lines) {
+var stringify = function(lines) {
     var result = "";
     var x = 1;
     for (var x = 0; x < lines.length; x++) {
@@ -121,12 +137,12 @@ var stringify = function (lines) {
 }
 
 /* Helper - Clear all edits */
-var clearEdits = function () {
+var clearEdits = function() {
     edits.splice(0, edits.length);
 }
 
 /* Helper - Get the database reference for an edit */
-var getEditRef = function (edit) {
+var getEditRef = function(edit) {
     if (editRef == null) return null;
     return editRef.child("" + edit.id);
 }
@@ -138,7 +154,7 @@ var getEditRefWithId = function (editID) {
 }
 
 /* Post a new edit to the database */
-var postEdit = function (edit) {
+var postEdit = function(edit) {
     var newEdit = editRef.push(); // generate a new edit
     newEdit.set({
         'startIndex': edit.start,
@@ -153,7 +169,7 @@ var postEdit = function (edit) {
 }
 
 /* Update your existing edit in the database */
-var updateEdit = function (edit, size) {
+var updateEdit = function(edit, size) {
     var ref = getEditRef(edit);
     glo_e = ref;
     return ref.update({
@@ -166,11 +182,11 @@ var updateEdit = function (edit, size) {
 
 
 /* Delete an edit from the database */
-var deleteEdit = function (edit, size, type) {
+var deleteEdit = function(edit, size, type) {
     var ref = getEditRef(edit);
-    editRef.once('value', function (snapshot) {
+    editRef.once('value', function(snapshot) {
         justTyped = true;
-        snapshot.forEach(function (child) {
+        snapshot.forEach(function(child) {
             var e = child.val();
             if (e.startIndex > edit.end - size) {
                 child.ref.update({
@@ -187,11 +203,13 @@ var deleteEdit = function (edit, size, type) {
 /* Fixes indecies for all edits after current edit */
 // edit is the updated/new edit
 // size is the amount to increase all other edits by
-var fixIndices = function (edit, size, type) {
+var fixIndices = function(edit, size, type) {
+	//reset accepted count on edit on change
+	editRef.child(edit.id).child('accepted').remove();
     if (type == "insert") {
-        editRef.once('value', function (snapshot) {
+        editRef.once('value', function(snapshot) {
             justTyped = true;
-            snapshot.forEach(function (child) {
+            snapshot.forEach(function(child) {
                 var e = child.val();
                 if (e.startIndex > edit.end - size) {
                     if (type == "insert") {
@@ -233,9 +251,9 @@ var fixIndices = function (edit, size, type) {
             });
         });
     } else if (type == "remove") {
-        editRef.once('value', function (snapshot) {
+        editRef.once('value', function(snapshot) {
             justTyped = true;
-            snapshot.forEach(function (child) {
+            snapshot.forEach(function(child) {
                 var e = child.val();
                 if (e.startIndex > edit.end - size) {
                     child.ref.update({
@@ -257,7 +275,7 @@ var fixIndices = function (edit, size, type) {
     }
 }
 
-var removeTypedText = function (startIndex, endIndex, delta) {
+var removeTypedText = function(startIndex, endIndex, delta) {
     if (delta.action == "insert") {
         global_ignore = true;
         var cursor = editor.getCursorPosition();
@@ -280,6 +298,8 @@ var removeTypedText = function (startIndex, endIndex, delta) {
 }
 
 var updateRemoval = function(edit, size) {
+	//reset accepted count on edit on change
+	editRef.child(edit.id).child('accepted').remove();
     childRef = editRef.child(edit.id);
     childRef.update({
         content: edit.content,
@@ -291,227 +311,231 @@ var updateRemoval = function(edit, size) {
 }
 
 /* Take a startIndex, endIndex, and the change, and make an edit */
-var setEdit = function (startIndex, endIndex, delta) {
+var setEdit = function(startIndex, endIndex, delta) {
     removeTypedText(startIndex, endIndex, delta);
+    if (fileMode == "live") {
+        // get the current user
+        var user = firebase.auth().currentUser;
+        if (user) {
+            var bool = 0;
+            bool = edits.find((obj, index) => {
+                if (obj.start < startIndex && startIndex < obj.end && delta.action == "insert" && obj.type == "insert") { // new addition was within an existing edit
 
-    // get the current user
-    var user = firebase.auth().currentUser;
-    if (user) {
-        var bool = 0;
-        bool = edits.find((obj, index) => {
-            if (obj.start < startIndex && startIndex < obj.end && delta.action == "insert" && obj.type == "insert") { // new addition was within an existing edit
+                    currentFile.child("delta").set({
+                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    });
 
-                currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
-                });
-
-                //console.log("added within");
-                edits[index].content = obj.content.substring(0, startIndex - obj.start) + stringify(delta.lines) + obj.content.substring(startIndex - obj.start, obj.content.length);
-                edits[index].start = obj.start;
-                edits[index].end = obj.end + (endIndex - startIndex);
-                edits[index].type = delta.action;
-                edits[index].user = user.uid;
-                fixIndices(edits[index], endIndex - startIndex, delta.action);
-                return true; // stop searching
-            } else if (obj.start == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the beginning of an existing edit
-
-                currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
-                });
-
-                //console.log("added to beginning");
-                edits[index].start = startIndex;
-                edits[index].end = obj.end + (endIndex - startIndex);
-                edits[index].content = stringify(delta.lines) + obj.content;
-                edits[index].type = delta.action;
-                edits[index].user = user.uid;
-                fixIndices(edits[index], endIndex - startIndex, delta.action);
-                return true;
-            } else if (obj.end == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the end of an existing edit
-
-                currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
-                });
-
-                //console.log("added to end");
-                edits[index].start = obj.start;
-                edits[index].end = endIndex;
-                edits[index].content = obj.content + stringify(delta.lines);
-                edits[index].type = delta.action;
-                edits[index].user = user.uid;
-                fixIndices(edits[index], endIndex - startIndex, delta.action);
-                return true;
-            } else if (obj.start == endIndex && obj.type == "remove" && delta.action == "remove") { // coalesce removal right
-                //console.log("coalesce removal right");
-                edits[index].start = startIndex;
-                edits[index].end = obj.end;
-                edits[index].content = stringify(delta.lines) + obj.content;
-                edits[index].type = delta.action;
-                edits[index].user = user.uid;
-                updateRemoval(edits[index], endIndex - startIndex);
-                //fixIndices(edits[index], endIndex - startIndex, "remove");
-                return true;
-            } else if (obj.end == startIndex && obj.type == "remove" && delta.action == "remove") { // coalesce removal left
-
-                currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
-                });
-
-                console.log("coalesce removal left");
-                var cursor = editor.getCursorPosition()
-                global_ignore = true;
-                var prefix = editor.session.getValue().substring(0, startIndex);
-                var suffix = editor.session.getValue().substring(endIndex);
-                editor.session.setValue(prefix + stringify(delta.lines) + suffix);
-                editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
-                global_ignore = false;
-
-                edits[index].start = obj.start;
-                edits[index].end = endIndex;
-                edits[index].content = obj.content + stringify(delta.lines);
-                edits[index].type = delta.action;
-                edits[index].user = user.uid;
-                updateRemoval(edits[index], endIndex - startIndex);
-                //fixIndices(edits[index], endIndex - startIndex, "remove");
-                return true;
-            } else if (obj.start > startIndex && obj.end < endIndex && delta.action == "remove") { // removed an edit as well as content on both sides
-
-                currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
-                });
-
-                var cursor = editor.getCursorPosition()
-                global_ignore = true;
-                var prefix = editor.session.getValue().substring(0, startIndex);
-                var suffix = editor.session.getValue().substring(endIndex - 1);
-                editor.session.setValue(prefix + stringify(delta.lines) + suffix);
-                editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
-                global_ignore = false;
-
-                console.log("edit and both sides");
-                deleteEdit(edits[index]);
-                edits.splice(index, 1);
-                var e = {
-                    start: startIndex,
-                    end: endIndex - (obj.end - obj.start),
-                    content: stringify(delta.lines).substring(0, obj.start - startIndex) + stringify(delta.lines).substring(obj.end - startIndex, stringify(delta.lines).length),
-                    type: delta.action,
-                    user: user.uid,
-                };
-                postEdit(e);
-                fixIndices(edits[index], obj.end - obj.start, delta.action);
-                return true;
-            } else if (obj.start <= startIndex && obj.end < endIndex && startIndex <= obj.end && delta.action == "remove") { // removed some or all of an edit as well as content on the right side
-                console.log("remove edit and right side");
-
-                currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
-                });
-
-                var e = {
-                    start: obj.end,
-                    end: endIndex,
-                    content: stringify(delta.lines).substring(obj.end - obj.start, endIndex - startIndex),
-                    type: delta.action,
-                    user: user.uid,
-                };
-                if (obj.start == startIndex) {
-                    //console.log("removing whole edit");
-                    fixIndices(edits[index], edits[index].end - edits[index].start, delta.action);
-                    deleteEdit(edits[index]);
-                    edits.splice(index, 1);
-                } else {
-                    //console.log("edit to the right ->");
+                    //console.log("added within");
+                    edits[index].content = obj.content.substring(0, startIndex - obj.start) + stringify(delta.lines) + obj.content.substring(startIndex - obj.start, obj.content.length);
                     edits[index].start = obj.start;
-                    edits[index].end = startIndex;
-                    edits[index].content = obj.content.substring(0, startIndex - obj.start);
-                    edits[index].type = "insert";
+                    edits[index].end = obj.end + (endIndex - startIndex);
+                    edits[index].type = delta.action;
                     edits[index].user = user.uid;
-                    fixIndices(edits[index], obj.end - startIndex, delta.action);
-                }
-                postEdit(e);
-                return true;
-            } else if (obj.start > startIndex && obj.end >= endIndex && endIndex > obj.start && delta.action == "remove") { // removed some or all of an edit as well as content on the left side
-                console.log("remove edit and left");
+                    fixIndices(edits[index], endIndex - startIndex, delta.action);
+                    return true; // stop searching
+                } else if (obj.start == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the beginning of an existing edit
 
-                currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
-                });
+                    currentFile.child("delta").set({
+                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    });
 
-                var e = {
-                    start: startIndex,
-                    end: obj.start,
-                    content: stringify(delta.lines).substring(0, obj.start - startIndex),
-                    type: delta.action,
-                    user: user.uid,
-                };
-                if (obj.end == endIndex) {
-                    //console.log("removing whole edit");
-                    fixIndices(edits[index], edits[index].end - edits[index].start, delta.action);
-                    deleteEdit(edits[index]);
-                    edits.splice(index, 1);
-                } else {
-                    //console.log("edit to the left <-");
-                    edits[index].content = obj.content.substring(endIndex - obj.start, obj.content.length);
-                    edits[index].start = endIndex;
+                    //console.log("added to beginning");
+                    edits[index].start = startIndex;
+                    edits[index].end = obj.end + (endIndex - startIndex);
+                    edits[index].content = stringify(delta.lines) + obj.content;
+                    edits[index].type = delta.action;
+                    edits[index].user = user.uid;
+                    fixIndices(edits[index], endIndex - startIndex, delta.action);
+                    return true;
+                } else if (obj.end == startIndex && delta.action == "insert" && obj.type == "insert") { // new addition was at the end of an existing edit
+
+                    currentFile.child("delta").set({
+                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    });
+
+                    //console.log("added to end");
+                    edits[index].start = obj.start;
+                    edits[index].end = endIndex;
+                    edits[index].content = obj.content + stringify(delta.lines);
+                    edits[index].type = delta.action;
+                    edits[index].user = user.uid;
+                    fixIndices(edits[index], endIndex - startIndex, delta.action);
+                    return true;
+                } else if (obj.start == endIndex && obj.type == "remove" && delta.action == "remove") { // coalesce removal right
+                    //console.log("coalesce removal right");
+                    edits[index].start = startIndex;
                     edits[index].end = obj.end;
-                    edits[index].type = "insert";
+                    edits[index].content = stringify(delta.lines) + obj.content;
+                    edits[index].type = delta.action;
                     edits[index].user = user.uid;
-                    fixIndices(edits[index], endIndex - startIndex, delta.action);
+                    updateRemoval(edits[index], endIndex - startIndex);
+                    //fixIndices(edits[index], endIndex - startIndex, "remove");
+                    return true;
+                } else if (obj.end == startIndex && obj.type == "remove" && delta.action == "remove") { // coalesce removal left
+
+                    currentFile.child("delta").set({
+                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    });
+
+                    console.log("coalesce removal left");
+                    var cursor = editor.getCursorPosition()
+                    global_ignore = true;
+                    var prefix = editor.session.getValue().substring(0, startIndex);
+                    var suffix = editor.session.getValue().substring(endIndex);
+                    editor.session.setValue(prefix + stringify(delta.lines) + suffix);
+                    editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
+                    global_ignore = false;
+
+                    edits[index].start = obj.start;
+                    edits[index].end = endIndex;
+                    edits[index].content = obj.content + stringify(delta.lines);
+                    edits[index].type = delta.action;
+                    edits[index].user = user.uid;
+                    updateRemoval(edits[index], endIndex - startIndex);
+                    //fixIndices(edits[index], endIndex - startIndex, "remove");
+                    return true;
+                } else if (obj.start > startIndex && obj.end < endIndex && delta.action == "remove") { // removed an edit as well as content on both sides
+
+                    currentFile.child("delta").set({
+                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    });
+
+                    var cursor = editor.getCursorPosition()
+                    global_ignore = true;
+                    var prefix = editor.session.getValue().substring(0, startIndex);
+                    var suffix = editor.session.getValue().substring(endIndex - 1);
+                    editor.session.setValue(prefix + stringify(delta.lines) + suffix);
+                    editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
+                    global_ignore = false;
+
+                    console.log("edit and both sides");
+                    deleteEdit(edits[index]);
+                    edits.splice(index, 1);
+                    var e = {
+                        start: startIndex,
+                        end: endIndex - (obj.end - obj.start),
+                        content: stringify(delta.lines).substring(0, obj.start - startIndex) + stringify(delta.lines).substring(obj.end - startIndex, stringify(delta.lines).length),
+                        type: delta.action,
+                        user: user.uid,
+                    };
+                    postEdit(e);
+                    fixIndices(edits[index], obj.end - obj.start, delta.action);
+                    return true;
+                } else if (obj.start <= startIndex && obj.end < endIndex && startIndex <= obj.end && delta.action == "remove") { // removed some or all of an edit as well as content on the right side
+                    console.log("remove edit and right side");
+
+                    currentFile.child("delta").set({
+                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    });
+
+
+                    var e = {
+                        start: obj.end,
+                        end: endIndex,
+                        content: stringify(delta.lines).substring(obj.end - obj.start, endIndex - startIndex),
+                        type: delta.action,
+                        user: user.uid,
+                    };
+                    if (obj.start == startIndex) {
+                        //console.log("removing whole edit");
+                        fixIndices(edits[index], edits[index].end - edits[index].start, delta.action);
+                        deleteEdit(edits[index]);
+                        edits.splice(index, 1);
+                    } else {
+                        //console.log("edit to the right ->");
+                        edits[index].start = obj.start;
+                        edits[index].end = startIndex;
+                        edits[index].content = obj.content.substring(0, startIndex - obj.start);
+                        edits[index].type = "insert";
+                        edits[index].user = user.uid;
+                        fixIndices(edits[index], obj.end - startIndex, delta.action);
+                    }
+                    postEdit(e);
+                    return true;
+                } else if (obj.start > startIndex && obj.end >= endIndex && endIndex > obj.start && delta.action == "remove") { // removed some or all of an edit as well as content on the left side
+                    console.log("remove edit and left");
+
+                    currentFile.child("delta").set({
+                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    });
+
+                    var e = {
+                        start: startIndex,
+                        end: obj.start,
+                        content: stringify(delta.lines).substring(0, obj.start - startIndex),
+                        type: delta.action,
+                        user: user.uid,
+                    };
+                    if (obj.end == endIndex) {
+                        //console.log("removing whole edit");
+                        fixIndices(edits[index], edits[index].end - edits[index].start, delta.action);
+                        deleteEdit(edits[index]);
+                        edits.splice(index, 1);
+                    } else {
+                        //console.log("edit to the left <-");
+                        edits[index].content = obj.content.substring(endIndex - obj.start, obj.content.length);
+                        edits[index].start = endIndex;
+                        edits[index].end = obj.end;
+                        edits[index].type = "insert";
+                        edits[index].user = user.uid;
+                        fixIndices(edits[index], endIndex - startIndex, delta.action);
+                    }
+                    postEdit(e);
+                    return true;
+                } else if (obj.start <= startIndex && endIndex <= obj.end && delta.action == "remove" && obj.type == "insert") { // removed something from within an edit
+                    console.log("remove from within");
+
+                    currentFile.child("delta").set({
+                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    });
+
+                    if (obj.start == startIndex && obj.end == endIndex) { // you're deleting the last of an edit
+                        deleteEdit(edits[index], edits[index].end - edits[index].start, delta.action);
+                        edits.splice(index, 1);
+                    } else {
+                        // console.log("Not really an insert");
+                        edits[index].content = obj.content.substring(0, startIndex - obj.start) + obj.content.substring(endIndex - obj.start, obj.content.length);
+                        edits[index].start = obj.start;
+                        edits[index].end = obj.end - (endIndex - startIndex);
+                        edits[index].type = "insert";
+                        edits[index].user = user.uid;
+                        fixIndices(edits[index], endIndex - startIndex, delta.action);
+                    }
+                    return true;
+                }
+            });
+            // never found parent edit, so add edit to edits
+            if (!bool) {
+                // console.log("no parent");
+                var e = {
+                    start: startIndex,
+                    end: endIndex,
+                    content: stringify(delta.lines),
+                    type: delta.action,
+                    user: user.uid,
+                    comment: "",
+                    addedSize: endIndex - startIndex,
                 }
                 postEdit(e);
-                return true;
-            } else if (obj.start <= startIndex && endIndex <= obj.end && delta.action == "remove" && obj.type == "insert") { // removed something from within an edit
-                console.log("remove from within");
-
                 currentFile.child("delta").set({
-                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                    'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + delta.action + ";" + e.id + ";" + stringify(delta.lines)
                 });
-
-                if (obj.start == startIndex && obj.end == endIndex) { // you're deleting the last of an edit
-                    deleteEdit(edits[index], edits[index].end - edits[index].start, delta.action);
-                    edits.splice(index, 1);
-                } else {
-                    // console.log("Not really an insert");
-                    edits[index].content = obj.content.substring(0, startIndex - obj.start) + obj.content.substring(endIndex - obj.start, obj.content.length);
-                    edits[index].start = obj.start;
-                    edits[index].end = obj.end - (endIndex - startIndex);
-                    edits[index].type = "insert";
-                    edits[index].user = user.uid;
-                    fixIndices(edits[index], endIndex - startIndex, delta.action);
+                if (delta.action == "insert") {
+                    fixIndices(e, endIndex - startIndex, delta.action);
                 }
-                return true;
-            }
-        });
-        // never found parent edit, so add edit to edits
-        if (!bool) {
-            // console.log("no parent");
-            var e = {
-                start: startIndex,
-                end: endIndex,
-                content: stringify(delta.lines),
-                type: delta.action,
-                user: user.uid,
-                comment: "",
-                addedSize: endIndex - startIndex,
-            }
-            postEdit(e);
-            currentFile.child("delta").set({
-                'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + delta.action + ";" + e.id + ";" + stringify(delta.lines)
-            });
-            if (delta.action == "insert") {
-                fixIndices(e, endIndex - startIndex, delta.action);
             }
         }
+    } else {
+        console.log("fileMode is not live");
     }
 }
 
 // Takes an index and reduces it by the sum of the lengths of
 // unaccepted lengths before the index
-var convertIndex = function (index) {
+var convertIndex = function(index) {
     var newIndex = index;
-    editRef.once('value', function (snapshot) {
-        snapshot.forEach(function (child) {
+    editRef.once('value', function(snapshot) {
+        snapshot.forEach(function(child) {
             var e = child.val();
             if (e.startIndex < index) {
                 if (e.type == "insert") {
@@ -523,11 +547,11 @@ var convertIndex = function (index) {
     return newIndex;
 }
 
-// Reduces start and end indices by the lenght of an edit removed
+// Reduces start and end indices by the length of an edit removed
 // for all edits that appear after the edit being removed
-var fixIndicesAfterRemovalAccept = function (index, length) {
-    editRef.once('value', function (snapshot) {
-        snapshot.forEach(function (child) {
+var fixIndicesAfterRemovalAccept = function(index, length) {
+    editRef.once('value', function(snapshot) {
+        snapshot.forEach(function(child) {
             var e = child.val();
             if (e.startIndex >= index) {
                 editRef.child(child.key).update({
@@ -540,14 +564,14 @@ var fixIndicesAfterRemovalAccept = function (index, length) {
 }
 
 // This function is called once all users have accepted an edit.
-var acceptEdit = function (editID) {
+var acceptEdit = function(editID) {
     editUnhighlight(editID);
     var thisEdit = editRef.child(editID);
     thisEdit.update({ hasBeenAccepted: "true" });
-    thisEdit.once('value', function (snapshot) {
+    thisEdit.once('value', function(snapshot) {
         var e = snapshot.val();
         var index = convertIndex(e.startIndex);
-        currentFile.once('value', function (childSnapshot) {
+        currentFile.once('value', function(childSnapshot) {
             var f = childSnapshot.val();
             var fileContent = f.fileContents;
             var prefix = fileContent.substring(0, index);
@@ -564,24 +588,19 @@ var acceptEdit = function (editID) {
                 });
                 // fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
                 global_ignore = true;
+                var cursor = editor.getCursorPosition();
                 editor.session.setValue(prefix + suffix);
+                editor.selection.moveTo(cursor.row, cursor.column);
                 global_ignore = false;
             }
         });
     });
-    //Delete edit from edits[]
-    for (i in edits) {
-        if (edits[i].id == thisEdit.key) {
-            thisEdit.remove();
-            edits.splice(i, 1);
-            return;
-        }
-    }
+    thisEdit.remove();
 }
 
 /* Highlights the provided edit */
-var highlight = function (edit) {
-    if (edit.hid) {
+var highlight = function(edit) {
+    if (edit.hid || fileMode == "base") {
         return;
     }
     var startRow = getRowColumnIndices(edit.start).row;
@@ -596,7 +615,7 @@ var highlight = function (edit) {
 }
 
 /* Unhighlight the provided edit */
-var unhighlight = function (edit) {
+var unhighlight = function(edit) {
     if (edit.hid) {
         editor.session.removeMarker(edit.hid);
         edit.hid = null;
@@ -604,12 +623,12 @@ var unhighlight = function (edit) {
 }
 
 /* Helper function for highlight */
-var getLastColumnIndex = function (row) {
+var getLastColumnIndex = function(row) {
     return editor.session.getDocumentLastRowColumnPosition(row, 0).column;
 }
 
 /* Helper function for highlight */
-var getLastColumnIndices = function () {
+var getLastColumnIndices = function() {
     var rows = editor.session.getLength();
     var lastColumnIndices = [];
     var lastColIndex = 0;
@@ -622,7 +641,7 @@ var getLastColumnIndices = function () {
 };
 
 /* Helper function for highlight */
-var getRowColumnIndices = function (characterIndex) {
+var getRowColumnIndices = function(characterIndex) {
     var lastColumnIndices = getLastColumnIndices();
     if (characterIndex <= lastColumnIndices[0]) {
         return { row: 0, column: characterIndex };
@@ -656,12 +675,12 @@ function loadEdits() {
     //for acceptance
     var numUsers;
     firebase.database().ref().child("files").child(currentKey)
-        .child('userList').on("value", function (snapshot) {
+        .child('userList').on("value", function(snapshot) {
             numUsers = snapshot.numChildren();
         });
 
-    userNames.on('value', function (userData) {
-        fileEdits.on('value', function (data) {
+    userNames.on('value', function(userData) {
+        fileEdits.on('value', function(data) {
             for (i in data.val()) {
                 // if (data.val()[i].hasBeenAccepted) {
                 //     continue;
@@ -698,48 +717,50 @@ function loadEdits() {
                 let eContent;
                 if (editVal.content.length > 20) {
                     eContent = editVal.content.substring(0, 20);
-                }
-                else {
+                } else {
                     eContent = editVal.content;
                 }
 
                 var numAccepted;
                 var passing = getEditRef(editVal);
                 firebase.database().ref().child("files").child(currentKey)
-                    .child('edits').child(editVal.id).child('accepted').on("value", function (snapshot) {
+                    .child('edits').child(editVal.id).child('accepted').on("value", function(snapshot) {
                         numAccepted = snapshot.numChildren();
                     });
 
                 let divContent = '<b>' + editVal.username + '</b>: ' + numAccepted + '/' + numUsers;
                 var deleteEditBtn = "";
                 if (user.uid == data.val()[editVal.id].user) {
-                    deleteEditBtn = '<img class="delete" id="delete-edit-btn"  src="./img/close.png" '
-                        + 'onclick="deleteEditById(\'' + editVal.id + '\')">';
+                    deleteEditBtn = '<img class="delete" id="delete-edit-btn"  src="./img/close.png" ' +
+                        'onclick="deleteEditById(\'' + editVal.id + '\')">';
                 }
+
 
                 let acceptButton = '<label class="switch" ><input id="edit' + editVal.id + '" type="checkbox"'
                     + ' onclick="acceptTracker(\'' + editVal.id + '\', ' + numUsers + ')">'
                     + '<span class="slider round"></span></label>';
 
                 let onClickLogic = 'onclick="openComment(\'' + editVal.id + '\');"';
-                //console.log(editVal);
 
                 if (editVal.type == 'insert') {
-                    editHTML += '<div id="edit-add" class="edit" '
-                        + onClickLogic
-                        + 'onmouseover="editHighlight(\'' + editVal.id + '\')" '
-                        + 'onmouseout="editUnhighlight(\'' + editVal.id + '\')">'
-                        + divContent
-                        + deleteEditBtn
-                        + acceptButton
-                        + '</div>\n';
+                    editHTML += '<div id="edit-add" class="edit" ' +
+                        onClickLogic +
+                        'oncontextmenu="admin(\'' + editVal.id + '\')"' +
+                        'onmouseover="editScrollandHighlight(\'' + editVal.id + '\')" ' +
+                        'onmouseout="editUnhighlight(\'' + editVal.id + '\')">' +
+                        divContent +
+                        deleteEditBtn +
+                        acceptButton +
+                        '</div>\n';
                 } else {
-                    editHTML += '<div id="edit-remove" class="edit" '
-                        + onClickLogic
-                        + divContent
-                        + deleteEditBtn
-                        + acceptButton
-                        + '</div>\n';
+                    editHTML += '<div id="edit-remove" class="edit" ' +
+                        onClickLogic +
+                        'oncontextmenu="admin(\'' + editVal.id + '\')"' +
+                        'onmouseover="editScroll(\'' + editVal.id + '\')" ' +
+                        divContent +
+                        deleteEditBtn +
+                        acceptButton +
+                        '</div>\n';
                     // editHighlight(editVal.id);
                 }
                 //console.log(editHTML)
@@ -748,21 +769,25 @@ function loadEdits() {
                     let childContent;
                     if (childVal.content.length > 20) {
                         childContent = childVal.content.substring(0, 20);
-                    }
-                    else {
+                    } else {
                         childContent = childVal.content;
                     }
                     let childDiv = '<b>' + childVal.username + '</b>: ' + childContent;
                     if (childVal.type == 'insert') {
-                        editHTML += '<div id="edit-add-child" class="edit"'
-                            + onClickLogic
-                            + 'onmouseover="editHighlight(\'' + childVal.id + '\')" '
-                            + 'onmouseout="editUnhighlight(\'' + childVal.id + '\')">'
-                            + childDiv + '</div>\n';
+
+
+                        editHTML += '<div id="edit-add-child" class="edit"' +
+                            onClickLogic +
+                            'oncontextmenu="admin(\'' + editVal.id + '\')"' +
+                            'onmouseover="editScrollandHighlight(\'' + childVal.id + '\')" ' +
+                            'onmouseout="editUnhighlight(\'' + childVal.id + '\')">' +
+                            childDiv + '</div>\n';
                     } else {
-                        editHTML += '<div id="edit-remove-child" class="edit" '
-                            + onClickLogic
-                            + childDiv + '</div>\n';
+                        editHTML += '<div id="edit-remove-child" class="edit" ' +
+                            onClickLogic +
+                            'oncontextmenu="admin(\'' + editVal.id + '\')"' +
+                            'onmouseover="editScroll(\'' + editVal.id + '\')" ' +
+                            childDiv + '</div>\n';
                         // editHighlight(childVal.id);
                     }
                 }
@@ -776,8 +801,8 @@ function loadEdits() {
                 firebase.database().ref().child("files").child(currentKey).child('edits').child(editVal.id)
                     .child('accepted').orderByChild('id')
                     .equalTo(user.uid)
-                    .once('value', function (snapshot) {
-                        snapshot.forEach(function (childSnapshot) {
+                    .once('value', function(snapshot) {
+                        snapshot.forEach(function(childSnapshot) {
                             document.getElementById('edit' + editVal.id).checked = true;
                         });
                     });
@@ -792,47 +817,31 @@ function loadEdits() {
     });
 }
 
-var deleteEditById = function (editID) {
+var deleteEditById = function(editID) {
     //TODO: delete Child Edits if parent
     //TODO: red wont unhighlight
     //TODO: delete from edit list
     editUnhighlight(editID);
     var thisEdit = editRef.child(editID);
-    thisEdit.once('value', function (snapshot) {
+    thisEdit.once('value', function(snapshot) {
         var e = snapshot.val();
         var index = convertIndex(e.startIndex);
-        currentFile.once('value', function (childSnapshot) {
+        currentFile.once('value', function(childSnapshot) {
             var f = childSnapshot.val();
             var fileContent = f.fileContents;
             var prefix = fileContent.slice(0, index);
             var suffix = fileContent.slice(index + 1);
             if (e.type == 'insert') {
-                suffix = fileContent.slice(e.endIndex);
-                // global_ignore = true;
-                // editor.session.setValue(prefix + suffix);
-                // global_ignore = false;
-            } else {
-                //fixIndicesAfterInsertDelete is same thing as this?
+                x_insert = true;
                 fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
+                thisEdit.remove();
+            } else {
+                fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
+                thisEdit.remove();
             }
-            thisEdit.remove();
         });
     });
-
-
-
-    // Delete edit from edits[]             edits.splice(edits.indexOf(editID), 1)  seemed to cause erorrs
-    for (i in edits) {
-        if (edits[i].id == thisEdit.key) {
-            thisEdit.remove();
-            edits.splice(i, 1);
-            return;
-        }
-    }
-
 }
-
-//TODO: Child Edits
 
 //add or remove user from accepted list in edit if toggle is clicked
 function acceptTracker(edit, numUsers) {
@@ -848,8 +857,8 @@ function acceptTracker(edit, numUsers) {
         firebase.database().ref().child("files").child(currentKey).child('edits').child(edit)
             .child('accepted').orderByChild('id')
             .equalTo(user.uid)
-            .once('value', function (snapshot) {
-                snapshot.forEach(function (childSnapshot) {
+            .once('value', function(snapshot) {
+                snapshot.forEach(function(childSnapshot) {
                     var childKey = childSnapshot.key;
                     var childData = childSnapshot.val();
                     firebase.database().ref().child("files")
@@ -861,7 +870,7 @@ function acceptTracker(edit, numUsers) {
     }
     var numAccepted;
     firebase.database().ref().child("files").child(currentKey)
-        .child('edits').child(edit).child('accepted').on("value", function (snapshot) {
+        .child('edits').child(edit).child('accepted').on("value", function(snapshot) {
             numAccepted = snapshot.numChildren();
         });
     if (numAccepted >= numUsers) acceptEdit(edit);
@@ -886,4 +895,73 @@ function editUnhighlight(id) {
         }
     }
     unhighlight(unHoveredEdit);
+}
+
+function loadEditsIntoEditor() {
+    editRef.once('value', function(data) {
+        for (i in data.val()) {
+            // Load contents of edit into editor
+            if (data.val()[i].type == "insert") {
+                global_ignore = true;
+                var cursor = editor.getCursorPosition();
+                var prefix = editor.session.getValue().slice(0, data.val()[i].startIndex);
+                var suffix = editor.session.getValue().slice(data.val()[i].startIndex);
+                editor.session.setValue(prefix + data.val()[i].content + suffix);
+                editor.selection.moveTo(cursor.row, cursor.column);
+                global_ignore = false;
+            } else {
+                editHighlight(i);
+            }
+        }
+    });
+}
+
+function unhighlightAllRemovals() {
+    for (i in edits) {
+        if (edits[i].type == "remove") {
+            unhighlight(edits[i]);
+        }
+    }
+}
+
+function highlightAllRemovals() {
+    for (i in edits) {
+        if (edits[i].type == "remove") {
+            unhighlight(edits[i]);
+            highlight(edits[i]);
+        }
+    }
+}
+
+highlightEditsByUser = function(userId) {
+    for (i in edits) {
+        console.log(edits[i].user);
+        console.log(userId);
+        if (edits[i].user == userId) {
+            highlight(edits[i]);
+        }
+    }
+}
+
+unhighlightEditsByUser = function(userId) {
+    for (i in edits) {
+        if (edits[i].user == userId) {
+            unhighlight(edits[i]);
+        }
+    }
+}
+
+editScrollandHighlight = function(editId) {
+    editHighlight(editId);
+    editScroll(editId);
+}
+
+var editScroll = function(editId) {
+    var row = 1;
+    for (var i = 0; i < edits.length; i++) {
+        if (edits[i].id == editId) {
+            row = getRowColumnIndices(edits[i].start).row;
+        }
+    }
+    editor.scrollToLine(row, true, true, function() {});
 }

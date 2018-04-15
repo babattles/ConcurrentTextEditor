@@ -1,5 +1,4 @@
 var updateEditor = function(startIndex, endIndex, action, editType, editID, lines) {
-    console.log("In updateFile");
     if (editType == "remove") {
         editUnhighlight(editID);
     }

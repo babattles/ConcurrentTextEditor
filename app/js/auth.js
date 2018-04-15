@@ -6,9 +6,6 @@
 const { ipcRenderer } = require('electron');
 const url = require('url');
 
-
-
-
 // Initialize Firebase
 var config = {
     apiKey: "AIzaSyAr4i-0nzmJi9x2bwyJXqQPjsPJfkeN0V0",
@@ -19,7 +16,6 @@ var config = {
     messagingSenderId: "254482798300"
 };
 firebase.initializeApp(config);
-
 
 var loginBtn = document.getElementById("loginBtn");
 var registerBtn = document.getElementById("registerBtn");
@@ -33,12 +29,9 @@ var forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
 var resetPasswordBtn = document.getElementById('resetPasswordBtn');
 var state = 'loginRegister';
 
-
-
- 
 //Listen for message to use google auth
-gLoginBtn.addEventListener('click', function() {
-     ipcRenderer.send('google-auth', 'ping');
+gLoginBtn.addEventListener('click', function () {
+    ipcRenderer.send('google-auth', 'ping');
 
 });
 
@@ -48,13 +41,13 @@ ipcRenderer.on('token', (event, args) => {
 });
 
 //sign in with token
-function useToken (gAccessToken) {
+function useToken(gAccessToken) {
     var credential = firebase.auth.GoogleAuthProvider.credential(gAccessToken.id_token);
     var refreshToken = gAccessToken.refresh_token;
 
     console.log(credential);
     // Sign in with credential from the Google user.
-    firebase.auth().signInWithCredential(credential).then(function() {
+    firebase.auth().signInWithCredential(credential).then(function () {
         // hide all the previous fields
         emailField.classList.add('hidden');
         passwordField.classList.add('hidden');
@@ -65,36 +58,36 @@ function useToken (gAccessToken) {
         gLoginBtn.classList.add('hidden');
 
 
-       
+
         // create a user node in the database
         var user = firebase.auth().currentUser;
 
         //check if user exists
         firebase.database().ref().child("users").child(user.uid).once('value', function (snapshot) {
-                var exists = (snapshot.val() !== null);
-                console.log(snapshot.val());
-                //if user does not already exist, prompt username
-                if (!exists) {
-                    console.log("user does not exist");
+            var exists = (snapshot.val() !== null);
+            console.log(snapshot.val());
+            //if user does not already exist, prompt username
+            if (!exists) {
+                console.log("user does not exist");
 
-                    // show set username elements
-                    usernameField.classList.remove('hidden');
-                    usernameBtn.classList.remove('hidden');
-                    usernameLabel.classList.remove('hidden');
+                // show set username elements
+                usernameField.classList.remove('hidden');
+                usernameBtn.classList.remove('hidden');
+                usernameLabel.classList.remove('hidden');
 
-                    // set temp username to uid
-                    firebase.database().ref().child("users")
-                        .child(user.uid).set({ username: user.uid });
-                    //save refresh token
-                    firebase.database().ref().child("users")
-                        .child(user.uid).set({ refreshToken: refreshToken });
-                } else {
-                    console.log("user signed in");
-                    ipcRenderer.send('close-auth-window', 'logged');
-                }          
-            });
- 
-    }).catch(function(error) {
+                // set temp username to uid
+                firebase.database().ref().child("users")
+                    .child(user.uid).set({ username: user.uid });
+                //save refresh token
+                firebase.database().ref().child("users")
+                    .child(user.uid).set({ refreshToken: refreshToken });
+            } else {
+                console.log("user signed in");
+                ipcRenderer.send('close-auth-window', 'logged');
+            }
+        });
+
+    }).catch(function (error) {
         if (error != null) {
             alert(error, "ERROR REGISTERING ACCOUNT AT " + error.lineNumber);
             console.log(error.message);
@@ -102,12 +95,13 @@ function useToken (gAccessToken) {
         }
     });
 }
-var login = function() {
+
+var login = function () {
     // Sign in with email & password
-    firebase.auth().signInWithEmailAndPassword(emailField.value, passwordField.value).then(function() {
+    firebase.auth().signInWithEmailAndPassword(emailField.value, passwordField.value).then(function () {
         // Close auth window
         ipcRenderer.send('close-auth-window', 'logged');
-    }).catch(function(error) {
+    }).catch(function (error) {
         if (error != null) {
             alert("ERROR LOGGING IN: Please Enter Correct Credentials");
             console.log(error.message);
@@ -117,12 +111,12 @@ var login = function() {
 }
 
 // Login Button was clicked 
-loginBtn.addEventListener('click', function() {
+loginBtn.addEventListener('click', function () {
     login();
 });
 
 // Enter was pressed on the emailField
-emailField.addEventListener('keydown', function(e) {
+emailField.addEventListener('keydown', function (e) {
     if (!e) { var e = window.event; }
 
     if (e.keyCode == 13) {
@@ -131,7 +125,7 @@ emailField.addEventListener('keydown', function(e) {
 }, false);
 
 // Enter was pressed on the passwordField
-passwordField.addEventListener('keydown', function(e) {
+passwordField.addEventListener('keydown', function (e) {
     if (!e) { var e = window.event; }
 
     if (e.keyCode == 13) {
@@ -142,9 +136,9 @@ passwordField.addEventListener('keydown', function(e) {
 }, false);
 
 // Register Button was clicked
-registerBtn.addEventListener("click", function() {
+registerBtn.addEventListener("click", function () {
     // Create a user with email & password then ask for username
-    firebase.auth().createUserWithEmailAndPassword(emailField.value, passwordField.value).then(function() {
+    firebase.auth().createUserWithEmailAndPassword(emailField.value, passwordField.value).then(function () {
         // hide all the previous fields
         emailField.classList.add('hidden');
         passwordField.classList.add('hidden');
@@ -170,7 +164,7 @@ registerBtn.addEventListener("click", function() {
             // No user is signed in.
             alert("No user!!");
         }
-    }).catch(function(error) {
+    }).catch(function (error) {
         if (error != null) {
             alert("ERROR REGISTERING ACCOUNT");
             console.log(error.message);
@@ -180,14 +174,17 @@ registerBtn.addEventListener("click", function() {
 });
 
 // Set username button was clicked
-usernameBtn.addEventListener('click', function() {
+usernameBtn.addEventListener('click', function () {
     var user = firebase.auth().currentUser;
     if (user) {
         /* uncomment to reset database data when registering new user */
         //firebase.database().ref().child("users").set(user.uid);
 
         // update username with provided username
-        firebase.database().ref().child("users").child(user.uid).update({ 'username': usernameField.value });
+        firebase.database().ref().child("users").child(user.uid).update({
+            'username': usernameField.value,
+            'email': user.email,
+        });
 
         // Send message to main.js to tell index.js to update the username field
         ipcRenderer.send('update-username', 'logged');
@@ -197,7 +194,7 @@ usernameBtn.addEventListener('click', function() {
 });
 
 // Close Button was clicked
-closeBtn.addEventListener("click", function() {
+closeBtn.addEventListener("click", function () {
     if (state === 'loginRegister') {
         ipcRenderer.send('close-auth-window', 'ping');
     } else {
@@ -212,7 +209,7 @@ closeBtn.addEventListener("click", function() {
 });
 
 // Forgot password button was clicked
-forgotPasswordBtn.addEventListener("click", function() {
+forgotPasswordBtn.addEventListener("click", function () {
     //TODO change the x button into a back arrow. when back arrow clicked, go back to login/register page.
     state = 'resetPassword';
     document.getElementById('closeBtnImg').src = './img/back.png';
@@ -224,10 +221,10 @@ forgotPasswordBtn.addEventListener("click", function() {
 });
 
 // Reset password button was clicked
-resetPasswordBtn.addEventListener("click", function() {
+resetPasswordBtn.addEventListener("click", function () {
     var email = emailField.value;
     var auth = firebase.auth();
-    auth.sendPasswordResetEmail(email).then(function() {
+    auth.sendPasswordResetEmail(email).then(function () {
         alert("A link to reset password has been sent to " + email);
         emailField.value = '';
         passwordField.value = '';
@@ -238,7 +235,7 @@ resetPasswordBtn.addEventListener("click", function() {
         loginBtn.classList.remove('hidden');
         registerBtn.classList.remove('hidden');
         state = 'loginRegister';
-    }).catch(function(error) {
+    }).catch(function (error) {
         alert("(DEBUG TEMP)failed")
     });
 });

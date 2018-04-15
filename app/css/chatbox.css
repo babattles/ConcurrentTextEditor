@@ -1,0 +1,9 @@
+.chat {
+    max-height: 250px;
+    overflow: scroll;
+}
+
+.more {
+    max-width: 150px;
+    font-size: 10px;
+}

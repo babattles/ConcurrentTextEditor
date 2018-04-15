@@ -11,11 +11,13 @@ var pathSeperator = requirePath.sep;
 var currentFile;
 
 
+
 var openFile = function() {
+    editor.setReadOnly(false);
     dialog.showOpenDialog((fileNames) => {
         path = fileNames[0];
         currentFileName = fileNames[0].substring(fileNames[0].lastIndexOf(pathSeperator) + 1, fileNames[0].length);
-        
+
         fs.readFile(path, 'utf-8', (err, data) => {
             if (err) {
                 alert("An error ocurred reading the file :" + err.message);
@@ -29,7 +31,7 @@ var openFile = function() {
             // set the state (so opening a file doesn't stage an edit)
             global_ignore = true;
 
-            fileContents = data;
+            fileContents = data.replace(/\r\n/g, '\n');
             // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
             editor.setValue(data, -1);
 
@@ -60,10 +62,57 @@ var openFile = function() {
                     });
                     // set the current open file to the new file
                     currentFile = newFile;
+                    // Set the default channels
+                    currentFile.child("messages").child("General").once('value', function(snapshot) {
+                        if (!snapshot.exists()) {
+                            currentFile.child("messages").child("General").push({
+                                content: "Welcome to the General Channel!",
+                                user: "HiveText",
+                            });
+                        }
+                    });
+                    currentFile.child("messages").child("Random").once('value', function(snapshot) {
+                        if (!snapshot.exists()) {
+                            currentFile.child("messages").child("Random").push({
+                                content: "Welcome to the Random Channel!",
+                                user: "HiveText",
+                            });
+                        }
+                    });
+                    loadChannels();
                     // set the editRef
                     editRef = currentFile.child("edits");
                     // add user to file's userList
                     newFile.child('userList').child(user.uid).set({ 'username': currentUserName });
+
+                    //add user to file's adminList
+                    newFile.child('adminList').child(user.uid).set({ 'username': currentUserName });
+                    console.log("You created this file! So you are an admin...");
+
+                    newFile.child('delta').set({ 'deltaToParse': '' });
+
+                    newFile.child("delta").on("child_changed", function(snapshot) {
+                        console.log("delta changed here");
+                        if (fileMode == "live") {
+                            // console.log(snapshot.ref.parent);
+                            var parsedContent = snapshot.val();
+                            // console.log("parsedContent = " + parsedContent);
+                            var startIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
+                            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+                            var endIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
+                            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+                            var type = parsedContent.slice(0, parsedContent.indexOf(";"));
+                            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+                            var editType = parsedContent.slice(0, parsedContent.indexOf(";"));
+                            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+                            var editID = parsedContent.slice(0, parsedContent.indexOf(";"));
+                            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+                            updateEditor(startIndex, endIndex, type, editType, editID, parsedContent);
+                        } else {
+                            console.log("filemode not live (delta on changed)");
+                        }
+                    });
+
                     // add fileID to user's fileList
                     userRef.child('fileList').child(newFile.key).set({ 'fileName': currentFileName });
                     // set current user online status
@@ -79,6 +128,7 @@ var openFile = function() {
 
 //open a file when dragged into ace
 var openFileDrag = function(pathDrag) {
+    editor.setReadOnly(false);
     path = pathDrag;
     currentFileName = path.substring(path.lastIndexOf(pathSeperator) + 1, path.length);;
 
@@ -125,10 +175,31 @@ var openFileDrag = function(pathDrag) {
                 });
                 // set the current open file to the new file
                 currentFile = newFile;
+                // Set the default channels
+                currentFile.child("messages").child("General").once('value', function(snapshot) {
+                    if (!snapshot.exists()) {
+                        currentFile.child("messages").child("General").push({
+                            content: "Welcome to the General Channel!",
+                            user: "HiveText",
+                        });
+                    }
+                });
+                currentFile.child("messages").child("Random").once('value', function(snapshot) {
+                    if (!snapshot.exists()) {
+                        currentFile.child("messages").child("Random").push({
+                            content: "Welcome to the Random Channel!",
+                            user: "HiveText",
+                        });
+                    }
+                });
+                loadChannels();
                 // set the editRef
                 editRef = currentFile.child("edits");
                 // add user to file's userList
                 newFile.child('userList').child(user.uid).set({ 'username': currentUserName });
+                //add user to file's adminList
+                newFile.child('adminList').child(user.uid).set({ 'username': currentUserName });
+                console.log("You created this file! So you are an admin...");
                 // add fileID to user's fileList
                 userRef.child('fileList').child(newFile.key).set({ 'fileName': currentFileName });
                 // set current user online status

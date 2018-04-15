@@ -15,17 +15,15 @@
         };
     </script>
     <!-- Bootstrap Components -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-        crossorigin="anonymous">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-        crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <!-- Firebase Component -->
     <script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
 
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/edits.css">
+    <link rel="stylesheet" href="css/chatbox.css">
 
     <!-- ACE Component -->
     <script src="../ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
@@ -43,6 +41,7 @@
     <!-- List of collaborators -->
     <div id="collab-container">
         <!-- Share file with other users -->
+        <button class="btn-success" id="searchBtn">Search</button>
         <div>
             <button class='share-link' id='shareLinkButton'>
                 <img src='./img/share-post-symbol.png' style=" max-width:100%;height:'auto';">&nbsp;Share File With Others</button>
@@ -64,8 +63,11 @@
         <div id="chatLabel">Chat
         </div>
         <select id="channel">
+            <option value=""></option>
         </select>
-        <div id="chat">
+        <button id="seeMore" class="btn-success more">Load more...</button>
+        <button id="addChannel" class="btn-danger addChannel">+</button>
+        <div id="chat" class="chat">
         </div>
         <textarea id="chatInput" rows="1" cols="26"></textarea>
     </div>
@@ -98,12 +100,21 @@
         <input type="password" class="form-item" placeholder="Confirm New Password" name="new_password_input2" id="new-password-input2">
         <button id="changePasswordBtn" class="btn form-item ">Change Password</button>
     </div>
-         
+
+    <div id="searchWindow" class=". hidden">
+        <span class="form-item form-text">Search by: </span>
+        <input id="radioEmail" type="radio" name="type" value="email"> Email<br>
+        <input id="radioUsername" type="radio" name="type" value="username"> Username<br>
+        <input type="text" class="form-item" placeholder="Email or Username to search" name="searchInput" id="searchInput">
+        <button id="submitSearchBtn" class="btn-success">Search</button>
+        <button id="searchCloseBtn" class="btn-danger">Close</button>
+    </div>
+
     <div id="Comment" class=". hidden">
-        <span class="form-item form-text">Input Comment:</span>            
+        <span class="form-item form-text">Input Comment:</span>
         <span class="form-item form-text" id="comment-span">Comment: </span>
-         <input type="text" class="form-item" placeholder="New Comment:" name="comment_field" id="comment-input">            
-         <button id="changeCommentBtn" class="btn form-item">Accept Comment</button>
+        <input type="text" class="form-item" placeholder="New Comment:" name="comment_field" id="comment-input">
+        <button id="changeCommentBtn" class="btn form-item">Accept Comment</button>
     </div>
 
     <footer id="auth_footer" role="auth_footer">
@@ -118,13 +129,12 @@
     <script src="js/concurrency.js"></script>
     <script src="js/chatbox.js"></script>
     <script src="js/tab.js"></script>
+    <script src="js/admin.js"></script>
     <script src="js/comment.js"></script>
     <script src="js/link.js"></script>
     <script src="js/aceStart.js"></script>
+    <script src="js/search.js"></script>
     <script src="../ace-builds/src-noconflict/ext-modelist.js"></script>
-    <script>
-        // Here we can require other files to use in this process
-    </script>
     </body>
 
 </html>

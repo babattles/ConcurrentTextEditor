@@ -1,28 +1,29 @@
 body {
-    background-color: #424242  
+    background-color: #424242
 }
 
 .rTable {
-    display: table; 
+    display: table;
 }
 
 .rTableRow {
-    display: table-row; 
+    display: table-row;
 }
 
 .rTableHeading {
-    display: table-header-group; 
+    display: table-header-group;
 }
 
 .rTableBody {
-    display: table-row-group; 
+    display: table-row-group;
 }
 
 .rTableFoot {
-    display: table-footer-group; 
+    display: table-footer-group;
 }
 
-.rTableCell, .rTableHead { 
+.rTableCell,
+.rTableHead {
     display: table-cell;
 }
 
@@ -35,6 +36,7 @@ body {
     bottom: 0;
     right: 0;
 }
+
 .form-item {
     display: block;
     margin-left: 5px;
@@ -46,7 +48,9 @@ body {
     color: #FFF;
 }
 
+
 /*User Settings*/
+
 #userSettings {
     z-index: 9999;
     position: absolute;
@@ -59,15 +63,31 @@ body {
     text-align: center;
 }
 
+/* Search "Window" */
+#searchWindow {
+    z-index: 9999;
+    position: absolute;
+    top: 0;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    padding-top: 150px;
+    background-color: #424242;
+    text-align: left;
+}
+
 /*File List*/
+
 #file-container {
     margin-top: 12px;
     position: absolute;
     left: 0px;
-    font-size:12px;
+    font-size: 12px;
 }
 
+
 /*Edit list*/
+
 #edit-container {
     position: absolute;
     top: 20px;
@@ -88,8 +108,7 @@ body {
     word-wrap: break-word;
 }
 
-
-#edit-add:hover{
+#edit-add:hover {
     background-color: #65CB86;
 }
 
@@ -99,7 +118,7 @@ body {
     word-wrap: break-word;
 }
 
-#edit-remove:hover{
+#edit-remove:hover {
     background-color: #C64F64;
 }
 
@@ -109,7 +128,7 @@ body {
     background-color: #B3FFCC;
 }
 
-#edit-add-child:hover{
+#edit-add-child:hover {
     background-color: #65CB86;
 }
 
@@ -119,10 +138,13 @@ body {
     background-color: #F1636A;
 }
 
-#edit-remove-child:hover{
+#edit-remove-child:hover {
     background-color: #C64F64;
 }
+
+
 /*Collaborator List*/
+
 #collab-container {
     position: absolute;
     right: 0px;
@@ -153,17 +175,18 @@ body {
     background-color: #999999;
 }
 
-
-.share-link{
-    padding:5px;
-    border:0px;
-    margin:0px;
+.share-link {
+    padding: 5px;
+    border: 0px;
+    margin: 0px;
     left: 5px;
     color: #CCCCCC;
-    background-color: rgba(0,0,0,0);
+    background-color: rgba(0, 0, 0, 0);
 }
 
+
 /*Chat*/
+
 #chat-container {
     position: absolute;
     bottom: 0px;
@@ -184,18 +207,20 @@ body {
     background-color: #F2F2F2;
 }
 
+
 /*Tabs*/
+
 #tab-container {
     position: absolute;
     top: 0px;
     right: 200px;
-    left: 200px;  
+    left: 200px;
     bottom: 20px;
-    font-size: 13.5px;  
+    font-size: 13.5px;
 }
 
 #new-tab {
-    text-align:center;
+    text-align: center;
     width: 50px;
     height: 20px;
     background-color: #1A1A1A;
@@ -207,12 +232,12 @@ body {
 }
 
 .tab {
-    text-align:center;
+    text-align: center;
     width: 100px;
     height: 20px;
     background-color: #1A1A1A;
     color: #CCCCCC;
-    border-right: 1px solid #FDF6E3; 
+    border-right: 1px solid #FDF6E3;
 }
 
 .tab:hover {
@@ -224,6 +249,7 @@ body {
     color: #1A1A1A;
 }
 
+
 /*ACE Editor*/
 
 #editor {
@@ -233,6 +259,7 @@ body {
     bottom: 0;
     left: 200px;
 }
+
 
 /*Begion of dropdown manu (syntax)*/
 
@@ -279,76 +306,86 @@ body {
 .show {
     display: block;
 }
+
+
 /*End of dropdown manu (syntax)*/
 
-.delete{
-    max-width:10%; 
-    height: auto; 
-    position: absolute; 
+.delete {
+    max-width: 10%;
+    height: auto;
+    position: absolute;
     right: 35px;
 }
 
+
 /*check toggle accept boxes*/
+
 .switch {
-  position: relative;
-  display: inline-block;
-  float: right;
-  width: 30px;
-  height: 15px;
-  top: 5px;
-  right: 2px;
+    position: relative;
+    display: inline-block;
+    float: right;
+    width: 30px;
+    height: 15px;
+    top: 5px;
+    right: 2px;
 }
 
-.switch input {display:none;}
+.switch input {
+    display: none;
+}
 
 .slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
 }
 
 .slider:before {
-  position: absolute;
-  content: "";
-  height: 15px;
-  width: 15px;
-  left: 0px;
-  bottom: 0px;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
+    position: absolute;
+    content: "";
+    height: 15px;
+    width: 15px;
+    left: 0px;
+    bottom: 0px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
 }
 
-input:checked + .slider {
-  background-color: #2196F3;
+input:checked+.slider {
+    background-color: #2196F3;
 }
 
-input:focus + .slider {
-  box-shadow: 0 0 1px #2196F3;
+input:focus+.slider {
+    box-shadow: 0 0 1px #2196F3;
 }
 
-input:checked + .slider:before {
-  -webkit-transform: translateX(15px);
-  -ms-transform: translateX(15px);
-  transform: translateX(15px);
+input:checked+.slider:before {
+    -webkit-transform: translateX(15px);
+    -ms-transform: translateX(15px);
+    transform: translateX(15px);
 }
+
 
 /* Rounded sliders */
+
 .slider.round {
-  border-radius: 15px;
+    border-radius: 15px;
 }
 
 .slider.round:before {
-  border-radius: 50%;
+    border-radius: 50%;
 }
 
+
 /*Comment*/
+
 #Comment {
     z-index: 9999;
     position: absolute;
@@ -360,5 +397,3 @@ input:checked + .slider:before {
     background-color: #424242;
     text-align: center;
 }
-
-

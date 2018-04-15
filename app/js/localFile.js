@@ -31,7 +31,7 @@ var openFile = function() {
             // set the state (so opening a file doesn't stage an edit)
             global_ignore = true;
 
-            fileContents = data;
+            fileContents = data.replace(/\r\n/g, '\n');
             // Show the text in ace editor. -1 specifies that cursor is at beginning of file.
             editor.setValue(data, -1);
 
@@ -52,7 +52,7 @@ var openFile = function() {
                 // user is logged in
                 var userRef = firebase.database().ref().child("users").child(user.uid);
                 // get the user's username
-                userRef.child("username").once("value").then(function (snapshot) {
+                userRef.child("username").once("value").then(function(snapshot) {
                     currentUserName = snapshot.val();
                     var fileList = firebase.database().ref().child('files');
                     var newFile = fileList.push(); // generate a new fileID
@@ -63,7 +63,7 @@ var openFile = function() {
                     // set the current open file to the new file
                     currentFile = newFile;
                     // Set the default channels
-                    currentFile.child("messages").child("General").once('value', function (snapshot) {
+                    currentFile.child("messages").child("General").once('value', function(snapshot) {
                         if (!snapshot.exists()) {
                             currentFile.child("messages").child("General").push({
                                 content: "Welcome to the General Channel!",
@@ -71,7 +71,7 @@ var openFile = function() {
                             });
                         }
                     });
-                    currentFile.child("messages").child("Random").once('value', function (snapshot) {
+                    currentFile.child("messages").child("Random").once('value', function(snapshot) {
                         if (!snapshot.exists()) {
                             currentFile.child("messages").child("Random").push({
                                 content: "Welcome to the Random Channel!",
@@ -84,6 +84,35 @@ var openFile = function() {
                     editRef = currentFile.child("edits");
                     // add user to file's userList
                     newFile.child('userList').child(user.uid).set({ 'username': currentUserName });
+
+                    //add user to file's adminList
+                    newFile.child('adminList').child(user.uid).set({ 'username': currentUserName });
+                    console.log("You created this file! So you are an admin...");
+
+                    newFile.child('delta').set({ 'deltaToParse': '' });
+
+                    newFile.child("delta").on("child_changed", function(snapshot) {
+                        console.log("delta changed here");
+                        if (fileMode == "live") {
+                            // console.log(snapshot.ref.parent);
+                            var parsedContent = snapshot.val();
+                            // console.log("parsedContent = " + parsedContent);
+                            var startIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
+                            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+                            var endIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
+                            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+                            var type = parsedContent.slice(0, parsedContent.indexOf(";"));
+                            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+                            var editType = parsedContent.slice(0, parsedContent.indexOf(";"));
+                            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+                            var editID = parsedContent.slice(0, parsedContent.indexOf(";"));
+                            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
+                            updateEditor(startIndex, endIndex, type, editType, editID, parsedContent);
+                        } else {
+                            console.log("filemode not live (delta on changed)");
+                        }
+                    });
+
                     // add fileID to user's fileList
                     userRef.child('fileList').child(newFile.key).set({ 'fileName': currentFileName });
                     // set current user online status
@@ -98,7 +127,8 @@ var openFile = function() {
 };
 
 //open a file when dragged into ace
-var openFileDrag = function (pathDrag) {
+var openFileDrag = function(pathDrag) {
+    editor.setReadOnly(false);
     path = pathDrag;
     currentFileName = path.substring(path.lastIndexOf(pathSeperator) + 1, path.length);;
 
@@ -135,7 +165,7 @@ var openFileDrag = function (pathDrag) {
             // user is logged in
             var userRef = firebase.database().ref().child("users").child(user.uid);
             // get the user's username
-            userRef.child("username").once("value").then(function (snapshot) {
+            userRef.child("username").once("value").then(function(snapshot) {
                 currentUserName = snapshot.val();
                 var fileList = firebase.database().ref().child('files');
                 var newFile = fileList.push(); // generate a new fileID
@@ -146,7 +176,7 @@ var openFileDrag = function (pathDrag) {
                 // set the current open file to the new file
                 currentFile = newFile;
                 // Set the default channels
-                currentFile.child("messages").child("General").once('value', function (snapshot) {
+                currentFile.child("messages").child("General").once('value', function(snapshot) {
                     if (!snapshot.exists()) {
                         currentFile.child("messages").child("General").push({
                             content: "Welcome to the General Channel!",
@@ -154,7 +184,7 @@ var openFileDrag = function (pathDrag) {
                         });
                     }
                 });
-                currentFile.child("messages").child("Random").once('value', function (snapshot) {
+                currentFile.child("messages").child("Random").once('value', function(snapshot) {
                     if (!snapshot.exists()) {
                         currentFile.child("messages").child("Random").push({
                             content: "Welcome to the Random Channel!",
@@ -167,6 +197,9 @@ var openFileDrag = function (pathDrag) {
                 editRef = currentFile.child("edits");
                 // add user to file's userList
                 newFile.child('userList').child(user.uid).set({ 'username': currentUserName });
+                //add user to file's adminList
+                newFile.child('adminList').child(user.uid).set({ 'username': currentUserName });
+                console.log("You created this file! So you are an admin...");
                 // add fileID to user's fileList
                 userRef.child('fileList').child(newFile.key).set({ 'fileName': currentFileName });
                 // set current user online status
@@ -176,9 +209,9 @@ var openFileDrag = function (pathDrag) {
     });
 };
 
-var saveFile = function () {
+var saveFile = function() {
     if (path) {
-        fs.writeFile(path, editor.getValue(), function (err) {
+        fs.writeFile(path, editor.getValue(), function(err) {
             if (err) {
                 alert("An error ocurred updating the file" + err.message);
                 console.log(err);
@@ -191,9 +224,9 @@ var saveFile = function () {
     }
 };
 
-var saveFileAs = function () {
-    dialog.showSaveDialog(function (filename) {
-        fs.writeFile(filename, editor.getValue(), function (err) {
+var saveFileAs = function() {
+    dialog.showSaveDialog(function(filename) {
+        fs.writeFile(filename, editor.getValue(), function(err) {
             if (err) {
                 alert("An error ocurred updating the file" + err.message);
                 console.log(err);
@@ -205,11 +238,11 @@ var saveFileAs = function () {
     });
 };
 
-setCurrentFile = function (fileKey) {
+setCurrentFile = function(fileKey) {
     currentFile = fileKey;
 }
 
-var closeFile = function () {
+var closeFile = function() {
     // set the state (so opening a file doesn't stage an edit)
     global_ignore = true;
 

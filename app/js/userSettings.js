@@ -69,12 +69,15 @@ changeEmailBtn.addEventListener("click", function() {
         alert("EMAIL CANNOT BE BLANK");
         return;
     }
-    user.updateEmail(newEmail).then(function() {
-        alert("Email updated");
-    }).catch(function(error) {
-        alert("Email update FAILED!");
-    });
-    clearEmail();
+    if (user) {
+        user.updateEmail(newEmail).then(function() {
+            firebase.database().ref().child("users").child(user.uid).update({ 'email': newEmail });
+            alert("Email updated");
+        }).catch(function(error) {
+            alert("Email update FAILED!");
+        });
+        clearEmail();
+    }
 });
 
 changePasswordBtn.addEventListener("click", function() {

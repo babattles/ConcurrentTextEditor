@@ -15,7 +15,6 @@ var config = {
 firebase.initializeApp(config);
 
 var database = firebase.database();
-
 var userSettingsBtn = document.getElementById("userSettingsBtn");
 var editor = document.getElementById("editor");
 var onlineUsersContainer = document.getElementById("online-users");
@@ -116,7 +115,7 @@ ShareListener.addEventListener('click', function() {
                         //add file to users filelist
                         //console.log(filename);
                         firebase.database().ref().child("users")
-                            .child(childKey).child("fileList").child(file).set({ 'fileName': filename });
+                            .child(childKey).child("fileList").child(file).set({ 'fileName': filename, 'content': '' });
                     });
 
 
@@ -225,6 +224,7 @@ document.body.ondrop = (e) => {
 // Called when user state changes (login/logout)
 firebase.auth().onAuthStateChanged(function(user) {
     global_user = user;
+    //console.log(user);
     var authBtn = document.getElementById("authBtn");
     var logoutBtn = document.getElementById("logoutBtn");
 
@@ -394,6 +394,9 @@ firebase.auth().onAuthStateChanged(function(user) {
                         var modelist = ace.require("ace/ext/modelist");
                         var mode = modelist.getModeForPath(childSnapshot.val().fileName).mode;
                         editor.getSession().setMode(mode);
+
+                        //console.log(file.child("fileContents"));
+
                         var contents = file.child("fileContents").once('value').then(function(snapshot) {
                             global_ignore = true;
                             //Create a flag to check if the files is opened
@@ -410,6 +413,11 @@ firebase.auth().onAuthStateChanged(function(user) {
                             //Add a new tab
                             if (flag) {
                                 editor.setValue(snapshot.val(), -1);
+                                //console.log(snapshot.val());
+                                //console.log(fileKey[fileNum]);
+                                //console.log(global_user);
+                                firebase.database().ref().child("users")
+                                .child(global_user.uid).child("fileList").child(fileKey[fileNum]).update({ 'content': snapshot.val() });
                                 fileNum++;
                                 addTab(childSnapshot.val().fileName);
                             }

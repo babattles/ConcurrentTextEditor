@@ -11,8 +11,7 @@ var x_insert = false;
 var getEdits = function() {
 
     currentFile.child("delta").on("child_added", function() {
-        console.log("delta added");
-        //apply most recent delta
+        //For the current implementation, this not needed, but I'm going to leave the function just in case it's needed later.
     });
 
     currentFile.child("delta").on("child_changed", function(snapshot) {
@@ -531,7 +530,7 @@ var convertIndex = function(index) {
     return newIndex;
 }
 
-// Reduces start and end indices by the lenght of an edit removed
+// Reduces start and end indices by the length of an edit removed
 // for all edits that appear after the edit being removed
 var fixIndicesAfterRemovalAccept = function(index, length) {
     editRef.once('value', function(snapshot) {
@@ -732,7 +731,7 @@ function loadEdits() {
                     editHTML += '<div id="edit-add" class="edit" ' +
                         onClickLogic +
                         'oncontextmenu="admin(\'' + editVal.id + '\')"' +
-                        'onmouseover="editHighlight(\'' + editVal.id + '\')" ' +
+                        'onmouseover="editScrollandHighlight(\'' + editVal.id + '\')" ' +
                         'onmouseout="editUnhighlight(\'' + editVal.id + '\')">' +
                         divContent +
                         deleteEditBtn +
@@ -758,10 +757,12 @@ function loadEdits() {
                     }
                     let childDiv = '<b>' + childVal.username + '</b>: ' + childContent;
                     if (childVal.type == 'insert') {
+
+
                         editHTML += '<div id="edit-add-child" class="edit"' +
                             onClickLogic +
                             'oncontextmenu="admin(\'' + editVal.id + '\')"' +
-                            'onmouseover="editHighlight(\'' + childVal.id + '\')" ' +
+                            'onmouseover="editScrollandHighlight(\'' + childVal.id + '\')" ' +
                             'onmouseout="editUnhighlight(\'' + childVal.id + '\')">' +
                             childDiv + '</div>\n';
                     } else {
@@ -940,4 +941,15 @@ unhighlightEditsByUser = function(userId) {
             unhighlight(edits[i]);
         }
     }
+}
+
+editScrollandHighlight = function(editId) {
+    editHighlight(editId);
+    var row = 1;
+    for (var i = 0; i < edits.length; i++) {
+        if (edits[i].id == editId) {
+            row = getRowColumnIndices(edits[i].start).row;
+        }
+    }
+    editor.scrollToLine(row, true, true, function() {});
 }

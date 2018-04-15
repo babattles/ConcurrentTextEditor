@@ -314,6 +314,12 @@ firebase.auth().onAuthStateChanged(function(user) {
                                 element.classList.add("collabInactive");
                             }
                             element.appendChild(document.createTextNode(snapshot.val().username));
+
+                            //event listener for right click on collaborators(make users admins)
+                            element.addEventListener("oncontextmenu", function() {
+                                console.log("context menu clicked");
+                            });
+
                             onlineUsersContainer.appendChild(element);
                         } else {
                             if (snapshot.val().online === 'true') {
@@ -374,6 +380,9 @@ firebase.auth().onAuthStateChanged(function(user) {
                                 element.addEventListener("mouseover", function(event) {
                                     unhighlightAllRemovals();
                                     highlightEditsByUser(childSnapshot.key);
+                                });
+                                element.addEventListener("contextmenu", function(event) {
+                                    makeAdmin(childSnapshot.key);
                                 });
                                 element.addEventListener("mouseout", function(event) {
                                     unhighlightEditsByUser(childSnapshot.key);

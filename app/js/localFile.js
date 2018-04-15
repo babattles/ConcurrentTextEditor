@@ -52,7 +52,7 @@ var openFile = function() {
                 // user is logged in
                 var userRef = firebase.database().ref().child("users").child(user.uid);
                 // get the user's username
-                userRef.child("username").once("value").then(function (snapshot) {
+                userRef.child("username").once("value").then(function(snapshot) {
                     currentUserName = snapshot.val();
                     var fileList = firebase.database().ref().child('files');
                     var newFile = fileList.push(); // generate a new fileID
@@ -63,7 +63,7 @@ var openFile = function() {
                     // set the current open file to the new file
                     currentFile = newFile;
                     // Set the default channels
-                    currentFile.child("messages").child("General").once('value', function (snapshot) {
+                    currentFile.child("messages").child("General").once('value', function(snapshot) {
                         if (!snapshot.exists()) {
                             currentFile.child("messages").child("General").push({
                                 content: "Welcome to the General Channel!",
@@ -71,7 +71,7 @@ var openFile = function() {
                             });
                         }
                     });
-                    currentFile.child("messages").child("Random").once('value', function (snapshot) {
+                    currentFile.child("messages").child("Random").once('value', function(snapshot) {
                         if (!snapshot.exists()) {
                             currentFile.child("messages").child("Random").push({
                                 content: "Welcome to the Random Channel!",
@@ -123,7 +123,7 @@ var openFile = function() {
 };
 
 //open a file when dragged into ace
-var openFileDrag = function (pathDrag) {
+var openFileDrag = function(pathDrag) {
     editor.setReadOnly(false);
     path = pathDrag;
     currentFileName = path.substring(path.lastIndexOf(pathSeperator) + 1, path.length);;
@@ -161,7 +161,7 @@ var openFileDrag = function (pathDrag) {
             // user is logged in
             var userRef = firebase.database().ref().child("users").child(user.uid);
             // get the user's username
-            userRef.child("username").once("value").then(function (snapshot) {
+            userRef.child("username").once("value").then(function(snapshot) {
                 currentUserName = snapshot.val();
                 var fileList = firebase.database().ref().child('files');
                 var newFile = fileList.push(); // generate a new fileID
@@ -172,7 +172,7 @@ var openFileDrag = function (pathDrag) {
                 // set the current open file to the new file
                 currentFile = newFile;
                 // Set the default channels
-                currentFile.child("messages").child("General").once('value', function (snapshot) {
+                currentFile.child("messages").child("General").once('value', function(snapshot) {
                     if (!snapshot.exists()) {
                         currentFile.child("messages").child("General").push({
                             content: "Welcome to the General Channel!",
@@ -180,7 +180,7 @@ var openFileDrag = function (pathDrag) {
                         });
                     }
                 });
-                currentFile.child("messages").child("Random").once('value', function (snapshot) {
+                currentFile.child("messages").child("Random").once('value', function(snapshot) {
                     if (!snapshot.exists()) {
                         currentFile.child("messages").child("Random").push({
                             content: "Welcome to the Random Channel!",
@@ -202,9 +202,9 @@ var openFileDrag = function (pathDrag) {
     });
 };
 
-var saveFile = function () {
+var saveFile = function() {
     if (path) {
-        fs.writeFile(path, editor.getValue(), function (err) {
+        fs.writeFile(path, editor.getValue(), function(err) {
             if (err) {
                 alert("An error ocurred updating the file" + err.message);
                 console.log(err);
@@ -217,9 +217,9 @@ var saveFile = function () {
     }
 };
 
-var saveFileAs = function () {
-    dialog.showSaveDialog(function (filename) {
-        fs.writeFile(filename, editor.getValue(), function (err) {
+var saveFileAs = function() {
+    dialog.showSaveDialog(function(filename) {
+        fs.writeFile(filename, editor.getValue(), function(err) {
             if (err) {
                 alert("An error ocurred updating the file" + err.message);
                 console.log(err);
@@ -231,11 +231,11 @@ var saveFileAs = function () {
     });
 };
 
-setCurrentFile = function (fileKey) {
+setCurrentFile = function(fileKey) {
     currentFile = fileKey;
 }
 
-var closeFile = function () {
+var closeFile = function() {
     // set the state (so opening a file doesn't stage an edit)
     global_ignore = true;
 

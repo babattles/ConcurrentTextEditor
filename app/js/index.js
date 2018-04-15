@@ -439,11 +439,12 @@ firebase.auth().onAuthStateChanged(function(user) {
                     }
 
                     //Sets file to read only if they don't have edit access
-                    var userPerms = database.ref("files/" + currentKey + "/userList/" + user.uid);
+                    let userPerms = database.ref("files/" + currentKey + "/userList/" + user.uid);
                     userPerms.on('value', function(data) {
                         if (data.val().readOnly == true) {
                             editor.setReadOnly(true);
-                            console.log('setting read only to true');
+                        } else {
+                            editor.setReadOnly(false);                        
                         }
                     });
 

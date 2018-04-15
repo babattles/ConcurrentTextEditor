@@ -119,20 +119,6 @@ var getEdits = function() {
         }
     });   
 
-    //edit ref = currentFile.child("edits");
-    //reset accepted votes when the contents of the edit are changed
-    /*editRef.on("child_changed", function (snapshot) {
-        snapshot.forEach(function(childSnapshot) {
-        	var childKey = childSnapshot.key;
-        	console.log("Edit accessed");
-        	editRef.child(childKey).child('content').on('child_changed', function(anotherSnap){
-        		editRef.child(childKey).child('accepted').remove();
-        		console.log("content was changed");
-        		console.log(anotherSnap.val());
-        	});
-        });
-    });*/
-
 }
 
 /* helper function */

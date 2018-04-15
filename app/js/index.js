@@ -156,7 +156,10 @@ ipcRenderer.on('close-file', function(event, arg) {
 // Listen for Close File Menu Select
 ipcRenderer.on('view-live-file', function(event, arg) {
     fileMode = "live";
+    console.log("back to live");
     loadEditsIntoEditor();
+    unhighlightAllRemovals();
+    highlightAllRemovals();
 });
 
 // Listen for Close File Menu Select
@@ -170,6 +173,7 @@ ipcRenderer.on('view-base-file', function(event, arg) {
         editor.session.setValue(fileContent);
         editor.selection.moveTo(cursor.row, cursor.column);
         global_ignore = false;
+        unhighlightAllRemovals();
     });
 });
 
@@ -373,6 +377,14 @@ firebase.auth().onAuthStateChanged(function(user) {
                                     element.classList.add("collabInactive");
                                 }
                                 element.appendChild(document.createTextNode(childSnapshot.val().username));
+                                element.addEventListener("mouseover", function(event) {
+                                    unhighlightAllRemovals();
+                                    highlightEditsByUser(childSnapshot.key);
+                                });
+                                element.addEventListener("mouseout", function(event) {
+                                    unhighlightEditsByUser(childSnapshot.key);
+                                    highlightAllRemovals();
+                                });
                                 onlineUsersContainer.appendChild(element);
                             });
                         });
@@ -425,7 +437,7 @@ firebase.auth().onAuthStateChanged(function(user) {
                     userPerms.on('value', function(data) {
                         if (data.val().readOnly == true) {
                             editor.setReadOnly(true);
-                            // console.log('test');
+                            console.log('setting read only to true');
                         }
                     });
 

@@ -498,7 +498,6 @@ var setEdit = function(startIndex, endIndex, delta) {
                     comment: "",
                     addedSize: endIndex - startIndex,
                 }
-                edits.push(e);
                 postEdit(e);
                 currentFile.child("delta").set({
                     'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + delta.action + ";" + e.id + ";" + stringify(delta.lines)

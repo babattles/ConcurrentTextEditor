@@ -7,12 +7,14 @@ var admin = function(id) {
         label: 'Force accept edit',
         click: function() {
             var user = firebase.auth().currentUser;
-            if (currentFile.child('adminList').child(user.uid) != null) {
-                console.log('accepting edit: ' + id);
-                acceptEdit(id);
-            } else {
-                console.log("You are not an admin...\n");
-            }
+            currentFile.child('adminList').once('value', function(snapshot) {
+                if (snapshot.hasChild(user.uid)) {
+                    console.log('accepting edit: ' + id);
+                    acceptEdit(id);
+                } else {
+                    console.log("You are not an admin...\n");
+                }
+            });
         }
     }));
     menu.append(new MenuItem({
@@ -22,12 +24,14 @@ var admin = function(id) {
         label: 'Veto edit',
         click: function() {
             var user = firebase.auth().currentUser;
-            if (currentFile.child('adminList').child(user.uid) != null) {
-                console.log('deleting edit: ' + id);
-                deleteEditById(id);
-            } else {
-                console.log("You are not an admin...\n");
-            }
+            currentFile.child('adminList').once('value', function(snapshot) {
+                if (snapshot.hasChild(user.uid)) {
+                    console.log('deleting edit: ' + id);
+                    deleteEditById(id);
+                } else {
+                    console.log("You are not an admin...\n");
+                }
+            });
         }
     }));
     menu.popup(remote.getCurrentWindow());
@@ -41,16 +45,18 @@ var makeAdmin = function(userid) {
         label: 'Make admin',
         click: function() {
             var user = firebase.auth().currentUser;
-            if (!currentFile.child('adminList').child(user.uid) != null) {
-                let userNames = database.ref('users');
-                userNames.child(user.uid).on('value', function(snapshot) {
-                    currentFile.child('adminList').child(user.uid).set({ 'username': snapshot.val().username });
-                });
-                console.log(snapshot.val().username + " has been made admin ");
-            } else {
-                console.log("You are not an admin...\n");
-            }
+            currentFile.child('adminList').once('value', function(snapshot) {
+                if (snapshot.hasChild(user.uid)) {
+                    let userNames = database.ref('users');
+                    userNames.child(userid).on('value', function(userData) {
+                        currentFile.child('adminList').child(userid).set({ 'username': userData.val().username });
+                        console.log(userData.val().username + " has been made admin ");
+                    });
+                } else {
+                    console.log("You are not an admin...\n");
+                }
+            });
         }
     }));
     menu.popup(remote.getCurrentWindow());
-}
+};

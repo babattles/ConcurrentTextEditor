@@ -65,6 +65,10 @@ var switchTab = function(args) {
     for (i in tabs) {
     	if(tabs[i] == lastTab) {
     		var buff = editor.getValue();
+            //console.log(fileKey[i]);
+            //console.log(buff);
+            firebase.database().ref().child("users")
+            .child(global_user.uid).child("fileList").child(fileKey[i]).update({ 'content': buff });
     		sessions[i] = buff;
     	}
     }
@@ -92,15 +96,16 @@ var switchTab = function(args) {
     editor.setValue(sessions[target]);
     editor.clearSelection();
 
-    console.log(fileKey[target]);
+   // console.log(fileKey[target]);
     
     var file = database.ref("files").child(fileKey[target]);
+    console.log(file)
     //console.log(file);
     currentFile = file;
  
     editRef = currentFile.child("edits");
     currentKey = fileKey[target];
-    clearEdits();
+    //clearEdits();
     getEdits();
     loadEdits();
 

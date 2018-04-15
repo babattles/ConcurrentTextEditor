@@ -38,7 +38,7 @@ var openFile = function() {
             //Create a new tab for the file
             addTab(currentFileName);
             fileNum++;
-            console.log("curr file number " + fileNum);
+            //console.log("curr file number " + fileNum);
 
             // reset the state
             global_ignore = false;

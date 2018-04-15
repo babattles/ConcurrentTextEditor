@@ -122,7 +122,7 @@ ShareListener.addEventListener('click', function() {
 
                 //add user to files userlist
                 firebase.database().ref().child("files")
-                    .child(file).child("userList").child(childKey).set({ 'username': username });
+                    .child(file).child("userList").child(childKey).set({ 'username': username, 'readOnly': document.getElementById('readOnlyInvite').checked});
                 alert("User added");
             }
         }).catch(function(error) {
@@ -132,6 +132,7 @@ ShareListener.addEventListener('click', function() {
             }
         });
     newUser.value = '';
+    document.getElementById('readOnlyInvite').checked = false;
 });
 /**
  * Menu Item Listeners
@@ -286,13 +287,6 @@ firebase.auth().onAuthStateChanged(function(user) {
                     //Updates the edits for the file
                     loadEdits();
                 });
-
-                //Allows you to get the link for a file
-                label.addEventListener('click', function() {
-                    copyLink();
-
-                });
-
                 // make open button
                 var openBtn = document.createElement("button");
                 openBtn.style.background = "green";
@@ -439,11 +433,12 @@ firebase.auth().onAuthStateChanged(function(user) {
                     }
 
                     //Sets file to read only if they don't have edit access
-                    var userPerms = database.ref("files/" + currentKey + "/userList/" + user.uid);
+                    let userPerms = database.ref("files/" + currentKey + "/userList/" + user.uid);
                     userPerms.on('value', function(data) {
                         if (data.val().readOnly == true) {
                             editor.setReadOnly(true);
-                            console.log('setting read only to true');
+                        } else {
+                            editor.setReadOnly(false);                        
                         }
                     });
 

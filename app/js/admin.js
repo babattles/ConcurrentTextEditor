@@ -6,8 +6,13 @@ var admin = function(id) {
     menu.append(new MenuItem({
         label: 'Force accept edit',
         click: function() {
-            console.log('accepting edit: ' + id);
-            acceptEdit(id);
+            var user = firebase.auth().currentUser;
+            if (currentFile.child('adminList').child(user.uid) != null) {
+                console.log('accepting edit: ' + id);
+                acceptEdit(id);
+            } else {
+                console.log("You are not an admin...\n");
+            }
         }
     }));
     menu.append(new MenuItem({
@@ -16,8 +21,13 @@ var admin = function(id) {
     menu.append(new MenuItem({
         label: 'Veto edit',
         click: function() {
-            console.log('deleting edit: ' + id);
-            deleteEditById(id);
+            var user = firebase.auth().currentUser;
+            if (currentFile.child('adminList').child(user.uid) != null) {
+                console.log('deleting edit: ' + id);
+                deleteEditById(id);
+            } else {
+                console.log("You are not an admin...\n");
+            }
         }
     }));
     menu.popup(remote.getCurrentWindow());
@@ -30,16 +40,16 @@ var makeAdmin = function(userid) {
     menu.append(new MenuItem({
         label: 'Make admin',
         click: function() {
-            console.log(userid + " has been made admin ");
-        }
-    }));
-    menu.append(new MenuItem({
-        type: 'separator'
-    }));
-    menu.append(new MenuItem({
-        label: 'Remove admin',
-        click: function() {
-            console.log(userid + " has lost admin privileges");
+            var user = firebase.auth().currentUser;
+            if (!currentFile.child('adminList').child(user.uid) != null) {
+                let userNames = database.ref('users');
+                userNames.child(user.uid).on('value', function(snapshot) {
+                    currentFile.child('adminList').child(user.uid).set({ 'username': snapshot.val().username });
+                });
+                console.log(snapshot.val().username + " has been made admin ");
+            } else {
+                console.log("You are not an admin...\n");
+            }
         }
     }));
     menu.popup(remote.getCurrentWindow());

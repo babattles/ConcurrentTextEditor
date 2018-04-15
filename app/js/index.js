@@ -26,6 +26,9 @@ var justTyped = false;
 
 // track the user's current open file in the database
 var currentFile = null;
+
+//track the user's current file's admin list
+var adminList = null;
 // track the user's edits in their current open file
 var editRef = null;
 

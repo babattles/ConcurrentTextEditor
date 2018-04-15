@@ -53,6 +53,13 @@ var getEdits = function() {
     editRef.on("child_removed", function(snapshot) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
         //console.log("child removed...");
         var e = snapshot.val();
+        // Delete edit from edits[]
+        for (i in edits) {
+            if (edits[i].id == snapshot.key) {
+                console.log("Deleted from local edits array");
+                edits.splice(i, 1);
+            }
+        }
         if (e.type == "insert" && !e.hasBeenAccepted) { // insert
             global_ignore = true;
             var cursor = editor.getCursorPosition();
@@ -61,7 +68,7 @@ var getEdits = function() {
                 var suffix = editor.session.getValue().slice(e.endIndex);
                 x_insert = false;
             } else {
-                var suffix = editor.session.getValue().slice(e.endIndex - 1);
+                var suffix = editor.session.getValue().slice(e.endIndex);
             }
             //console.log("Prefix = " + prefix);
             //console.log("Suffix = " + suffix);
@@ -577,14 +584,7 @@ var acceptEdit = function(editID) {
             }
         });
     });
-    //Delete edit from edits[]
-    for (i in edits) {
-        if (edits[i].id == thisEdit.key) {
-            thisEdit.remove();
-            edits.splice(i, 1);
-            return;
-        }
-    }
+    thisEdit.remove();
 }
 
 /* Highlights the provided edit */
@@ -824,14 +824,6 @@ var deleteEditById = function(editID) {
             }
         });
     });
-
-    // Delete edit from edits[]
-    for (i in edits) {
-        if (edits[i].id == thisEdit.key) {
-            edits.splice(i, 1);
-            return;
-        }
-    }
 }
 
 //TODO: Child Edits

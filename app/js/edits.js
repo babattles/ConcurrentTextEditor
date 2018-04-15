@@ -740,6 +740,7 @@ function loadEdits() {
                     editHTML += '<div id="edit-remove" class="edit" ' +
                         onClickLogic +
                         'oncontextmenu="admin(\'' + editVal.id + '\')"' +
+                        'onmouseover="editScroll(\'' + editVal.id + '\')" ' +
                         divContent +
                         deleteEditBtn +
                         acceptButton +
@@ -768,6 +769,7 @@ function loadEdits() {
                         editHTML += '<div id="edit-remove-child" class="edit" ' +
                             onClickLogic +
                             'oncontextmenu="admin(\'' + editVal.id + '\')"' +
+                            'onmouseover="editScroll(\'' + editVal.id + '\')" ' +
                             childDiv + '</div>\n';
                         // editHighlight(childVal.id);
                     }
@@ -944,6 +946,10 @@ unhighlightEditsByUser = function(userId) {
 
 editScrollandHighlight = function(editId) {
     editHighlight(editId);
+    editScroll(editId);
+}
+
+var editScroll = function(editId) {
     var row = 1;
     for (var i = 0; i < edits.length; i++) {
         if (edits[i].id == editId) {

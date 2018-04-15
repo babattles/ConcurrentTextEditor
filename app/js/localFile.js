@@ -85,9 +85,13 @@ var openFile = function() {
                     // add user to file's userList
                     newFile.child('userList').child(user.uid).set({ 'username': currentUserName });
 
-                    newFile.child('delta').set({'deltaToParse': ''});
+                    //add user to file's adminList
+                    newFile.child('adminList').child(user.uid).set({ 'username': currentUserName });
+                    console.log("You created this file! So you are an admin...");
 
-                    newFile.child("delta").on("child_changed", function (snapshot) {
+                    newFile.child('delta').set({ 'deltaToParse': '' });
+
+                    newFile.child("delta").on("child_changed", function(snapshot) {
                         console.log("delta changed here");
                         if (fileMode == "live") {
                             // console.log(snapshot.ref.parent);
@@ -193,6 +197,9 @@ var openFileDrag = function(pathDrag) {
                 editRef = currentFile.child("edits");
                 // add user to file's userList
                 newFile.child('userList').child(user.uid).set({ 'username': currentUserName });
+                //add user to file's adminList
+                newFile.child('adminList').child(user.uid).set({ 'username': currentUserName });
+                console.log("You created this file! So you are an admin...");
                 // add fileID to user's fileList
                 userRef.child('fileList').child(newFile.key).set({ 'fileName': currentFileName });
                 // set current user online status

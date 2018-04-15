@@ -381,6 +381,9 @@ firebase.auth().onAuthStateChanged(function(user) {
                                     unhighlightAllRemovals();
                                     highlightEditsByUser(childSnapshot.key);
                                 });
+                                element.addEventListener("contextmenu", function(event) {
+                                    makeAdmin(childSnapshot.key);
+                                });
                                 element.addEventListener("mouseout", function(event) {
                                     unhighlightEditsByUser(childSnapshot.key);
                                     highlightAllRemovals();

@@ -317,12 +317,6 @@ firebase.auth().onAuthStateChanged(function(user) {
                                 element.classList.add("collabInactive");
                             }
                             element.appendChild(document.createTextNode(snapshot.val().username));
-
-                            //event listener for right click on collaborators(make users admins)
-                            element.addEventListener("oncontextmenu", function() {
-                                console.log("context menu clicked");
-                            });
-
                             onlineUsersContainer.appendChild(element);
                         } else {
                             if (snapshot.val().online === 'true') {
@@ -379,7 +373,16 @@ firebase.auth().onAuthStateChanged(function(user) {
                                 } else if (childSnapshot.key != user.uid) {
                                     element.classList.add("collabInactive");
                                 }
-                                element.appendChild(document.createTextNode(childSnapshot.val().username));
+                                file.child('adminList').on('value', function(snapshot) {
+                                    if (snapshot.hasChild(childSnapshot.key)) {
+                                        console.log(childSnapshot.val().username + "(admin)");
+                                        element.appendChild(document.createTextNode(childSnapshot.val().username + "(admin)"));
+                                    } else {
+                                        console.log(childSnapshot.val().username);
+                                        element.appendChild(document.createTextNode(childSnapshot.val().username));
+                                    }
+                                });
+                                //element.appendChild(document.createTextNode(childSnapshot.val().username));
                                 element.addEventListener("mouseover", function(event) {
                                     unhighlightAllRemovals();
                                     highlightEditsByUser(childSnapshot.key);

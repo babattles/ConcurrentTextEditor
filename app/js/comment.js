@@ -1,6 +1,5 @@
 var userInput;
 
-var editR;
 
 var commentPanel = document.getElementById('Comment');
 var commentInput = document.getElementById('comment-input');
@@ -12,13 +11,12 @@ clearComment = function() {
 
 var openComment = function(edit) {
     //does not open comment box when accept toggle is clicked
-    x = edit;
-    //console.log(x);
+    x = getEditRefWithId(edit);
     clearComment();
     commentPanel.classList.toggle("hidden");
     x.once('value', function(snapshot) {
-        if (snapshot.val().comment) {
-        comment_span.innerHTML = "Comment: " + snapshot.val().comment;
+        if (snapshot.val().comment != null) {
+            comment_span.innerHTML = "Comment: " + snapshot.val().comment;
         } else {
             comment_span.innerHTML = "Comment: ";
         }

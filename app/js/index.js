@@ -122,7 +122,7 @@ ShareListener.addEventListener('click', function() {
 
                 //add user to files userlist
                 firebase.database().ref().child("files")
-                    .child(file).child("userList").child(childKey).set({ 'username': username });
+                    .child(file).child("userList").child(childKey).set({ 'username': username, 'readOnly': document.getElementById('readOnlyInvite').checked});
                 alert("User added");
             }
         }).catch(function(error) {
@@ -132,6 +132,7 @@ ShareListener.addEventListener('click', function() {
             }
         });
     newUser.value = '';
+    document.getElementById('readOnlyInvite').checked = false;
 });
 /**
  * Menu Item Listeners

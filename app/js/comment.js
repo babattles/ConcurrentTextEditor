@@ -1,22 +1,26 @@
 var userInput;
 
-var editR;
 
 var commentPanel = document.getElementById('Comment');
 var commentInput = document.getElementById('comment-input');
+var comment_span = document.getElementById('comment-span');
 
 clearComment = function() {
     commentInput.value = '';
 }
 
-var openComment = function(glo_e) {
+var openComment = function(edit) {
     //does not open comment box when accept toggle is clicked
-    if (!e) var e = window.event;
-    if (!e.target.matches('.edit')){
-        return;
-    }
+    x = getEditRefWithId(edit);
     clearComment();
     commentPanel.classList.toggle("hidden");
+    x.once('value', function(snapshot) {
+        if (snapshot.val().comment != null) {
+            comment_span.innerHTML = "Comment: " + snapshot.val().comment;
+        } else {
+            comment_span.innerHTML = "Comment: ";
+        }
+    });
 }
 
 changeCommentBtn.addEventListener("click", function() {

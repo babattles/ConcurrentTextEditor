@@ -286,13 +286,6 @@ firebase.auth().onAuthStateChanged(function(user) {
                     //Updates the edits for the file
                     loadEdits();
                 });
-
-                //Allows you to get the link for a file
-                label.addEventListener('click', function() {
-                    copyLink();
-
-                });
-
                 // make open button
                 var openBtn = document.createElement("button");
                 openBtn.style.background = "green";

@@ -690,7 +690,8 @@ function loadEdits() {
                         'id': i,
                         'username': userData.val()[data.val()[i].user].username,
                         'content': data.val()[i].content,
-                        'type': data.val()[i].type
+                        'type': data.val()[i].type,
+                        'last': data.val()[i].last
                     });
                 } else {
                     childList.push({
@@ -698,6 +699,7 @@ function loadEdits() {
                         'username': userData.val()[data.val()[i].user].username,
                         'content': data.val()[i].content,
                         'type': data.val()[i].type,
+                        'last': data.val()[i].last,
                         'parent': data.val()[i].parent
                     });
                 }
@@ -763,7 +765,10 @@ function loadEdits() {
                         '</div>\n';
                     // editHighlight(editVal.id);
                 }
-                //console.log(editHTML)
+
+                if(editVal.last == user.uid) {
+                    notifyLastUser(user.uid, editVal.content);
+                }
                 if (editVal.child) {
                     childVal = editVal.child;
                     let childContent;
@@ -789,6 +794,9 @@ function loadEdits() {
                             'onmouseover="editScroll(\'' + editVal.id + '\')" ' +
                             childDiv + '</div>\n';
                         // editHighlight(childVal.id);
+                    }
+                    if(editVal.last == user.uid) {
+                        notifyLastUser(user.uid, editVal.content);
                     }
                 }
             }
@@ -964,4 +972,8 @@ var editScroll = function(editId) {
         }
     }
     editor.scrollToLine(row, true, true, function() {});
+}
+
+var notifyLastUser = function(user, edit) {
+    alert("You are the last person not to make a decison on edit:\n" + edit);
 }

@@ -117,7 +117,8 @@ var getEdits = function() {
         if (changedEdit.type == "remove") {
             editHighlight(snapshot.key);
         }
-    });
+    });   
+
 }
 
 /* helper function */
@@ -144,6 +145,12 @@ var clearEdits = function() {
 var getEditRef = function(edit) {
     if (editRef == null) return null;
     return editRef.child("" + edit.id);
+}
+
+/* Helper - Get the database reference for an edit given edit.id*/
+var getEditRefWithId = function (editID) {
+    if (editRef == null) return null;
+    return editRef.child("" + editID);
 }
 
 /* Post a new edit to the database */
@@ -197,6 +204,8 @@ var deleteEdit = function(edit, size, type) {
 // edit is the updated/new edit
 // size is the amount to increase all other edits by
 var fixIndices = function(edit, size, type) {
+	//reset accepted count on edit on change
+	editRef.child(edit.id).child('accepted').remove();
     if (type == "insert") {
         editRef.once('value', function(snapshot) {
             justTyped = true;
@@ -289,6 +298,8 @@ var removeTypedText = function(startIndex, endIndex, delta) {
 }
 
 var updateRemoval = function(edit, size) {
+	//reset accepted count on edit on change
+	editRef.child(edit.id).child('accepted').remove();
     childRef = editRef.child(edit.id);
     childRef.update({
         content: edit.content,
@@ -704,6 +715,7 @@ function loadEdits() {
 
             for (var i = 0; i < parentList.length; i++) {
                 editVal = parentList[i];
+
                 let eContent;
                 if (editVal.content.length > 20) {
                     eContent = editVal.content.substring(0, 20);
@@ -712,6 +724,7 @@ function loadEdits() {
                 }
 
                 var numAccepted;
+                var passing = getEditRef(editVal);
                 firebase.database().ref().child("files").child(currentKey)
                     .child('edits').child(editVal.id).child('accepted').on("value", function(snapshot) {
                         numAccepted = snapshot.numChildren();
@@ -724,10 +737,13 @@ function loadEdits() {
                         'onclick="deleteEditById(\'' + editVal.id + '\')">';
                 }
 
-                let acceptButton = '<label class="switch" ><input id="edit' + editVal.id + '" type="checkbox"' +
-                    ' onclick="acceptTracker(\'' + editVal.id + '\', ' + numUsers + ')">' +
-                    '<span class="slider round"></span></label>';
-                let onClickLogic = 'onclick="openComment(glo_e);"';
+
+                let acceptButton = '<label class="switch" ><input id="edit' + editVal.id + '" type="checkbox"'
+                    + ' onclick="acceptTracker(\'' + editVal.id + '\', ' + numUsers + ')">'
+                    + '<span class="slider round"></span></label>';
+
+                let onClickLogic = 'onclick="openComment(\'' + editVal.id + '\');"';
+
                 if (editVal.type == 'insert') {
                     editHTML += '<div id="edit-add" class="edit" ' +
                         onClickLogic +
@@ -749,6 +765,7 @@ function loadEdits() {
                         '</div>\n';
                     // editHighlight(editVal.id);
                 }
+
                 if(editVal.last == user.uid) {
                     notifyLastUser(user.uid, editVal.content);
                 }
@@ -833,8 +850,6 @@ var deleteEditById = function(editID) {
         });
     });
 }
-
-//TODO: Child Edits
 
 //add or remove user from accepted list in edit if toggle is clicked
 function acceptTracker(edit, numUsers) {

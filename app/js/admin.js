@@ -12,7 +12,7 @@ var admin = function(id) {
                     console.log('accepting edit: ' + id);
                     acceptEdit(id);
                 } else {
-                    console.log("You are not an admin...\n");
+                    alert("You are not an admin...");
                 }
             });
         }
@@ -29,7 +29,7 @@ var admin = function(id) {
                     console.log('deleting edit: ' + id);
                     deleteEditById(id);
                 } else {
-                    console.log("You are not an admin...\n");
+                    alert("You are not an admin...");
                 }
             });
         }
@@ -46,14 +46,18 @@ var makeAdmin = function(userid) {
         click: function() {
             var user = firebase.auth().currentUser;
             currentFile.child('adminList').once('value', function(snapshot) {
-                if (snapshot.hasChild(user.uid)) {
-                    let userNames = database.ref('users');
-                    userNames.child(userid).on('value', function(userData) {
-                        currentFile.child('adminList').child(userid).set({ 'username': userData.val().username });
-                        console.log(userData.val().username + " has been made admin ");
-                    });
+                if (!snapshot.hasChild(userid)) {
+                    if (snapshot.hasChild(user.uid)) {
+                        let userNames = database.ref('users');
+                        userNames.child(userid).on('value', function(userData) {
+                            currentFile.child('adminList').child(userid).set({ 'username': userData.val().username });
+                            console.log(userData.val().username + " has been made admin ");
+                        });
+                    } else {
+                        alert("You are not an admin...");
+                    }
                 } else {
-                    console.log("You are not an admin...\n");
+                    alert("User is already an admin!");
                 }
             });
         }

@@ -168,7 +168,7 @@ ipcRenderer.on('view-live-file', function(event, arg) {
 // Listen for Close File Menu Select
 ipcRenderer.on('view-base-file', function(event, arg) {
     fileMode = "base";
-    currentFile.on('value', function(childSnapshot) {
+    currentFile.once('value', function(childSnapshot) {
         var f = childSnapshot.val();
         var fileContent = f.fileContents;
         global_ignore = true;

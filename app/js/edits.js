@@ -30,8 +30,6 @@ var getEdits = function() {
             var editID = parsedContent.slice(0, parsedContent.indexOf(";"));
             parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
             updateEditor(startIndex, endIndex, type, editType, editID, parsedContent);
-        } else {
-            console.log("filemode not live (delta on changed)");
         }
     });
 
@@ -53,13 +51,7 @@ var getEdits = function() {
     editRef.on("child_removed", function(snapshot) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
         //console.log("child removed...");
         var e = snapshot.val();
-        // Delete edit from edits[]
-        for (i in edits) {
-            if (edits[i].id == snapshot.key) {
-                console.log("Deleted from local edits array");
-                edits.splice(i, 1);
-            }
-        }
+
         if (e.type == "insert" && !e.hasBeenAccepted) { // insert
             global_ignore = true;
             var cursor = editor.getCursorPosition();
@@ -70,38 +62,35 @@ var getEdits = function() {
             } else {
                 var suffix = editor.session.getValue().slice(e.endIndex);
             }
-            //console.log("Prefix = " + prefix);
-            //console.log("Suffix = " + suffix);
             editor.session.setValue(prefix + suffix);
             editor.selection.moveTo(cursor.row, cursor.column);
             global_ignore = false;
         } else if (e.type == "remove" && e.hasBeenAccepted) {
-            editUnhighlight(snapshot.key);
             global_ignore = true;
             var cursor = editor.getCursorPosition();
             var prefix = editor.session.getValue().slice(0, e.startIndex);
             var suffix = editor.session.getValue().slice(e.endIndex);
-            // console.log("Prefix = " + prefix);
-            // console.log("Suffix = " + suffix);
             editor.session.setValue(prefix + suffix);
             editor.selection.moveTo(cursor.row, cursor.column);
             global_ignore = false;
-        } else if (e.type == "remove" && !e.hasBeenAccepted) {
-            editUnhighlight(snapshot.key);
+        }
+        editUnhighlight(snapshot.key);
+        // Delete edit from edits[]
+        for (i in edits) {
+            if (edits[i].id == snapshot.key) {
+                edits.splice(i, 1);
+            }
         }
     });
 
     // update local edit array when edits are changed on the database
     editRef.on("child_changed", function(snapshot) {
-        // console.log("CHILD CHANGED!");
         var changedEdit = snapshot.val();
         if (changedEdit.type == "remove") {
             editUnhighlight(snapshot.key);
         }
-        // console.log(changedEdit.content);
         edits.find((obj, index) => {
             if (obj.id == snapshot.key && (obj.start != changedEdit.startIndex || obj.end != changedEdit.endIndex)) {
-                // console.log("updating edits[index]");
                 edits[index] = {
                     start: changedEdit.startIndex,
                     end: changedEdit.endIndex,
@@ -117,7 +106,7 @@ var getEdits = function() {
         if (changedEdit.type == "remove") {
             editHighlight(snapshot.key);
         }
-    });   
+    });
 
 }
 
@@ -148,7 +137,7 @@ var getEditRef = function(edit) {
 }
 
 /* Helper - Get the database reference for an edit given edit.id*/
-var getEditRefWithId = function (editID) {
+var getEditRefWithId = function(editID) {
     if (editRef == null) return null;
     return editRef.child("" + editID);
 }
@@ -204,8 +193,8 @@ var deleteEdit = function(edit, size, type) {
 // edit is the updated/new edit
 // size is the amount to increase all other edits by
 var fixIndices = function(edit, size, type) {
-	//reset accepted count on edit on change
-	editRef.child(edit.id).child('accepted').remove();
+    //reset accepted count on edit on change
+    editRef.child(edit.id).child('accepted').remove();
     if (type == "insert") {
         editRef.once('value', function(snapshot) {
             justTyped = true;
@@ -281,8 +270,6 @@ var removeTypedText = function(startIndex, endIndex, delta) {
         var cursor = editor.getCursorPosition();
         var prefix = editor.session.getValue().slice(0, startIndex);
         var suffix = editor.session.getValue().slice(endIndex);
-        // console.log("Prefix = " + prefix);
-        // console.log("Suffix = " + suffix);
         editor.session.setValue(prefix + suffix);
         editor.selection.moveTo(cursor.row, cursor.column);
         global_ignore = false;
@@ -298,8 +285,8 @@ var removeTypedText = function(startIndex, endIndex, delta) {
 }
 
 var updateRemoval = function(edit, size) {
-	//reset accepted count on edit on change
-	editRef.child(edit.id).child('accepted').remove();
+    //reset accepted count on edit on change
+    editRef.child(edit.id).child('accepted').remove();
     childRef = editRef.child(edit.id);
     childRef.update({
         content: edit.content,
@@ -471,14 +458,13 @@ var setEdit = function(startIndex, endIndex, delta) {
                 } else if (obj.start <= startIndex && endIndex <= obj.end && delta.action == "remove" && obj.type == "insert") { // removed something from within an edit
                     console.log("remove from within");
 
-                    currentFile.child("delta").set({
-                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
-                    });
-
                     if (obj.start == startIndex && obj.end == endIndex) { // you're deleting the last of an edit
                         deleteEdit(edits[index], edits[index].end - edits[index].start, delta.action);
                         edits.splice(index, 1);
                     } else {
+                        currentFile.child("delta").set({
+                            'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                        });
                         // console.log("Not really an insert");
                         edits[index].content = obj.content.substring(0, startIndex - obj.start) + obj.content.substring(endIndex - obj.start, obj.content.length);
                         edits[index].start = obj.start;
@@ -490,7 +476,10 @@ var setEdit = function(startIndex, endIndex, delta) {
                     return true;
                 } else if (obj.start <= startIndex && endIndex <= obj.end && delta.action == "remove" && obj.type == "remove") { // removed something from within a removal edit
                     return true;
+                } else if (obj.start <= startIndex && endIndex <= obj.end && delta.action == "insert" && obj.type == "remove") { // added something within a removal edit
+                    return true;
                 }
+
             });
             // never found parent edit, so add edit to edits
             if (!bool) {
@@ -513,8 +502,6 @@ var setEdit = function(startIndex, endIndex, delta) {
                 }
             }
         }
-    } else {
-        console.log("fileMode is not live");
     }
 }
 
@@ -553,7 +540,6 @@ var fixIndicesAfterRemovalAccept = function(index, length) {
 
 // This function is called once all users have accepted an edit.
 var acceptEdit = function(editID) {
-    editUnhighlight(editID);
     var thisEdit = editRef.child(editID);
     thisEdit.update({ hasBeenAccepted: "true" });
     thisEdit.once('value', function(snapshot) {
@@ -726,9 +712,9 @@ function loadEdits() {
                 }
 
 
-                let acceptButton = '<label class="switch" ><input id="edit' + editVal.id + '" type="checkbox"'
-                    + ' onclick="acceptTracker(\'' + editVal.id + '\', ' + numUsers + ')">'
-                    + '<span class="slider round"></span></label>';
+                let acceptButton = '<label class="switch" ><input id="edit' + editVal.id + '" type="checkbox"' +
+                    ' onclick="acceptTracker(\'' + editVal.id + '\', ' + numUsers + ')">' +
+                    '<span class="slider round"></span></label>';
 
                 //let onClickLogic = 'onclick="openComment(\'' + editVal.id + '\');" ';
 
@@ -755,7 +741,7 @@ function loadEdits() {
                     // editHighlight(editVal.id);
                 }
 
-                if(editVal.last == user.uid) {
+                if (editVal.last == user.uid) {
                     notifyLastUser(user.uid, editVal.content);
                 }
                 if (editVal.child) {
@@ -784,7 +770,7 @@ function loadEdits() {
                             childDiv + '</div>\n';
                         // editHighlight(childVal.id);
                     }
-                    if(editVal.last == user.uid) {
+                    if (editVal.last == user.uid) {
                         notifyLastUser(user.uid, editVal.content);
                     }
                 }
@@ -815,10 +801,6 @@ function loadEdits() {
 }
 
 var deleteEditById = function(editID) {
-    //TODO: delete Child Edits if parent
-    //TODO: red wont unhighlight
-    //TODO: delete from edit list
-    editUnhighlight(editID);
     var thisEdit = editRef.child(editID);
     thisEdit.once('value', function(snapshot) {
         var e = snapshot.val();

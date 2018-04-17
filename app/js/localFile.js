@@ -91,38 +91,20 @@ var openFile = function() {
 
                     newFile.child('delta').set({ 'deltaToParse': '' });
 
-                    newFile.child("delta").on("child_changed", function(snapshot) {
-                        console.log("delta changed here");
-                        if (fileMode == "live") {
-                            // console.log(snapshot.ref.parent);
-                            var parsedContent = snapshot.val();
-                            // console.log("parsedContent = " + parsedContent);
-                            var startIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
-                            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-                            var endIndex = parsedContent.slice(0, parsedContent.indexOf(";"));
-                            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-                            var type = parsedContent.slice(0, parsedContent.indexOf(";"));
-                            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-                            var editType = parsedContent.slice(0, parsedContent.indexOf(";"));
-                            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-                            var editID = parsedContent.slice(0, parsedContent.indexOf(";"));
-                            parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
-                            updateEditor(startIndex, endIndex, type, editType, editID, parsedContent);
-                        } else {
-                            console.log("filemode not live (delta on changed)");
-                        }
-                    });
-
                     // add fileID to user's fileList
                     userRef.child('fileList').child(newFile.key).set({ 'fileName': currentFileName });
                     // set current user online status
                     newFile.child('userList').child(user.uid).child('online').set('true');
+
+                    editRef = currentFile.child("edits");
+                    getEdits();
+
+                    //Loads the edits for the file
+                    currentKey = currentFile.key;
+                    loadEdits();
                 });
             }
         });
-
-        //Loads the edits for the file
-        loadEdits();
     });
 };
 
@@ -204,6 +186,13 @@ var openFileDrag = function(pathDrag) {
                 userRef.child('fileList').child(newFile.key).set({ 'fileName': currentFileName });
                 // set current user online status
                 newFile.child('userList').child(user.uid).child('online').set('true');
+
+                editRef = currentFile.child("edits");
+                getEdits();
+
+                //Loads the edits for the file
+                currentKey = currentFile.key;
+                loadEdits();
             });
         }
     });

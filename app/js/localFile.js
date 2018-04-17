@@ -95,11 +95,9 @@ var openFile = function() {
                     userRef.child('fileList').child(newFile.key).set({ 'fileName': currentFileName });
                     // set current user online status
                     newFile.child('userList').child(user.uid).child('online').set('true');
-
-                    editRef = currentFile.child("edits");
-                    getEdits();
-
+                    
                     //Loads the edits for the file
+                    getEdits();
                     currentKey = currentFile.key;
                     loadEdits();
                 });
@@ -186,11 +184,9 @@ var openFileDrag = function(pathDrag) {
                 userRef.child('fileList').child(newFile.key).set({ 'fileName': currentFileName });
                 // set current user online status
                 newFile.child('userList').child(user.uid).child('online').set('true');
-
-                editRef = currentFile.child("edits");
-                getEdits();
-
+                
                 //Loads the edits for the file
+                getEdits();
                 currentKey = currentFile.key;
                 loadEdits();
             });

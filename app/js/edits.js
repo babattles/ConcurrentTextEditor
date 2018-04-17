@@ -30,8 +30,6 @@ var getEdits = function() {
             var editID = parsedContent.slice(0, parsedContent.indexOf(";"));
             parsedContent = parsedContent.slice(parsedContent.indexOf(";") + 1);
             updateEditor(startIndex, endIndex, type, editType, editID, parsedContent);
-        } else {
-            console.log("filemode not live (delta on changed)");
         }
     });
 
@@ -56,7 +54,6 @@ var getEdits = function() {
         // Delete edit from edits[]
         for (i in edits) {
             if (edits[i].id == snapshot.key) {
-                console.log("Deleted from local edits array");
                 edits.splice(i, 1);
             }
         }
@@ -70,38 +67,32 @@ var getEdits = function() {
             } else {
                 var suffix = editor.session.getValue().slice(e.endIndex);
             }
-            //console.log("Prefix = " + prefix);
-            //console.log("Suffix = " + suffix);
             editor.session.setValue(prefix + suffix);
             editor.selection.moveTo(cursor.row, cursor.column);
             global_ignore = false;
         } else if (e.type == "remove" && e.hasBeenAccepted) {
-            editUnhighlight(snapshot.key);
             global_ignore = true;
             var cursor = editor.getCursorPosition();
             var prefix = editor.session.getValue().slice(0, e.startIndex);
             var suffix = editor.session.getValue().slice(e.endIndex);
-            // console.log("Prefix = " + prefix);
-            // console.log("Suffix = " + suffix);
             editor.session.setValue(prefix + suffix);
             editor.selection.moveTo(cursor.row, cursor.column);
             global_ignore = false;
+            editUnhighlight(snapshot.key);
         } else if (e.type == "remove" && !e.hasBeenAccepted) {
             editUnhighlight(snapshot.key);
         }
+
     });
 
     // update local edit array when edits are changed on the database
     editRef.on("child_changed", function(snapshot) {
-        // console.log("CHILD CHANGED!");
         var changedEdit = snapshot.val();
         if (changedEdit.type == "remove") {
             editUnhighlight(snapshot.key);
         }
-        // console.log(changedEdit.content);
         edits.find((obj, index) => {
             if (obj.id == snapshot.key && (obj.start != changedEdit.startIndex || obj.end != changedEdit.endIndex)) {
-                // console.log("updating edits[index]");
                 edits[index] = {
                     start: changedEdit.startIndex,
                     end: changedEdit.endIndex,
@@ -281,8 +272,6 @@ var removeTypedText = function(startIndex, endIndex, delta) {
         var cursor = editor.getCursorPosition();
         var prefix = editor.session.getValue().slice(0, startIndex);
         var suffix = editor.session.getValue().slice(endIndex);
-        // console.log("Prefix = " + prefix);
-        // console.log("Suffix = " + suffix);
         editor.session.setValue(prefix + suffix);
         editor.selection.moveTo(cursor.row, cursor.column);
         global_ignore = false;
@@ -513,8 +502,6 @@ var setEdit = function(startIndex, endIndex, delta) {
                 }
             }
         }
-    } else {
-        console.log("fileMode is not live");
     }
 }
 
@@ -553,7 +540,6 @@ var fixIndicesAfterRemovalAccept = function(index, length) {
 
 // This function is called once all users have accepted an edit.
 var acceptEdit = function(editID) {
-    editUnhighlight(editID);
     var thisEdit = editRef.child(editID);
     thisEdit.update({ hasBeenAccepted: "true" });
     thisEdit.once('value', function(snapshot) {
@@ -815,10 +801,6 @@ function loadEdits() {
 }
 
 var deleteEditById = function(editID) {
-    //TODO: delete Child Edits if parent
-    //TODO: red wont unhighlight
-    //TODO: delete from edit list
-    editUnhighlight(editID);
     var thisEdit = editRef.child(editID);
     thisEdit.once('value', function(snapshot) {
         var e = snapshot.val();

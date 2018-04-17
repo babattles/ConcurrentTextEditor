@@ -245,7 +245,7 @@ firebase.auth().onAuthStateChanged(function(user) {
         userSettingsBtn.style.display = "initial";
 
         // Load user's files
-        var filesRef = database.ref("/users/" + user.uid + "/fileList").orderByChild("fileName").once('value', function(snapshot) {
+        var filesRef = database.ref("/users/" + user.uid + "/fileList").orderByChild("fileName").on('value', function(snapshot) {
             // Clear files if any are there
             var files = document.getElementById("file-container");
             while (files.firstChild) {

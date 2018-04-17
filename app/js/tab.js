@@ -61,7 +61,9 @@ var closeTab = function() {
 		index = 1;
 	}
 	console.log(index);
+    global_ignore = true;
 	editor.setValue(sessions[index - 1]);
+    global_ignore = false;
 	updateTabs(index - 1);
 }
 

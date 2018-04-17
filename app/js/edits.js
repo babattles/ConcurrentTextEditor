@@ -742,12 +742,13 @@ function loadEdits() {
                     + ' onclick="acceptTracker(\'' + editVal.id + '\', ' + numUsers + ')">'
                     + '<span class="slider round"></span></label>';
 
-                let onClickLogic = 'onclick="openComment(\'' + editVal.id + '\');"';
+                // let onClickLogic = 'onclick="openComment(\'' + editVal.id + '\');" ';
+
 
                 if (editVal.type == 'insert') {
                     editHTML += '<div id="edit-add" class="edit" ' +
-                        onClickLogic +
-                        'oncontextmenu="admin(\'' + editVal.id + '\')"' +
+                        // onClickLogic +
+                        'oncontextmenu="admin(\'' + editVal.id + '\')" ' +
                         'onmouseover="editScrollandHighlight(\'' + editVal.id + '\')" ' +
                         'onmouseout="editUnhighlight(\'' + editVal.id + '\')">' +
                         divContent +
@@ -756,8 +757,8 @@ function loadEdits() {
                         '</div>\n';
                 } else {
                     editHTML += '<div id="edit-remove" class="edit" ' +
-                        onClickLogic +
-                        'oncontextmenu="admin(\'' + editVal.id + '\')"' +
+                        // onClickLogic +
+                        'oncontextmenu="admin(\'' + editVal.id + '\')" ' +
                         'onmouseover="editScroll(\'' + editVal.id + '\')" ' +
                         divContent +
                         deleteEditBtn +
@@ -943,8 +944,6 @@ function highlightAllRemovals() {
 
 highlightEditsByUser = function(userId) {
     for (i in edits) {
-        console.log(edits[i].user);
-        console.log(userId);
         if (edits[i].user == userId) {
             highlight(edits[i]);
         }

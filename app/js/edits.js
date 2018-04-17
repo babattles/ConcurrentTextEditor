@@ -502,6 +502,8 @@ var setEdit = function(startIndex, endIndex, delta) {
                         fixIndices(edits[index], endIndex - startIndex, delta.action);
                     }
                     return true;
+                } else if (obj.start <= startIndex && endIndex <= obj.end && delta.action == "remove" && obj.type == "remove") { // removed something from within a removal edit
+                    return true;
                 }
             });
             // never found parent edit, so add edit to edits

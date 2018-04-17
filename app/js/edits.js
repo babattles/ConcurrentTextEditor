@@ -372,20 +372,6 @@ var setEdit = function(startIndex, endIndex, delta) {
                     //fixIndices(edits[index], endIndex - startIndex, "remove");
                     return true;
                 } else if (obj.end == startIndex && obj.type == "remove" && delta.action == "remove") { // coalesce removal left
-
-                    currentFile.child("delta").set({
-                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
-                    });
-
-                    console.log("coalesce removal left");
-                    var cursor = editor.getCursorPosition()
-                    global_ignore = true;
-                    var prefix = editor.session.getValue().substring(0, startIndex);
-                    var suffix = editor.session.getValue().substring(endIndex);
-                    editor.session.setValue(prefix + stringify(delta.lines) + suffix);
-                    editor.selection.setRange(new Range(0, cursor.row, 0, cursor.column));
-                    global_ignore = false;
-
                     edits[index].start = obj.start;
                     edits[index].end = endIndex;
                     edits[index].content = obj.content + stringify(delta.lines);
@@ -844,10 +830,10 @@ var deleteEditById = function(editID) {
             var suffix = fileContent.slice(index + 1);
             if (e.type == 'insert') {
                 x_insert = true;
-                fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
+                // fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
                 thisEdit.remove();
             } else {
-                fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
+                // fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
                 thisEdit.remove();
             }
         });

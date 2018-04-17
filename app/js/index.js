@@ -122,7 +122,7 @@ ShareListener.addEventListener('click', function() {
 
                 //add user to files userlist
                 firebase.database().ref().child("files")
-                    .child(file).child("userList").child(childKey).set({ 'username': username, 'readOnly': document.getElementById('readOnlyInvite').checked});
+                    .child(file).child("userList").child(childKey).set({ 'username': username, 'readOnly': document.getElementById('readOnlyInvite').checked });
                 alert("User added");
             }
         }).catch(function(error) {
@@ -310,6 +310,9 @@ firebase.auth().onAuthStateChanged(function(user) {
                             } else {
                                 element.classList.add("collabInactive");
                             }
+                            element.addEventListener("contextmenu", function(event) {
+                                makeAdmin(snapshot.key);
+                            });
                             element.appendChild(document.createTextNode(snapshot.val().username));
                             onlineUsersContainer.appendChild(element);
                         } else {
@@ -367,22 +370,13 @@ firebase.auth().onAuthStateChanged(function(user) {
                                 } else if (childSnapshot.key != user.uid) {
                                     element.classList.add("collabInactive");
                                 }
-                                file.child('adminList').on('value', function(snapshot) {
-                                    if (snapshot.hasChild(childSnapshot.key)) {
-                                        console.log(childSnapshot.val().username + "(admin)");
-                                        element.appendChild(document.createTextNode(childSnapshot.val().username + "(admin)"));
-                                    } else {
-                                        console.log(childSnapshot.val().username);
-                                        element.appendChild(document.createTextNode(childSnapshot.val().username));
-                                    }
+                                element.addEventListener("contextmenu", function(event) {
+                                    makeAdmin(snapshot.key);
                                 });
-                                //element.appendChild(document.createTextNode(childSnapshot.val().username));
+                                element.appendChild(document.createTextNode(childSnapshot.val().username));
                                 element.addEventListener("mouseover", function(event) {
                                     unhighlightAllRemovals();
                                     highlightEditsByUser(childSnapshot.key);
-                                });
-                                element.addEventListener("contextmenu", function(event) {
-                                    makeAdmin(childSnapshot.key);
                                 });
                                 element.addEventListener("mouseout", function(event) {
                                     unhighlightEditsByUser(childSnapshot.key);
@@ -441,7 +435,7 @@ firebase.auth().onAuthStateChanged(function(user) {
                         if (data.val().readOnly == true) {
                             editor.setReadOnly(true);
                         } else {
-                            editor.setReadOnly(false);                        
+                            editor.setReadOnly(false);
                         }
                     });
 

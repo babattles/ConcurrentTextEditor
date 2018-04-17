@@ -108,7 +108,7 @@ var getEdits = function() {
         if (changedEdit.type == "remove") {
             editHighlight(snapshot.key);
         }
-    });   
+    });
 
 }
 
@@ -139,7 +139,7 @@ var getEditRef = function(edit) {
 }
 
 /* Helper - Get the database reference for an edit given edit.id*/
-var getEditRefWithId = function (editID) {
+var getEditRefWithId = function(editID) {
     if (editRef == null) return null;
     return editRef.child("" + editID);
 }
@@ -195,8 +195,8 @@ var deleteEdit = function(edit, size, type) {
 // edit is the updated/new edit
 // size is the amount to increase all other edits by
 var fixIndices = function(edit, size, type) {
-	//reset accepted count on edit on change
-	editRef.child(edit.id).child('accepted').remove();
+    //reset accepted count on edit on change
+    editRef.child(edit.id).child('accepted').remove();
     if (type == "insert") {
         editRef.once('value', function(snapshot) {
             justTyped = true;
@@ -287,8 +287,8 @@ var removeTypedText = function(startIndex, endIndex, delta) {
 }
 
 var updateRemoval = function(edit, size) {
-	//reset accepted count on edit on change
-	editRef.child(edit.id).child('accepted').remove();
+    //reset accepted count on edit on change
+    editRef.child(edit.id).child('accepted').remove();
     childRef = editRef.child(edit.id);
     childRef.update({
         content: edit.content,
@@ -460,14 +460,13 @@ var setEdit = function(startIndex, endIndex, delta) {
                 } else if (obj.start <= startIndex && endIndex <= obj.end && delta.action == "remove" && obj.type == "insert") { // removed something from within an edit
                     console.log("remove from within");
 
-                    currentFile.child("delta").set({
-                        'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
-                    });
-
                     if (obj.start == startIndex && obj.end == endIndex) { // you're deleting the last of an edit
                         deleteEdit(edits[index], edits[index].end - edits[index].start, delta.action);
                         edits.splice(index, 1);
                     } else {
+                        currentFile.child("delta").set({
+                            'deltaToParse': startIndex + ";" + endIndex + ";" + delta.action + ";" + obj.type + ";" + obj.id + ";" + stringify(delta.lines)
+                        });
                         // console.log("Not really an insert");
                         edits[index].content = obj.content.substring(0, startIndex - obj.start) + obj.content.substring(endIndex - obj.start, obj.content.length);
                         edits[index].start = obj.start;
@@ -479,7 +478,10 @@ var setEdit = function(startIndex, endIndex, delta) {
                     return true;
                 } else if (obj.start <= startIndex && endIndex <= obj.end && delta.action == "remove" && obj.type == "remove") { // removed something from within a removal edit
                     return true;
+                } else if (obj.start <= startIndex && endIndex <= obj.end && delta.action == "insert" && obj.type == "remove") { // added something within a removal edit
+                    return true;
                 }
+
             });
             // never found parent edit, so add edit to edits
             if (!bool) {
@@ -712,9 +714,9 @@ function loadEdits() {
                 }
 
 
-                let acceptButton = '<label class="switch" ><input id="edit' + editVal.id + '" type="checkbox"'
-                    + ' onclick="acceptTracker(\'' + editVal.id + '\', ' + numUsers + ')">'
-                    + '<span class="slider round"></span></label>';
+                let acceptButton = '<label class="switch" ><input id="edit' + editVal.id + '" type="checkbox"' +
+                    ' onclick="acceptTracker(\'' + editVal.id + '\', ' + numUsers + ')">' +
+                    '<span class="slider round"></span></label>';
 
                 // let onClickLogic = 'onclick="openComment(\'' + editVal.id + '\');" ';
 
@@ -741,7 +743,7 @@ function loadEdits() {
                     // editHighlight(editVal.id);
                 }
 
-                if(editVal.last == user.uid) {
+                if (editVal.last == user.uid) {
                     notifyLastUser(user.uid, editVal.content);
                 }
                 if (editVal.child) {
@@ -770,7 +772,7 @@ function loadEdits() {
                             childDiv + '</div>\n';
                         // editHighlight(childVal.id);
                     }
-                    if(editVal.last == user.uid) {
+                    if (editVal.last == user.uid) {
                         notifyLastUser(user.uid, editVal.content);
                     }
                 }

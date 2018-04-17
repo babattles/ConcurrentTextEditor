@@ -20,17 +20,26 @@ $(document).ready(function(){
 //Add a new tab
 var addTab = function(filename) {
 	//Create a new tab 
-	tabs.push(filename);
+    if (tabs[0] != "untitled") {
+	   tabs.push(filename);
 	
-	//Update content of the tab
-	sessions.push(editor.getValue());
+	   //Update content of the tab
+	   //sessions.push(editor.getValue());
 
-	//Update lastTab
-	lastTab = tabs.slice(-1)[0]; 
+	   //Update lastTab
+	   lastTab = tabs.slice(-1)[0]; 
 
-	//Update GUI
-	//editor.getSession().setUndoManager(new ace.UndoManager());
-	updateTabs();
+	   updateTabs();
+    }
+    else {
+        tabs[0] = filename;
+        console.log(sessions);
+        sessions.push(editor.getValue());
+        //sessions[0] = editor.getValue;
+        fileNum--;
+
+        updateTabs();
+    }
 }
 
 //Close current tab
@@ -67,8 +76,8 @@ var switchTab = function(args) {
     		var buff = editor.getValue();
             //console.log(fileKey[i]);
             //console.log(buff);
-            firebase.database().ref().child("users")
-            .child(global_user.uid).child("fileList").child(fileKey[i]).update({ 'content': buff });
+            //firebase.database().ref().child("users")
+            //.child(global_user.uid).child("fileList").child(fileKey[i]).update({ 'content': buff });
     		sessions[i] = buff;
     	}
     }
@@ -96,10 +105,10 @@ var switchTab = function(args) {
     editor.setValue(sessions[target]);
     editor.clearSelection();
 
-   // console.log(fileKey[target]);
-    
+    console.log(fileKey[target]);
+    //console.log(fileKey);
     var file = database.ref("files").child(fileKey[target]);
-    console.log(file)
+    //console.log(file)
     //console.log(file);
     currentFile = file;
  

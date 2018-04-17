@@ -67,8 +67,8 @@ var switchTab = function(args) {
     		var buff = editor.getValue();
             //console.log(fileKey[i]);
             //console.log(buff);
-            firebase.database().ref().child("users")
-            .child(global_user.uid).child("fileList").child(fileKey[i]).update({ 'content': buff });
+            //firebase.database().ref().child("users")
+            //.child(global_user.uid).child("fileList").child(fileKey[i]).update({ 'content': buff });
     		sessions[i] = buff;
     	}
     }

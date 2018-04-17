@@ -51,12 +51,7 @@ var getEdits = function() {
     editRef.on("child_removed", function(snapshot) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
         //console.log("child removed...");
         var e = snapshot.val();
-        // Delete edit from edits[]
-        for (i in edits) {
-            if (edits[i].id == snapshot.key) {
-                edits.splice(i, 1);
-            }
-        }
+
         if (e.type == "insert" && !e.hasBeenAccepted) { // insert
             global_ignore = true;
             var cursor = editor.getCursorPosition();
@@ -78,11 +73,14 @@ var getEdits = function() {
             editor.session.setValue(prefix + suffix);
             editor.selection.moveTo(cursor.row, cursor.column);
             global_ignore = false;
-            editUnhighlight(snapshot.key);
-        } else if (e.type == "remove" && !e.hasBeenAccepted) {
-            editUnhighlight(snapshot.key);
         }
-
+        editUnhighlight(snapshot.key);
+        // Delete edit from edits[]
+        for (i in edits) {
+            if (edits[i].id == snapshot.key) {
+                edits.splice(i, 1);
+            }
+        }
     });
 
     // update local edit array when edits are changed on the database

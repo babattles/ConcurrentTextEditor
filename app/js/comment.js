@@ -26,9 +26,11 @@ var openComment = function(edit) {
 changeCommentBtn.addEventListener("click", function() {
     commentPanel.classList.toggle("hidden");
     userInput = document.getElementById("comment-input").value;
-    x.update ({
-         comment: userInput
-    })
+    if (userInput != "") {
+        x.update ({
+             comment: userInput
+        })
+    }
 });
 
 var acceptComment = function() {

@@ -6,6 +6,7 @@ if (f == "index.html") {
 var edits = [];
 
 var glo_e;
+var DarkRemovalHighlight;
 var x_insert = false;
 // Retrieve new edits as they are added to the database (including your own!)
 var getEdits = function() {
@@ -81,6 +82,9 @@ var getEdits = function() {
                 edits.splice(i, 1);
             }
         }
+        if (DarkRemovalHighlight) {
+            editor.session.removeMarker(DarkRemovalHighlight);
+        }
     });
 
     // update local edit array when edits are changed on the database
@@ -140,6 +144,14 @@ var getEditRef = function(edit) {
 var getEditRefWithId = function(editID) {
     if (editRef == null) return null;
     return editRef.child("" + editID);
+}
+
+var getEditById = function(editId) {
+    for (var i = 0; i < edits.length; i++) {
+        if (edits[i].id == editId) {
+            return edits[i];
+        }
+    }
 }
 
 /* Post a new edit to the database */
@@ -733,7 +745,9 @@ function loadEdits() {
                     editHTML += '<div id="edit-remove" class="edit" ' +
                         //onClickLogic +
                         'oncontextmenu="admin(\'' + editVal.id + '\')" ' +
-                        'onmouseover="editScroll(\'' + editVal.id + '\')" ' +
+                        // 'onmouseover="editScroll(\'' + editVal.id + '\')" ' +
+                        'onmouseover="editScrollandDarkHighlight(\'' + editVal.id + '\')" ' +
+                        'onmouseout="editDarkUnighlight(\'' + editVal.id + '\')">' +
                         divContent +
                         deleteEditBtn +
                         acceptButton +
@@ -766,7 +780,9 @@ function loadEdits() {
                         editHTML += '<div id="edit-remove-child" class="edit" ' +
                             onClickLogic +
                             'oncontextmenu="admin(\'' + editVal.id + '\')"' +
-                            'onmouseover="editScroll(\'' + editVal.id + '\')" ' +
+                            // 'onmouseover="editScroll(\'' + editVal.id + '\')" ' +
+                            'onmouseover="editScrollandDarkHighlight(\'' + editVal.id + '\')" ' +
+                            'onmouseout="editDarkUnighlight(\'' + editVal.id + '\')">' +
                             childDiv + '</div>\n';
                         // editHighlight(childVal.id);
                     }
@@ -931,6 +947,23 @@ unhighlightEditsByUser = function(userId) {
 editScrollandHighlight = function(editId) {
     editHighlight(editId);
     editScroll(editId);
+}
+
+editScrollandDarkHighlight = function(editId) {
+    var tempEdit = getEditById(editId);
+    var startRow = getRowColumnIndices(tempEdit.start).row;
+    var startColumn = getRowColumnIndices(tempEdit.start).column;
+    var endRow = getRowColumnIndices(tempEdit.end).row;
+    var endColumn = getRowColumnIndices(tempEdit.end).column;
+    DarkRemovalHighlight = editor.session.addMarker(new Range(startRow, startColumn, endRow, endColumn), "mark_red", "text");
+    editScroll(editId);
+}
+
+editDarkUnighlight = function() {
+    if (DarkRemovalHighlight) {
+        editor.session.removeMarker(DarkRemovalHighlight);
+        DarkRemovalHighlight = null;
+    }
 }
 
 var editScroll = function(editId) {

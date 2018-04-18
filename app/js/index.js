@@ -107,7 +107,7 @@ ShareListener.addEventListener('click', function() {
                 });
                 //console.log(childKey);
                 //console.log(childData);
-
+                var readOnly = document.getElementById('readOnlyInvite').checked;
                 database.ref().child('files').child(file).child('fileName')
                     .once('value', function(snapshot) {
                         var filename = snapshot.val();
@@ -115,13 +115,14 @@ ShareListener.addEventListener('click', function() {
                         //add file to users filelist
                         //console.log(filename);
                         firebase.database().ref().child("users")
-                            .child(childKey).child("fileList").child(file).set({ 'fileName': filename, 'content': '' });
+                            .child(childKey).child("fileList").child(file).set({ 'fileName': filename, 'content': '', 'readOnly': readOnly});
                     });
 
-
-                //add user to files userlist
-                firebase.database().ref().child("files")
-                    .child(file).child("userList").child(childKey).set({ 'username': username, 'readOnly': document.getElementById('readOnlyInvite').checked });
+                if(!readOnly) {
+                    //add user to files userlist
+                    firebase.database().ref().child("files")
+                        .child(file).child("userList").child(childKey).set({ 'username': username});
+                }
                 alert("User added");
             }
         }).catch(function(error) {
@@ -298,7 +299,6 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                 var file = database.ref("files").child(childSnapshot.key);
                 var onlineUsers = file.child('userList');
-
                 var updateUserStatus = function(snapshot) {
                     if (currentKey === childSnapshot.key) {
                         var element = document.getElementById(snapshot.key);
@@ -348,7 +348,6 @@ firebase.auth().onAuthStateChanged(function(user) {
                 openBtn.addEventListener('click', function() {
                     if (editor.getReadOnly()) {
                         editor.setReadOnly(false);
-                        // console.log(editor.getReadOnly());
                     }
                     editor.setReadOnly(false);
                     if (currentKey != childSnapshot.key) {
@@ -448,8 +447,9 @@ firebase.auth().onAuthStateChanged(function(user) {
                     }
 
                     //Sets file to read only if they don't have edit access
-                    let userPerms = database.ref("files/" + currentKey + "/userList/" + user.uid);
+                    let userPerms = database.ref("/users/" + user.uid + "/fileList/" + currentKey);
                     userPerms.on('value', function(data) {
+                        console.log(data.val());
                         if (data.val().readOnly == true) {
                             editor.setReadOnly(true);
                         } else {

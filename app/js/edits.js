@@ -728,12 +728,12 @@ function loadEdits() {
                     ' onclick="acceptTracker(\'' + editVal.id + '\', ' + numUsers + ')">' +
                     '<span class="slider round"></span></label>';
 
-                //let onClickLogic = 'onclick="openComment(\'' + editVal.id + '\');" ';
+                let onClickLogic = 'ondblclick="openComment(\'' + editVal.id + '\');" ';
 
 
                 if (editVal.type == 'insert') {
                     editHTML += '<div id="edit-add" class="edit" ' +
-                        //onClickLogic +
+                        onClickLogic +
                         'oncontextmenu="admin(\'' + editVal.id + '\')" ' +
                         'onmouseover="editScrollandHighlight(\'' + editVal.id + '\')" ' +
                         'onmouseout="editUnhighlight(\'' + editVal.id + '\')">' +
@@ -743,7 +743,7 @@ function loadEdits() {
                         '</div>\n';
                 } else {
                     editHTML += '<div id="edit-remove" class="edit" ' +
-                        //onClickLogic +
+                        onClickLogic +
                         'oncontextmenu="admin(\'' + editVal.id + '\')" ' +
                         // 'onmouseover="editScroll(\'' + editVal.id + '\')" ' +
                         'onmouseover="editScrollandDarkHighlight(\'' + editVal.id + '\')" ' +

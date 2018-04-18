@@ -423,8 +423,8 @@ firebase.auth().onAuthStateChanged(function(user) {
                                 //console.log(snapshot.val());
                                 //console.log(fileKey[fileNum]);
                                 //console.log(global_user);
-                                firebase.database().ref().child("users")
-                                    .child(global_user.uid).child("fileList").child(fileKey[fileNum]).update({ 'content': snapshot.val() });
+                                //firebase.database().ref().child("users")
+                                    //.child(global_user.uid).child("fileList").child(fileKey[fileNum]).update({ 'content': snapshot.val() });
                                 fileNum++;
                                 addTab(childSnapshot.val().fileName);
                             }

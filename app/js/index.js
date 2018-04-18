@@ -493,7 +493,11 @@ firebase.auth().onAuthStateChanged(function(user) {
             if (!global_ignore && editRef != null) {
                 justTyped = true;
                 var startIndex = editor.session.doc.positionToIndex(delta.start, 0);
-                var endIndex = editor.session.doc.positionToIndex(delta.end, 0);
+                var endIndex = startIndex;
+                for (var i = 0; i < delta.lines.length; i++) {
+                    endIndex += delta.lines[i].length + 1;
+                }
+                endIndex -=1;
                 setEdit(startIndex, endIndex, delta);
                 // output for debugging
                 console.log("**EDITS**");

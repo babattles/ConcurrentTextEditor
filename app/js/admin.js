@@ -218,9 +218,10 @@ function deleteUser(userID){
     }
     //update the List of edits with the correct users and counts
     loadEdits();
+    //checkNumRequired();
 
     //get num users
-    var numUsers;
+    /*var numUsers;
     firebase.database().ref().child("files").child(currentKey)
         .child('userList').once("value", function(snapshot) {
             numUsers = snapshot.numChildren();
@@ -233,5 +234,5 @@ function deleteUser(userID){
                 var numAccepted = snapshot.numChildren();
                 if (numAccepted >= numUsers) acceptEdit(edits[i].id);
             });
-    }
+    }*/
 }

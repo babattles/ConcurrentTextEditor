@@ -639,7 +639,7 @@ var getRowColumnIndices = function(characterIndex) {
 
 
 function loadEdits() {
-    if (currentKey == undefined) {
+    if (currentKey == undefined || currentKey == null) {
         console.log('No File Selected');
         return;
     }
@@ -653,15 +653,23 @@ function loadEdits() {
     //for deletion
     let user = firebase.auth().currentUser;
 
-    //for acceptance
+    /*//for acceptance
     var numUsers;
     firebase.database().ref().child("files").child(currentKey)
         .child('userList').once("value", function(snapshot) {
             numUsers = snapshot.numChildren();
-        });
+        });*/
 
     userNames.on('value', function(userData) {
-        fileEdits.on('value', function(data) {
+		fileEdits.on('value', function(data) {
+    		currentFile.child('offlineAccept').on('child_changed', function(snapshot){
+				checkNumRequired();
+			});
+
+			//listen for users coming online
+			currentFile.child('userList').on('child_changed', function(snapshot){
+				checkNumRequired();
+			});
             for (i in data.val()) {
                 // if (data.val()[i].hasBeenAccepted) {
                 //     continue;
@@ -705,12 +713,15 @@ function loadEdits() {
                     eContent = editVal.content;
                 }
 
-                var numAccepted;
                 var passing = getEditRef(editVal);
-                firebase.database().ref().child("files").child(currentKey)
-                    .child('edits').child(editVal.id).child('accepted').once("value", function(snapshot) {
-                        numAccepted = snapshot.numChildren();
-                    });
+				var numUsers= checkNumRequired(editVal);
+	            var numAccepted;
+	            checkAccByID(editVal, function(numAccepted, edit){
+					numAccepted = numAccepted;
+				});
+	           
+               
+                
 
                 let divContent = '<b>' + editVal.username + '</b>: ' + numAccepted + '/' + numUsers;
                 var deleteEditBtn = "";
@@ -859,12 +870,13 @@ function acceptTracker(edit, numUsers) {
             });
         document.getElementById('edit' + edit).checked = false;
     }
-    var numAccepted;
+    /*var numAccepted;
     firebase.database().ref().child("files").child(currentKey)
         .child('edits').child(edit).child('accepted').once("value", function(snapshot) {
             numAccepted = snapshot.numChildren();
         });
-    if (numAccepted >= numUsers) acceptEdit(edit);
+    if (numAccepted >= numUsers) acceptEdit(edit);*/
+    checkNumRequired();
 
 }
 

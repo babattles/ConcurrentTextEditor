@@ -118,6 +118,25 @@
         <button id="changeCommentBtn" class="btn form-item">Accept Comment</button>
     </div>
 
+    <div id='acceptSettings' class=". hidden">
+        <div class="settings-title">Edit Acceptance Criteria Settings</div>
+        <div class="entry-label">Users who are offline automatically accept:
+        <input type="checkbox" id="offline-accept"></div><br>
+
+        <div class="entry-label" >Configurable Quota (default 100%):</div><br>
+        <div style="text-indent: 2em;">
+            <div class="entry-label">Percent of users required for accept:</div><br>
+            <input class='mutex-check' name="porq" type="radio" id="percent-check">
+            <input type='number' placeholder='Enter 1 - 100' class='form-item-inline' id='pVal'><br>
+            <div class="entry-label">Amount of users required for accept:</div><br>
+            <input class='mutex-check' name="porq" type="radio" id="quota-check">
+            <input type='number' placeholder='Enter any whole #' class='form-item-inline' id='qVal'><br>
+            <br>
+            <button id="cancelBtn" class="btn-danger">Cancel</button>
+            <button id="saveSettingsBtn" class="btn-success">Save</button>
+        </div>
+    </div>
+
     <footer id="auth_footer" role="auth_footer">
         <button class='btn btn-success' id='authBtn'>Authenticate</button>
         <button class='btn btn-danger' id='logoutBtn'>Logout</button>
@@ -134,6 +153,7 @@
     <script src="js/comment.js"></script>
     <script src="js/aceStart.js"></script>
     <script src="js/search.js"></script>
+    <script src="js/acceptance.js"></script>
     <script src="../ace-builds/src-noconflict/ext-modelist.js"></script>
     </body>
 

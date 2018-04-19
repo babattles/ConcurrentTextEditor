@@ -119,6 +119,17 @@ function createWindow() {
                     type: 'separator'
                 },
                 {
+                    label: 'Acceptance Settings',
+                    click: () =>{
+                        if (win) {
+                            win.webContents.send('quota-settings', 'ping');
+                        }
+                    }
+                },
+                {
+                    type: 'separator'
+                },
+                {
                     role: 'cut'
                 },
                 {

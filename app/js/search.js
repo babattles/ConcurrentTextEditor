@@ -24,19 +24,17 @@ submitSearchBtn.addEventListener("click", function () {
             if (snap.numChildren() == 1) {
                 snap.forEach(function (child) {
                     var result = child.val();
-                    if (result) {
-                        // close the window
-                        searchWindow.classList.toggle("hidden");
-                        clearSearch();
-                        // add the username to the invite box
-                        var usernameField = document.getElementById("username");
-                        usernameField.value = result.username;
-                        return;
-                    } else {
-                        alert("No user found with given email");
-                        return;
-                    }
+                    // close the window
+                    searchWindow.classList.toggle("hidden");
+                    clearSearch();
+                    // add the username to the invite box
+                    var usernameField = document.getElementById("username");
+                    usernameField.value = result.username;
+                    return;
                 });
+            } else {
+                alert("No user found with given email");
+                return;
             }
         });
     } else if (radioUsername.checked) {

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 'use strict';
 const { ipcRenderer } = require('electron');
 var fileNum = 1;

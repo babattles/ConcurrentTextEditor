@@ -40,6 +40,9 @@ var fileMode = "live";
 var global_user;
 var global_username;
 
+//Variable to track if the user is on a readOnly file
+var readOnlyFile = false;
+
 // Authenticate Button is clicked
 var AuthListener = document.getElementById("authBtn");
 AuthListener.addEventListener('click', function() {
@@ -346,13 +349,11 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                 // listener to open this file from database
                 openBtn.addEventListener('click', function() {
-                    if (editor.getReadOnly()) {
-                        editor.setReadOnly(false);
-                    }
                     editor.setReadOnly(false);
+                    readOnlyFile = false;
                     if (currentKey != childSnapshot.key) {
                         //Set online status of old file to false
-                        if (currentKey != null && currentKey != '') {
+                        if (currentKey != null && currentKey != '' && !readOnlyFile) {
                             database.ref("files/" + currentKey + "/userList/" + user.uid + "/online").set("false");
                         }
                         //Remove all users from GUI 
@@ -396,7 +397,20 @@ firebase.auth().onAuthStateChanged(function(user) {
                         });
                         currentKey = childSnapshot.key;
                         setCurrentFile(childSnapshot.key);
-                        file.child('userList').child(user.uid).child('online').set('true');
+
+                        //Sets file to read only if they don't have edit access
+                        database.ref("/users/" + user.uid + "/fileList/" + currentKey).on('value', function(data) {
+                            console.log(data.val());
+                            if (data.val().readOnly == true) {
+                                editor.setReadOnly(true);
+                                readOnlyFile = true;
+                            } else {
+                                editor.setReadOnly(false);
+                                readOnlyFile = false;
+                                file.child('userList').child(user.uid).child('online').set('true');
+                            }
+                        });
+
                         var modelist = ace.require("ace/ext/modelist");
                         var mode = modelist.getModeForPath(childSnapshot.val().fileName).mode;
                         editor.getSession().setMode(mode);
@@ -445,17 +459,6 @@ firebase.auth().onAuthStateChanged(function(user) {
                         // enable close menu
                         ipcRenderer.send('enable-close', 'ping');
                     }
-
-                    //Sets file to read only if they don't have edit access
-                    let userPerms = database.ref("/users/" + user.uid + "/fileList/" + currentKey);
-                    userPerms.on('value', function(data) {
-                        console.log(data.val());
-                        if (data.val().readOnly == true) {
-                            editor.setReadOnly(true);
-                        } else {
-                            editor.setReadOnly(false);
-                        }
-                    });
 
                     //Loads the edits for the file
                     loadEdits();

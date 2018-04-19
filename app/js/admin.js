@@ -70,6 +70,7 @@ var makeAdmin = function(userid) {
     }));
     menu.popup(remote.getCurrentWindow());
 };
+
 var updateAdminStatus = function(file, user){
 
     //console.log('updateAdminStatus');
@@ -234,7 +235,3 @@ function deleteUser(userID){
             });
     }
 }
-
-
-
-

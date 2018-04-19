@@ -572,16 +572,11 @@ var acceptEdit = function(editID) {
                 currentFile.update({
                     fileContents: prefix + suffix
                 });
-                // fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
-                global_ignore = true;
-                var cursor = editor.getCursorPosition();
-                editor.session.setValue(prefix + suffix);
-                editor.selection.moveTo(cursor.row, cursor.column);
-                global_ignore = false;
             }
+            thisEdit.remove();
+            fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
         });
     });
-    thisEdit.remove();
 }
 
 /* Highlights the provided edit */
@@ -831,10 +826,9 @@ var deleteEditById = function(editID) {
             var suffix = fileContent.slice(index + 1);
             if (e.type == 'insert') {
                 x_insert = true;
-                // fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
                 thisEdit.remove();
+                fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
             } else {
-                // fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
                 thisEdit.remove();
             }
         });

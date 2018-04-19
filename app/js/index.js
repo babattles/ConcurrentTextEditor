@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 'use strict';
 const { ipcRenderer } = require('electron');
 var fileNum = 1;
@@ -43,6 +44,9 @@ var fileMode = "live";
 // variable to track the current user globally
 var global_user;
 var global_username;
+
+//Variable to track if the user is on a readOnly file
+var readOnlyFile = false;
 
 // Authenticate Button is clicked
 var AuthListener = document.getElementById("authBtn");
@@ -119,6 +123,7 @@ ShareListener.addEventListener('click', function() {
                 });
                 //console.log(childKey);
                 //console.log(childData);
+                var readOnly = document.getElementById('readOnlyInvite').checked;
 
                 database.ref().child('files').child(file).child('fileName')
                     .once('value', function(snapshot) {
@@ -127,13 +132,15 @@ ShareListener.addEventListener('click', function() {
                         //add file to users filelist
                         //console.log(filename);
                         firebase.database().ref().child("users")
-                            .child(childKey).child("fileList").child(file).set({ 'fileName': filename, 'content': '' });
+                            .child(childKey).child("fileList").child(file)
+                            .set({ 'fileName': filename, 'content': '', 'readOnly': readOnly});
                     });
 
-
-                //add user to files userlist
-                firebase.database().ref().child("files")
-                    .child(file).child("userList").child(childKey).set({ 'username': username, 'readOnly': document.getElementById('readOnlyInvite').checked });
+                if(!readOnly) {
+                    //add user to files userlist
+                    firebase.database().ref().child("files")
+                        .child(file).child("userList").child(childKey).set({ 'username': username});
+                }
                 alert("User added");
             }
         }).catch(function(error) {
@@ -425,14 +432,11 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                 // listener to open this file from database
                 openBtn.addEventListener('click', function() {
-                    if (editor.getReadOnly()) {
-                        editor.setReadOnly(false);
-                        // console.log(editor.getReadOnly());
-                    }
                     editor.setReadOnly(false);
+                    readOnlyFile = false;
                     if (currentKey != childSnapshot.key) {
                         //Set online status of old file to false
-                        if (currentKey != null && currentKey != '') {
+                        if (currentKey != null && currentKey != '' && !readOnlyFile) {
                             database.ref("files/" + currentKey + "/userList/" + user.uid + "/online").set("false");
                         }
                         //Remove all users from GUI 
@@ -508,7 +512,18 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                         currentKey = childSnapshot.key;
                         setCurrentFile(childSnapshot.key);
-                        file.child('userList').child(user.uid).child('online').set('true');
+                        //Sets file to read only if they don't have edit access
+                        database.ref("/users/" + user.uid + "/fileList/" + currentKey).on('value', function(data) {
+                            console.log(data.val());
+                            if (data.val().readOnly == true) {
+                                editor.setReadOnly(true);
+                                readOnlyFile = true;
+                            } else {
+                                editor.setReadOnly(false);
+                                readOnlyFile = false;
+                                file.child('userList').child(user.uid).child('online').set('true');
+                            }
+                        });
                         var modelist = ace.require("ace/ext/modelist");
                         var mode = modelist.getModeForPath(childSnapshot.val().fileName).mode;
                         editor.getSession().setMode(mode);
@@ -558,16 +573,6 @@ firebase.auth().onAuthStateChanged(function(user) {
                         ipcRenderer.send('enable-close', 'ping');
                     }
 
-                    //Sets file to read only if they don't have edit access
-                    let userPerms = database.ref("files/" + currentKey + "/userList/" + user.uid);
-                    userPerms.on('value', function(data) {
-                        if (data.val().readOnly == true) {
-                            editor.setReadOnly(true);
-                        } else {
-                            editor.setReadOnly(false);
-                        }
-                    });
-
                     //Loads the edits for the file
                     loadEdits();
                     let fileEdits = database.ref('files/' + currentKey + '/edits');
@@ -604,7 +609,11 @@ firebase.auth().onAuthStateChanged(function(user) {
             if (!global_ignore && editRef != null) {
                 justTyped = true;
                 var startIndex = editor.session.doc.positionToIndex(delta.start, 0);
-                var endIndex = editor.session.doc.positionToIndex(delta.end, 0);
+                var endIndex = startIndex;
+                for (var i = 0; i < delta.lines.length; i++) {
+                    endIndex += delta.lines[i].length + 1;
+                }
+                endIndex -=1;
                 setEdit(startIndex, endIndex, delta);
                 // output for debugging
                 console.log("**EDITS**");

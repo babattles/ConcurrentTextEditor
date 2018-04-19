@@ -1012,5 +1012,6 @@ var notifyLastUser = function(edit, file) {
             }
         }   
     });
+    editScrollandHighlight(edit.id);
     alert("You are the last person not to make a decison on edit:\n" + edit.content);
 }

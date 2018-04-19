@@ -33,7 +33,7 @@ var addTab = function(filename) {
     }
     else {
         tabs[0] = filename;
-        console.log(sessions);
+        // console.log(sessions);
         sessions.push(editor.getValue());
         //sessions[0] = editor.getValue;
         fileNum--;

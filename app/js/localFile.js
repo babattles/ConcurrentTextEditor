@@ -243,7 +243,7 @@ var closeFile = function() {
     path = '';
     currentKey = '';
     var user = firebase.auth().currentUser;
-    if (user) {
+    if (user && !readOnlyFile) {
         currentFile.child('userList').child(user.uid).child('online').set('false');
     }
     //reset the state

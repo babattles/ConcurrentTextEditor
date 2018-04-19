@@ -513,7 +513,7 @@ firebase.auth().onAuthStateChanged(function(user) {
                         setCurrentFile(childSnapshot.key);
                         //Sets file to read only if they don't have edit access
                         database.ref("/users/" + user.uid + "/fileList/" + currentKey).on('value', function(data) {
-                            console.log(data.val());
+                            // console.log(data.val());
                             if (data.val().readOnly == true) {
                                 editor.setReadOnly(true);
                                 readOnlyFile = true;
@@ -615,9 +615,9 @@ firebase.auth().onAuthStateChanged(function(user) {
                 endIndex -=1;
                 setEdit(startIndex, endIndex, delta);
                 // output for debugging
-                console.log("**EDITS**");
+                // console.log("**EDITS**");
                 for (var x = 0; x < edits.length; x++) {
-                    console.log(edits[x]);
+                    // console.log(edits[x]);
                 }
                 justTyped = false;
             }

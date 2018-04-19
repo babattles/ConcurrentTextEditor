@@ -3,6 +3,8 @@ if (f == "index.html") {
     var Range = ace.require("ace/range").Range;
 }
 
+var alertSent = false;
+
 var edits = [];
 
 var glo_e;
@@ -577,6 +579,7 @@ var acceptEdit = function(editID) {
             fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
         });
     });
+    alertSent = false;
 }
 
 /* Highlights the provided edit */
@@ -1013,5 +1016,8 @@ var notifyLastUser = function(edit, file) {
         }   
     });
     editScrollandHighlight(edit.id);
+    if(alertSent) {
+        return;
+    }
     alert("You are the last person not to make a decison on edit:\n" + edit.content);
 }

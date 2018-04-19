@@ -719,10 +719,10 @@ function loadEdits() {
                         'onclick="deleteEditById(\'' + editVal.id + '\')">';
                 }
 
-
-                let acceptButton = '<label class="switch" ><input id="edit' + editVal.id + '" type="checkbox"' +
+                
+                let acceptButton = (readOnlyFile? "":'<label class="switch" ><input id="edit' + editVal.id + '" type="checkbox"' +
                     ' onclick="acceptTracker(\'' + editVal.id + '\', ' + numUsers + ')">' +
-                    '<span class="slider round"></span></label>';
+                    '<span class="slider round"></span></label>');
 
                 let onClickLogic = 'ondblclick="openComment(\'' + editVal.id + '\');" ';
 

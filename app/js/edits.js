@@ -752,7 +752,7 @@ function loadEdits() {
                 }
 
                 if (editVal.last == user.uid) {
-                    notifyLastUser(user.uid, editVal.content);
+                    notifyLastUser(editVal, currentKey);
                 }
                 if (editVal.child) {
                     childVal = editVal.child;
@@ -783,7 +783,7 @@ function loadEdits() {
                         // editHighlight(childVal.id);
                     }
                     if (editVal.last == user.uid) {
-                        notifyLastUser(user.uid, editVal.content);
+                        notifyLastUser(editVal.content, currentKey);
                     }
                 }
             }
@@ -841,6 +841,11 @@ function acceptTracker(edit, numUsers) {
     let user = firebase.auth().currentUser;
 
     if (accept.checked == true) {
+        database.ref("/files/" + currentKey + "/edits/" + edit).on('value', function(data){
+            if(data.val().last == user.uid) {
+                database.ref("/files/" + currentKey + "/edits/" + edit + "/last/").set(null);
+            }
+        });
         firebase.database().ref().child("files")
             .child(currentKey).child('edits').child(edit).child('accepted').push({ 'id': user.uid });
         document.getElementById('edit' + edit).checked = true;
@@ -874,7 +879,6 @@ function acceptTracker(edit, numUsers) {
 }
 
 var sendNotification = function(editID) {
-    // console.log(editID);
     let lastUserId = null;
     database.ref("/files/" + currentKey).on('value', function(data) {
         let listOfUsers = [];
@@ -893,7 +897,6 @@ var sendNotification = function(editID) {
             }     
         }
         database.ref("files/" + currentKey + "/edits/" + editID + "/last").set(lastUserId);
-        console.log(lastUserId);
     });
 }
 
@@ -1001,6 +1004,13 @@ var editScroll = function(editId) {
     editor.scrollToLine(row, true, true, function() {});
 }
 
-var notifyLastUser = function(user, edit) {
-    alert("You are the last person not to make a decison on edit:\n" + edit);
+var notifyLastUser = function(edit, file) {
+    database.ref("/files/" + currentKey + "/edits/" + edit.id + "accepted").on('value', function(data){
+        for(i in data.val()){
+            if(data.val()[i].id == user.uid) {
+                return;
+            }
+        }   
+    });
+    alert("You are the last person not to make a decison on edit:\n" + edit.content);
 }

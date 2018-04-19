@@ -864,8 +864,37 @@ function acceptTracker(edit, numUsers) {
         .child('edits').child(edit).child('accepted').once("value", function(snapshot) {
             numAccepted = snapshot.numChildren();
         });
-    if (numAccepted >= numUsers) acceptEdit(edit);
+    if (numAccepted >= numUsers) {
+        acceptEdit(edit);
+    }
 
+    if (numAccepted == numUsers-1) {
+        sendNotification(edit);
+    }
+}
+
+var sendNotification = function(editID) {
+    // console.log(editID);
+    let lastUserId = null;
+    database.ref("/files/" + currentKey).on('value', function(data) {
+        let listOfUsers = [];
+        for(i in data.val().userList){
+            listOfUsers.push(i);
+        }
+
+        let listOfAcceptedUsers = [];
+        for(i in data.val().edits[editID].accepted){
+            listOfAcceptedUsers.push(data.val().edits[editID].accepted[i].id);
+        }
+
+        for(i in listOfUsers) {
+            if(!listOfAcceptedUsers.includes(listOfUsers[i])) {
+                lastUserId = listOfUsers[i];
+            }     
+        }
+        database.ref("files/" + currentKey + "/edits/" + editID + "/last").set(lastUserId);
+        console.log(lastUserId);
+    });
 }
 
 function editHighlight(id) {

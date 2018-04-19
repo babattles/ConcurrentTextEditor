@@ -20,14 +20,18 @@ var editor = document.getElementById("editor");
 var onlineUsersContainer = document.getElementById("online-users");
 var currentKey;
 
+//Does not trigger child_added for existing admins
+let isNewAdmin = false;
+
+//Does not trigger child_added for existing users
+let isNewUser = false;
+
 // keep track of user key strokes
 var justTyped = false;
 
 // track the user's current open file in the database
 var currentFile = null;
 
-//track the user's current file's admin list
-var adminList = null;
 // track the user's edits in their current open file
 var editRef = null;
 
@@ -88,6 +92,14 @@ newUser.addEventListener("keyup", function(event) {
     }
 });
 ShareListener.addEventListener('click', function() {
+
+    //check for file
+    if (currentKey == null) {
+        alert('A file must be open to add a user');
+        newUser.value = '';
+        return;
+    } 
+
     //get filename
     var file = currentKey;
     var username = newUser.value;
@@ -111,6 +123,7 @@ ShareListener.addEventListener('click', function() {
                 //console.log(childKey);
                 //console.log(childData);
                 var readOnly = document.getElementById('readOnlyInvite').checked;
+
                 database.ref().child('files').child(file).child('fileName')
                     .once('value', function(snapshot) {
                         var filename = snapshot.val();
@@ -118,7 +131,8 @@ ShareListener.addEventListener('click', function() {
                         //add file to users filelist
                         //console.log(filename);
                         firebase.database().ref().child("users")
-                            .child(childKey).child("fileList").child(file).set({ 'fileName': filename, 'content': '', 'readOnly': readOnly});
+                            .child(childKey).child("fileList").child(file)
+                            .set({ 'fileName': filename, 'content': '', 'readOnly': readOnly});
                     });
 
                 if(!readOnly) {
@@ -302,7 +316,26 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                 var file = database.ref("files").child(childSnapshot.key);
                 var onlineUsers = file.child('userList');
+                var adminUsers = file.child('adminList');
+
+                //listen for NEW admin assignments
+                adminUsers.on('child_added', function(snapshot) {
+                    if (isNewAdmin && currentKey === childSnapshot.key) {
+                        //console.log('admin added', snapshot.key);
+                        updateAdminStatus(file, snapshot.key);
+                        //isNewAdmin = false;
+                    }
+                    //console.log('admin skipped', newAdmin, file.key, snapshot.key);
+                });
+                //The 'value' event always happens last, existing admins get ignored
+                adminUsers.once('value', function(snapshot) {
+                    isNewAdmin = true;
+                    //console.log('once', newAdmin, file.key, snapshot.key);
+                });
+
+
                 var updateUserStatus = function(snapshot) {
+                    //console.log('updateUserStatus');
                     if (currentKey === childSnapshot.key) {
                         var element = document.getElementById(snapshot.key);
                         if (element == null) {
@@ -313,10 +346,47 @@ firebase.auth().onAuthStateChanged(function(user) {
                             } else {
                                 element.classList.add("collabInactive");
                             }
-                            element.addEventListener("contextmenu", function(event) {
-                                makeAdmin(snapshot.key);
-                            });
                             element.appendChild(document.createTextNode(snapshot.val().username));
+
+                            //display to everyone if user is an admin
+                            userIsAdmin(file, snapshot.key, function(isAdmin){
+                                //console.log('USER', isAdmin);
+                                if (isAdmin){
+                                    //console.log('user:', snapshot.val().username, 'key', isAdmin);
+                                    //Icon made by zlatko-najdenovski from https://www.flaticon.com
+                                    var adminIcon = document.createElement("INPUT");
+                                    adminIcon.src = "./img/admin.png";
+                                    adminIcon.type = "image";
+                                    adminIcon.className = "admin-icon";
+                                    element.appendChild(adminIcon);
+                                }
+                            });
+
+                            //display delete button is global_user is admin
+                            userIsAdmin(file, global_user.uid, function(isAdmin){
+                                if (isAdmin){
+
+                                    //allow user to make others admin
+                                    element.addEventListener("contextmenu", function(event) {
+                                        makeAdmin(snapshot.key);
+                                    });
+
+                                    //console.log('user:', snapshot.val().username, 'delete', isAdmin);
+                                    getNumAdmins(file, function(numAdmins){
+                                        if ( numAdmins <= 1 && snapshot.key == global_user.uid){
+                                            //do not create delete button for current user if numadmins <= 1
+                                        } else {
+                                            var deleteUserBtn = document.createElement("INPUT");
+                                            deleteUserBtn.src = "./img/close.png";
+                                            deleteUserBtn.type = "image";
+                                            deleteUserBtn.className = "delete-user";
+                                            deleteUserBtn.onclick = function(){deleteUser(snapshot.key)};
+                                            element.appendChild(deleteUserBtn);
+                                        }
+                                    });
+                                }
+                            });
+
                             onlineUsersContainer.appendChild(element);
                         } else {
                             if (snapshot.val().online === 'true') {
@@ -332,8 +402,15 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                 //When a user creates a file or gains access to a file
                 onlineUsers.on("child_added", function(snapshot) {
-                    updateUserStatus(snapshot);
+
+                    if (isNewUser){
+                        updateUserStatus(snapshot);
+                    }
                 });
+                onlineUsers.once("value", function(snapshot) {
+                    isNewUser = true;
+                });
+
 
                 //When a user is deleted from the file userlist (ie. no longer has access)
                 onlineUsers.on("child_removed", function(snapshot) {
@@ -341,6 +418,11 @@ firebase.auth().onAuthStateChanged(function(user) {
                     if (element != null) {
                         element.parentNode.removeChild(element);
                     }
+                    if (snapshot.key == user.uid){
+                        clearAfterDelete();
+                        return true;
+                    }
+                    updateAdminStatus(file, user);
                 });
 
                 onlineUsers.on("child_changed", function(snapshot) {
@@ -360,9 +442,11 @@ firebase.auth().onAuthStateChanged(function(user) {
                         while (onlineUsersContainer.firstChild) {
                             onlineUsersContainer.removeChild(onlineUsersContainer.firstChild);
                         }
+
                         //Update GUI to show already online users
                         file.child('userList').orderByChild("username").once('value', function(snapshot) {
                             snapshot.forEach(function(childSnapshot) {
+                                 //childSnapshot.key is the userID
                                 var element = document.createElement("div");
                                 element.setAttribute("id", childSnapshot.key);
                                 if (childSnapshot.val().online === 'true') {
@@ -370,23 +454,52 @@ firebase.auth().onAuthStateChanged(function(user) {
                                 } else if (childSnapshot.key != user.uid) {
                                     element.classList.add("collabInactive");
                                 }
-                                //TODO: display "(admin)" against admins in collaborators list
-                                /*file.child('adminList').on('value', function(snapshot) {
-                                    if (snapshot.hasChild(childSnapshot.key)) {
-                                        console.log(childSnapshot.val().username + "(admin)");
-                                        element.appendChild(document.createTextNode(childSnapshot.val().username + "(admin)"));
-                                    } else {
-                                        console.log(childSnapshot.val().username);
-                                        element.appendChild(document.createTextNode(childSnapshot.val().username));
-                                    }
-                                });*/
+
+                                //console.log('Initial Users');
                                 element.appendChild(document.createTextNode(childSnapshot.val().username));
+
+                                //display to everyone if user is an admin
+                                userIsAdmin(file, childSnapshot.key, function(isAdmin){
+                                    //console.log('initial', isAdmin);
+                                    if (isAdmin){
+                                        //console.log('user:', childSnapshot.val().username, 'key', isAdmin);
+                                        //Icon made by zlatko-najdenovski from https://www.flaticon.com
+                                        var adminIcon = document.createElement("INPUT");
+                                        adminIcon.src = "./img/admin.png";
+                                        adminIcon.type = "image";
+                                        adminIcon.className = "admin-icon";
+                                        element.appendChild(adminIcon);
+                                    }
+                                });
+
+                                //display delete button is global_user is admin
+                                userIsAdmin(file, global_user.uid, function(isAdmin){
+                                    if (isAdmin){
+
+                                        //allow user to make others admin
+                                        element.addEventListener("contextmenu", function(event) {
+                                            makeAdmin(childSnapshot.key);
+                                        });
+
+                                        //console.log('user:', childSnapshot.val().username, 'delete', isAdmin);
+                                        getNumAdmins(file, function(numAdmins){
+                                            if ( numAdmins <= 1 && childSnapshot.key == global_user.uid){
+                                                //do not create delete button for current user if numadmins <= 1
+                                            } else {
+                                                var deleteUserBtn = document.createElement("INPUT");
+                                                deleteUserBtn.src = "./img/close.png";
+                                                deleteUserBtn.type = "image";
+                                                deleteUserBtn.className = "delete-user";
+                                                deleteUserBtn.onclick = function(){deleteUser(childSnapshot.key)};
+                                                element.appendChild(deleteUserBtn);
+                                            }
+                                        });
+                                    }
+                                });
+
                                 element.addEventListener("mouseover", function(event) {
                                     unhighlightAllRemovals();
                                     highlightEditsByUser(childSnapshot.key);
-                                });
-                                element.addEventListener("contextmenu", function(event) {
-                                    makeAdmin(childSnapshot.key);
                                 });
                                 element.addEventListener("mouseout", function(event) {
                                     unhighlightEditsByUser(childSnapshot.key);
@@ -395,9 +508,9 @@ firebase.auth().onAuthStateChanged(function(user) {
                                 onlineUsersContainer.appendChild(element);
                             });
                         });
+
                         currentKey = childSnapshot.key;
                         setCurrentFile(childSnapshot.key);
-
                         //Sets file to read only if they don't have edit access
                         database.ref("/users/" + user.uid + "/fileList/" + currentKey).on('value', function(data) {
                             console.log(data.val());
@@ -410,7 +523,6 @@ firebase.auth().onAuthStateChanged(function(user) {
                                 file.child('userList').child(user.uid).child('online').set('true');
                             }
                         });
-
                         var modelist = ace.require("ace/ext/modelist");
                         var mode = modelist.getModeForPath(childSnapshot.val().fileName).mode;
                         editor.getSession().setMode(mode);

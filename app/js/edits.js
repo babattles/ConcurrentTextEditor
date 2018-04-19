@@ -656,7 +656,7 @@ function loadEdits() {
     //for acceptance
     var numUsers;
     firebase.database().ref().child("files").child(currentKey)
-        .child('userList').on("value", function(snapshot) {
+        .child('userList').once("value", function(snapshot) {
             numUsers = snapshot.numChildren();
         });
 
@@ -694,6 +694,7 @@ function loadEdits() {
                 }
             }
 
+            //create editHTML
             for (var i = 0; i < parentList.length; i++) {
                 editVal = parentList[i];
 
@@ -707,7 +708,7 @@ function loadEdits() {
                 var numAccepted;
                 var passing = getEditRef(editVal);
                 firebase.database().ref().child("files").child(currentKey)
-                    .child('edits').child(editVal.id).child('accepted').on("value", function(snapshot) {
+                    .child('edits').child(editVal.id).child('accepted').once("value", function(snapshot) {
                         numAccepted = snapshot.numChildren();
                     });
 
@@ -786,6 +787,8 @@ function loadEdits() {
                     }
                 }
             }
+
+            //add edits to UI
             $('#edits').empty();
             $('#edits').append(editHTML);
 
@@ -836,7 +839,6 @@ var deleteEditById = function(editID) {
 function acceptTracker(edit, numUsers) {
     var accept = document.getElementById('edit' + edit);
     let user = firebase.auth().currentUser;
-    console.log(accept.checked);
 
     if (accept.checked == true) {
         firebase.database().ref().child("files")
@@ -859,7 +861,7 @@ function acceptTracker(edit, numUsers) {
     }
     var numAccepted;
     firebase.database().ref().child("files").child(currentKey)
-        .child('edits').child(edit).child('accepted').on("value", function(snapshot) {
+        .child('edits').child(edit).child('accepted').once("value", function(snapshot) {
             numAccepted = snapshot.numChildren();
         });
     if (numAccepted >= numUsers) acceptEdit(edit);

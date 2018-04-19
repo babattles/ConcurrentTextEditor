@@ -317,6 +317,25 @@ body {
     right: 35px;
 }
 
+.delete-user {
+    max-width: 10%;
+    height: auto;
+    position: absolute;
+    right: 0px;
+    padding-top: 1px;
+}
+
+.admin-icon {
+    max-width: 90%;
+    height: auto;
+    position: absolute;
+    right: 25px;
+    padding-top: 3px;
+}
+.alert {
+  width:120%;
+}
+
 
 /*check toggle accept boxes*/
 

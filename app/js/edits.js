@@ -3,6 +3,8 @@ if (f == "index.html") {
     var Range = ace.require("ace/range").Range;
 }
 
+var alertSent = false;
+
 var edits = [];
 
 var glo_e;
@@ -577,6 +579,7 @@ var acceptEdit = function(editID) {
             fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
         });
     });
+    alertSent = false;
 }
 
 /* Highlights the provided edit */
@@ -653,23 +656,23 @@ function loadEdits() {
     //for deletion
     let user = firebase.auth().currentUser;
 
-    /*//for acceptance
+    //for acceptance
     var numUsers;
     firebase.database().ref().child("files").child(currentKey)
         .child('userList').once("value", function(snapshot) {
             numUsers = snapshot.numChildren();
-        });*/
+        });
 
     userNames.on('value', function(userData) {
 		fileEdits.on('value', function(data) {
-    		currentFile.child('offlineAccept').on('child_changed', function(snapshot){
+    		/*currentFile.child('offlineAccept').on('child_changed', function(snapshot){
 				checkNumRequired();
 			});
 
 			//listen for users coming online
 			currentFile.child('userList').on('child_changed', function(snapshot){
 				checkNumRequired();
-			});
+			});*/
             for (i in data.val()) {
                 // if (data.val()[i].hasBeenAccepted) {
                 //     continue;
@@ -714,11 +717,18 @@ function loadEdits() {
                 }
 
                 var passing = getEditRef(editVal);
-				var numUsers= checkNumRequired(editVal);
+
+				/*var numUsers= checkNumRequired(editVal);
 	            var numAccepted;
 	            checkAccByID(editVal, function(numAccepted, edit){
 					numAccepted = numAccepted;
-				});
+				});    */
+				var numAccepted;
+			    firebase.database().ref().child("files").child(currentKey)
+			        .child('edits').child(edit).child('accepted').once("value", function(snapshot) {
+			            numAccepted = snapshot.numChildren();
+			    });
+
 	           
                
                 
@@ -730,10 +740,10 @@ function loadEdits() {
                         'onclick="deleteEditById(\'' + editVal.id + '\')">';
                 }
 
-
-                let acceptButton = '<label class="switch" ><input id="edit' + editVal.id + '" type="checkbox"' +
+                
+                let acceptButton = (readOnlyFile? "":'<label class="switch" ><input id="edit' + editVal.id + '" type="checkbox"' +
                     ' onclick="acceptTracker(\'' + editVal.id + '\', ' + numUsers + ')">' +
-                    '<span class="slider round"></span></label>';
+                    '<span class="slider round"></span></label>');
 
                 let onClickLogic = 'ondblclick="openComment(\'' + editVal.id + '\');" ';
 
@@ -763,7 +773,7 @@ function loadEdits() {
                 }
 
                 if (editVal.last == user.uid) {
-                    notifyLastUser(user.uid, editVal.content);
+                    notifyLastUser(editVal, currentKey);
                 }
                 if (editVal.child) {
                     childVal = editVal.child;
@@ -794,7 +804,7 @@ function loadEdits() {
                         // editHighlight(childVal.id);
                     }
                     if (editVal.last == user.uid) {
-                        notifyLastUser(user.uid, editVal.content);
+                        notifyLastUser(editVal.content, currentKey);
                     }
                 }
             }
@@ -852,6 +862,11 @@ function acceptTracker(edit, numUsers) {
     let user = firebase.auth().currentUser;
 
     if (accept.checked == true) {
+        database.ref("/files/" + currentKey + "/edits/" + edit).on('value', function(data){
+            if(data.val().last == user.uid) {
+                database.ref("/files/" + currentKey + "/edits/" + edit + "/last/").set(null);
+            }
+        });
         firebase.database().ref().child("files")
             .child(currentKey).child('edits').child(edit).child('accepted').push({ 'id': user.uid });
         document.getElementById('edit' + edit).checked = true;
@@ -870,14 +885,48 @@ function acceptTracker(edit, numUsers) {
             });
         document.getElementById('edit' + edit).checked = false;
     }
-    /*var numAccepted;
+    var numAccepted;
     firebase.database().ref().child("files").child(currentKey)
         .child('edits').child(edit).child('accepted').once("value", function(snapshot) {
             numAccepted = snapshot.numChildren();
         });
-    if (numAccepted >= numUsers) acceptEdit(edit);*/
-    checkNumRequired();
 
+    
+
+    if (numAccepted >= numUsers) {
+        acceptEdit(edit);
+    }
+
+    if (numAccepted == numUsers-1) {
+        sendNotification(edit);
+    }
+}
+
+var checkAcceptanceCriteria = function(editID){
+	currentFile.
+
+}
+
+var sendNotification = function(editID) {
+    let lastUserId = null;
+    database.ref("/files/" + currentKey).on('value', function(data) {
+        let listOfUsers = [];
+        for(i in data.val().userList){
+            listOfUsers.push(i);
+        }
+
+        let listOfAcceptedUsers = [];
+        for(i in data.val().edits[editID].accepted){
+            listOfAcceptedUsers.push(data.val().edits[editID].accepted[i].id);
+        }
+
+        for(i in listOfUsers) {
+            if(!listOfAcceptedUsers.includes(listOfUsers[i])) {
+                lastUserId = listOfUsers[i];
+            }     
+        }
+        database.ref("files/" + currentKey + "/edits/" + editID + "/last").set(lastUserId);
+    });
 }
 
 function editHighlight(id) {
@@ -984,6 +1033,17 @@ var editScroll = function(editId) {
     editor.scrollToLine(row, true, true, function() {});
 }
 
-var notifyLastUser = function(user, edit) {
-    alert("You are the last person not to make a decison on edit:\n" + edit);
+var notifyLastUser = function(edit, file) {
+    database.ref("/files/" + currentKey + "/edits/" + edit.id + "accepted").on('value', function(data){
+        for(i in data.val()){
+            if(data.val()[i].id == user.uid) {
+                return;
+            }
+        }   
+    });
+    editScrollandHighlight(edit.id);
+    if(alertSent) {
+        return;
+    }
+    alert("You are the last person not to make a decison on edit:\n" + edit.content);
 }

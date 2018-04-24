@@ -29,6 +29,7 @@ ipcRenderer.on('quota-settings', function(event, arg) {
 
 var loadMode = function(_callback){
 	var mode;
+
 	currentFile.child('mode').child('percent').once('value', function(snap){
 		if (snap.exists()){
 			//console.log(snap.val());
@@ -41,22 +42,22 @@ var loadMode = function(_callback){
 				_callback(mode);
 			}
 		} else {
-			//default value
+			//if the value does not exist then create it with default value
             currentFile.child('mode').set({'percent': true,'quota': false, 'pVal': 100, 'qVal': ''});
 			document.getElementById("percent-check").checked = true;
 			document.getElementById("pVal").defaultValue = 100;
-			//offAcc
-			currentFile.child('offlineAccept').once('value', function(snap){
-				if (snap.exists()){
-					//console.log(snap.val());
-					if (snap.val() == true) document.getElementById('offline-accept').checked = true;
-					else document.getElementById('offline-accept').checked = false;
-				} else {
-					document.getElementById('offline-accept').checked = false;
-					currentFile.child('offlineAccept').set({'bool': false});
-				}
-			});
-			//return false;
+		}
+	});
+	//offline Accept
+	currentFile.child('offlineAccept').once('value', function(snap){
+		if (snap.exists()){
+			//console.log(snap.val());
+			if (snap.val().count != null) document.getElementById('offline-accept').checked = true;
+			else document.getElementById('offline-accept').checked = false;
+		} else {
+			//default values
+			document.getElementById('offline-accept').checked = false;
+			currentFile.child('offlineAccept').set({'count': null});
 		}
 	});
 }
@@ -71,14 +72,14 @@ var openAcceptance = function(){
 		if (mode == 'p'){
 			currentFile.child('mode').once('value', function(snap){
 				var value = snap.val().pVal;
-				console.log(value);
+				//console.log(value);
 				document.getElementById("percent-check").checked = true;
 				document.getElementById("pVal").defaultValue = value;
 			});
 		} else if (mode == 'q'){
 			currentFile.child('mode').once('value', function(snap){
 				var value = snap.val().qVal;
-				console.log(value);
+				//console.log(value);
 				document.getElementById("quota-check").checked = true;
 				document.getElementById("qVal").defaultValue = value;
 			});
@@ -87,10 +88,11 @@ var openAcceptance = function(){
 		currentFile.child('offlineAccept').once('value', function(snap){
 			if (snap.exists()){
 				//console.log(snap.val().bool);
-				if (snap.val().bool == true) document.getElementById('offline-accept').checked = true;
+				if (snap.val().count != null) document.getElementById('offline-accept').checked = true;
 				else document.getElementById('offline-accept').checked = false;
 			} else {
 				document.getElementById('offline-accept').checked = false;
+				currentFile.child('offlineAccept').set({'count': null});
 			}
 		});
 	});
@@ -109,7 +111,6 @@ saveSettingsBtn.addEventListener("click", function () {
 	} else if (quotaCheck.checked) {
 		quotaActivated();
 	}
-	checkNumRequired();
 });
 
 var percentActivated = function(){
@@ -129,9 +130,9 @@ var percentActivated = function(){
     currentFile.child('userList').once("value", function(snapshot) {
             numUsers = snapshot.numChildren();
     });
-    var ratio = numUsers*(p/100);
+    var ratio = Math.ceil(numUsers*(p/100));
     if (ratio < 1) {
-    	alert('The lowest percentage possible with this many users is '+(1/numUsers)*100);
+    	alert('The lowest percentage possible with this many users is '+Math.round((1/numUsers)*100));
     	return true;
     }
 
@@ -140,6 +141,10 @@ var percentActivated = function(){
 
 	//close Window
 	aSetBtn.classList.toggle("hidden");
+
+	//update edits accordingly
+	console.log('from percentActivated()');
+	updateEditAcceptance();
 }
 
 
@@ -163,116 +168,82 @@ var quotaActivated = function(){
 	//close Window
 	aSetBtn.classList.toggle("hidden");
 
+	//update edits accordingly
+	console.log('from qoutaActivated()');
+	updateEditAcceptance();
+
 }
 
 var offlineAccept = function(){
 	var offAcc = offlineUsersAccept.checked;
 	if (offAcc) {
-		currentFile.child('offlineAccept').set({'bool': true});
+		currentFile.child('offlineAccept').set({'count': 0});
 	} else {
-		currentFile.child('offlineAccept').set({'bool': false});
+		currentFile.child('offlineAccept').set({'count': null});
 	}
 }
-var checkNumRequired = function(editVal){
-	editVal = editVal || null;
-	var numRequired;
-	currentFile.child('mode').once('value', function(snapshot){
-		var p = snapshot.val().pVal;
-		var q = snapshot.val().qVal;
-		var isPercent = snapshot.val().percent;
-		if (isPercent){
-			var numUsers;
-		    currentFile.child('userList').once("value", function(snapshot) {
-		            numUsers = snapshot.numChildren();
-		    });
-		    numRequired = Math.ceil(numUsers*p/100);
-		    if(editVal){
-		    	 checkAccByID(editVal, function(numAccepted, edit){
-					//console.log(edit);
-					//console.log(numRequired, numAccepted)
-					if (numAccepted >= numRequired) acceptEdit(editVal);
-					return numRequired;
-				});
+var checkAcceptanceCriteria = function(editID){
+	loadMode(function(mode){
+		var numUsers;
+		
+		//get the number of users
+		firebase.database().ref().child("files").child(currentKey)
+		    		.child('userList').once("value", function(snapshot) {
+		    numUsers = snapshot.numChildren();
 
-		    } else {
-			    checkNumAccepted(function(numAccepted, edit){
-					//console.log(edit);
-					//console.log(numRequired, numAccepted)
-					if (numAccepted >= numRequired) acceptEdit(edit);
-					return numRequired;
+		    //set numNeeded according to the setting
+		    var numNeeded;
+		    if (mode == 'p'){
+				currentFile.child('mode').once('value', function(snap){
+					numNeeded = Math.ceil((snap.val().pVal/100)*numUsers);
+					getNumAccept(numNeeded, editID);
 				});
-		    }
+			} else if (mode == 'q'){
+				currentFile.child('mode').once('value', function(snap){
+					numNeeded = snap.val().qVal;
+					getNumAccept(numNeeded, editID);
+				});
+			}
+		});
+	});
+}
+//for the sake of readability
+//this method is where acceptEdit is called
+var getNumAccept = function(numNeeded, editID){
+	console.log(numNeeded);
+	//count number of user who have accepted the edit
+	currentFile.child('edits').child(editID).child('accepted').once("value", function(snapshot) {
+        var numAccepted = snapshot.numChildren();
+        //check for a offline users count, if so, add # to to numAccepted
+        currentFile.child('offlineAccept').once('value', function(snap){
+        	if (snap.exists()){
+        		console.log('offlineAccept exists');
+        		//does not accept 
+				if (snap.val().count != null && snap.val().count > 0) {
+					numAccepted += snap.val().count;
+					if (numAccepted >= numNeeded) acceptEdit(editID);
+				} else {
+					if (numAccepted >= numNeeded) acceptEdit(editID);
+				}	
+			} else {
+				console.log('offlineAccept does not exist');
+				currentFile.child('offlineAccept').set({'count': null});
+				if (numAccepted >= numNeeded) acceptEdit(editID);
+			}
 			
-
-		} else {
-			numRequired = q;
-			 if(editVal){
-		    	 checkAccByID(editVal, function(numAccepted, edit){
-					//console.log(edit);
-					//console.log(numRequired, numAccepted)
-					if (numAccepted >= numRequired) acceptEdit(editVal);
-					return numRequired;
-				});
-
-		    } else {
-			    checkNumAccepted(function(numAccepted, edit){
-					//console.log(edit);
-					//console.log(numRequired, numAccepted)
-					if (numAccepted >= numRequired) acceptEdit(edit);
-					return numRequired;
-				});
-		    }
-		}
+		});
 	});
 }
 
-var checkAccByID = function(editVal, _callback){
-	var numAccepted = 0;
-	currentFile.child('offlineAccept').once('value', function(snap){
-		//count through count all accepted only increment if offline and not in accepted
-		currentFile.child('edits').child(editVal.id).child('accepted').once("value", function(snapshot) {
-	        numAccepted = snapshot.numChildren();
-	        console.log(numAccepted);
-	        //if offline and has not accepted edit
-			if (snap.val().bool == true){
-		        snapshot.forEach(function(inAccepted) {
-		        	currentFile.child('userList').once('value', function(isOffline){
-		        		if (!inAccepted.hasChild(isOffline.key)
-		        			&& isOffline.val().online == false){
-		        				numAccepted++;
-		        		}
-		        	});
-		        });
-		    }
-		});
-	_callback(numAccepted);
-	});	
+var updateEditAcceptance = function(){
+	//check for any edit that now has met the quota
+	for (var i = 0; i < edits.length; i++) {
+		checkAcceptanceCriteria(edits[i].id);
+	}
 }
 
-var checkNumAccepted = function(_callback){
-	var numAccepted = 0;
-	currentFile.child('offlineAccept').once('value', function(snap){
-		//count through count all accepted only increment if offline and not in accepted
-		for (var i = 0; i < edits.length; i++) {
-			currentFile.child('edits').child(edits[i].id).child('accepted').once("value", function(snapshot) {
-		        numAccepted = snapshot.numChildren();
-		        console.log(numAccepted);
-		        //if offline and has not accepted edit
-				if (snap.val().bool == true){
-			        snapshot.forEach(function(inAccepted) {
-			        	currentFile.child('userList').once('value', function(isOffline){
-			        		if (!inAccepted.hasChild(isOffline.key)
-			        			&& isOffline.val().online == false){
-			        				numAccepted++;
-			        		}
-			        	});
-			        });
-			    }
-			});
-		_callback(numAccepted, edits[i].id);
-		}
-	});	
-}
+
+
 
 
 

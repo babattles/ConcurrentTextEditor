@@ -665,14 +665,7 @@ function loadEdits() {
 
     userNames.on('value', function(userData) {
 		fileEdits.on('value', function(data) {
-    		/*currentFile.child('offlineAccept').on('child_changed', function(snapshot){
-				checkNumRequired();
-			});
 
-			//listen for users coming online
-			currentFile.child('userList').on('child_changed', function(snapshot){
-				checkNumRequired();
-			});*/
             for (i in data.val()) {
                 // if (data.val()[i].hasBeenAccepted) {
                 //     continue;
@@ -718,20 +711,11 @@ function loadEdits() {
 
                 var passing = getEditRef(editVal);
 
-				/*var numUsers= checkNumRequired(editVal);
-	            var numAccepted;
-	            checkAccByID(editVal, function(numAccepted, edit){
-					numAccepted = numAccepted;
-				});    */
 				var numAccepted;
 			    firebase.database().ref().child("files").child(currentKey)
-			        .child('edits').child(edit).child('accepted').once("value", function(snapshot) {
+			        .child('edits').child(editVal.id).child('accepted').once("value", function(snapshot) {
 			            numAccepted = snapshot.numChildren();
 			    });
-
-	           
-               
-                
 
                 let divContent = '<b>' + editVal.username + '</b>: ' + numAccepted + '/' + numUsers;
                 var deleteEditBtn = "";
@@ -863,9 +847,11 @@ function acceptTracker(edit, numUsers) {
 
     if (accept.checked == true) {
         database.ref("/files/" + currentKey + "/edits/" + edit).on('value', function(data){
-            if(data.val().last == user.uid) {
-                database.ref("/files/" + currentKey + "/edits/" + edit + "/last/").set(null);
-            }
+        	if (data.exists()){
+	            if(data.val().last == user.uid) {
+	                database.ref("/files/" + currentKey + "/edits/" + edit + "/last/").set(null);
+	            }
+	        }
         });
         firebase.database().ref().child("files")
             .child(currentKey).child('edits').child(edit).child('accepted').push({ 'id': user.uid });
@@ -885,26 +871,22 @@ function acceptTracker(edit, numUsers) {
             });
         document.getElementById('edit' + edit).checked = false;
     }
+    
     var numAccepted;
     firebase.database().ref().child("files").child(currentKey)
         .child('edits').child(edit).child('accepted').once("value", function(snapshot) {
             numAccepted = snapshot.numChildren();
         });
-
-    
-
+	/*
     if (numAccepted >= numUsers) {
         acceptEdit(edit);
-    }
+    }*/
+    console.log('from acceptTracker()');
+    checkAcceptanceCriteria(edit);
 
     if (numAccepted == numUsers-1) {
         sendNotification(edit);
     }
-}
-
-var checkAcceptanceCriteria = function(editID){
-	currentFile.
-
 }
 
 var sendNotification = function(editID) {

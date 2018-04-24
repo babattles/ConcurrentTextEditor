@@ -400,11 +400,92 @@ firebase.auth().onAuthStateChanged(function(user) {
                     }
                 }
 
+                // to update offline users count
+                // was removed should only be true if the function is called on 'child_removed'
+                // will not work correctly if online/offline doesn't
+                // TODO: must change all numAccepted's to not add offlineCount, numAccepted will be correct
+                // TODO: does not work well with percent and qouta, make it its own radio button
+                // TODO: separate ina acceptance
+                var trackOfflineCount = function(snapshot, wasRemoved){
+                    //check that file exists
+                    if (file){
+                        // only call track offlineCount if the switch is flipped
+                        file.child('offlineAccept').once('value', function(snap){
+                            if (snap.val().count != null) {
+
+                                //loop through edits
+                                for (var i = 0; i < edits.length; i++) {
+                                    if (snapshot.val().online === 'false') {
+                                        file.child('edits').child(edits[i].id).child('accepted').orderByChild('id')
+                                            .equalTo(snapshot.key).once("value", function(snap) {
+                                                //if user is not already on accepted list and if they are offline 
+                                                if (!snap.exists()){
+                                                    //ad user to accepted list
+                                                    file.child('edits').child(edits[i].id).child('accepted')
+                                                        .push(snapshot);
+                                                }
+                                        });
+                                    // remove once user comes online if feild 'id' does not exist
+                                    // meaning they were added by the above method
+                                    // Users will be removed from accepted as they are deleted automatically
+                                    } else if (snapshot.val().online === 'true'){
+                                        file.child('edits').child(edits[i].id).child('accepted')
+                                            .once("value", function(snap) {
+                                                snap.forEach(function(childSnap){
+                                                    if (childSnap.val().id == null){
+                                                        console.log("removing from offline on accepted");
+                                                        file.child('edits').child(edits[i].id).child('accepted')
+                                                            .child(childSnap).remove();
+                                                    }
+                                                });
+                                        });
+                                    }
+                                }
+
+                                //update count so as not to
+                                if (snapshot.val().online === 'true' 
+                                        || (snapshot.val().online === 'false' && wasRemoved) ) {
+                                    //change the count of people on the file, stored on server, only for offline accept
+                                    file.child('offlineAccept').child('count').once('value', function(snap){
+                                        var count = snap.val();
+                                        console.log(count);
+                                        if (count != null){
+                                            count--;
+                                            file.child('offlineAccept').set({'count': count});
+                                        }
+                                    });
+
+
+                                } else {
+
+                                    //change the count of people on the file, stored on server, only for offline accept
+                                    file.child('offlineAccept').child('count').once('value', function(snap){
+                                        var count = snap.val();
+                                        console.log(count);
+                                        if (count != null){
+                                            count++;
+                                            file.child('offlineAccept').set({'count': count});
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                }
+                        
+                //maybe listen to accepted, every time it changes
+                /*file.child('offlineAccept').on('child_changed', function(snapshot){
+                    console.log('offlineAccept done changed');
+                    updateEditAcceptance();
+                });*/
+
+
                 //When a user creates a file or gains access to a file
                 onlineUsers.on("child_added", function(snapshot) {
 
                     if (isNewUser){
                         updateUserStatus(snapshot);
+                        //trackOfflineCount(snapshot, false);
                     }
                 });
                 onlineUsers.once("value", function(snapshot) {
@@ -423,10 +504,13 @@ firebase.auth().onAuthStateChanged(function(user) {
                         return true;
                     }
                     updateAdminStatus(file, user);
+                    //trackOfflineCount(snapshot, true);
+
                 });
 
                 onlineUsers.on("child_changed", function(snapshot) {
                     updateUserStatus(snapshot);
+                    //trackOfflineCount(snapshot, false);
                 });
 
                 // listener to open this file from database

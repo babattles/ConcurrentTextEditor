@@ -52,7 +52,19 @@ var getEdits = function() {
     editRef.on("child_removed", function(snapshot) { // prevChildKey is the key of the last child added (we may need it, idk but it's there)
         //console.log("child removed...");
         var e = snapshot.val();
-
+        if (fileMode == "base") {
+            currentFile.once('value', function(childSnapshot) {
+                global_ignore = true;
+                var f = childSnapshot.val();
+                var fileContent = f.fileContents;
+                var cursor = editor.getCursorPosition();
+                editor.session.setValue(fileContent);
+                loadEditsIntoEditor();
+                editor.selection.moveTo(cursor.row, cursor.column);
+                global_ignore = false;
+            });
+            return;
+        }
         if (e.type == "insert" && !e.hasBeenAccepted) { // insert
             global_ignore = true;
             var cursor = editor.getCursorPosition();

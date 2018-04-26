@@ -129,6 +129,33 @@
         </center>
     </div>
 
+    <div id='acceptSettings' class=". hidden">
+        <div class="settings-title">Edit Acceptance Criteria Settings</div><br>
+        <div class="entry-label" >Configurable Quota (default 100%):</div><br>
+        <div style="text-indent: 2em;">
+            <!--
+            <input class='mutex-check' type="radio" name="mode" id="offline-accept">
+            <div style="text-indent: 4em;">
+                <div class="entry-label" >Offline users automatically accept edits</div>
+            </div><br>!-->
+            <input class='mutex-check' name="mode" type="radio" id="percent-check">
+            <div style="text-indent: 4em;">
+                <div class="entry-label">Percent of users required for accept:</div>
+                <input type='number' placeholder='Enter 1 - 100' class='form-item-inline' id='pVal'><br>
+            </div><br>
+            <input class='mutex-check' name="mode" type="radio" id="quota-check">
+            <div style="text-indent: 4em;">
+                <div class="entry-label">Amount of users required for accept:</div>
+                <input type='number' placeholder='Enter any whole #' class='form-item-inline' id='qVal'><br>
+            </div>
+            <br>
+            <div style="text-indent: 20em;">
+                <button id="cancelBtn" class="btn-danger">Cancel</button>
+                <button id="saveSettingsBtn" class="btn-success">Save</button>
+            </div>
+        </div>
+    </div>
+
     <footer id="auth_footer" role="auth_footer">
         <button class='btn btn-success' id='authBtn'>Authenticate</button>
         <button class='btn btn-danger' id='logoutBtn'>Logout</button>
@@ -145,6 +172,7 @@
     <script src="js/comment.js"></script>
     <script src="js/aceStart.js"></script>
     <script src="js/search.js"></script>
+    <script src="js/acceptance.js"></script>
     <script src="../ace-builds/src-noconflict/ext-modelist.js"></script>
     </body>
 

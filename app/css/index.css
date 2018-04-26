@@ -75,6 +75,45 @@ body {
     background-color: #424242;
     text-align: left;
 }
+/* Quota Settings "Window" */
+#acceptSettings {
+    z-index: 9999;
+    position: absolute;
+    top: 0;
+    bottom: 0px;
+    left: 0;
+    right: 0;
+    padding-top: 150px;
+    padding-left: 20px;
+    background-color: #424242;
+    text-align: left;
+}
+.settings-title{
+    background-color: #424242;
+    color: #CCCCCC;
+    position: absolute;
+    top: 60px;
+    left: 25px;
+    font-size: 36px;
+}
+.entry-label {
+    padding-left: 20px;
+    text-align: left;
+    padding-bottom: 5px;
+    background-color: #424242;
+    color: #CCCCCC;
+}
+.mutex-check{
+    position: absolute;
+    left: 70px;
+    line-height: 10px;
+}
+.form-item-inline {
+    position: relative;
+    display: inline;
+    left: 90px;
+}
+
 
 /*File List*/
 
@@ -333,7 +372,7 @@ body {
     padding-top: 3px;
 }
 .alert {
-  width:120%;
+  width:150%;
 }
 
 

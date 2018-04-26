@@ -27,76 +27,57 @@ ipcRenderer.on('quota-settings', function(event, arg) {
 	}
 });
 
-var loadMode = function(_callback){
-	var mode;
-
-	currentFile.child('mode').child('percent').once('value', function(snap){
-		if (snap.exists()){
-			//console.log(snap.val());
-			if (snap.val() == true){
-				mode = 'p';
-				_callback(mode);
-			} 
-			else{
-				 mode = 'q';
-				_callback(mode);
-			}
-		} else {
-			//if the value does not exist then create it with default value
-            currentFile.child('mode').set({'percent': true,'quota': false, 'pVal': 100, 'qVal': ''});
-			document.getElementById("percent-check").checked = true;
-			document.getElementById("pVal").defaultValue = 100;
-		}
-	});
-	//offline Accept
-	currentFile.child('offlineAccept').once('value', function(snap){
-		if (snap.exists()){
-			//console.log(snap.val());
-			if (snap.val().count != null) document.getElementById('offline-accept').checked = true;
-			else document.getElementById('offline-accept').checked = false;
-		} else {
-			//default values
-			document.getElementById('offline-accept').checked = false;
-			currentFile.child('offlineAccept').set({'count': null});
-		}
-	});
-}
-
 var openAcceptance = function(){
 	//open window
 	aSetBtn.classList.toggle("hidden");
 
 	//load settings
-	loadMode(function(mode){
+	loadMode();
+}
 
-		if (mode == 'p'){
-			currentFile.child('mode').once('value', function(snap){
-				var value = snap.val().pVal;
-				//console.log(value);
-				document.getElementById("percent-check").checked = true;
-				document.getElementById("pVal").defaultValue = value;
-			});
-		} else if (mode == 'q'){
-			currentFile.child('mode').once('value', function(snap){
-				var value = snap.val().qVal;
-				//console.log(value);
-				document.getElementById("quota-check").checked = true;
-				document.getElementById("qVal").defaultValue = value;
-			});
+var loadMode = function(){
+	currentFile.child('mode').child('useRule').once('value', function(snap){
+		if (snap.exists()){
+			//console.log(snap.val());
+			if (snap.val() == 'p'){
+				currentFile.child('mode').once('value', function(snap){
+					var value = snap.val().pVal;
+					//console.log(value);
+					document.getElementById("percent-check").checked = true;
+					document.getElementById("pVal").defaultValue = value;
+				});
+				return 'p';
+			} else if (snap.val() == 'q') {
+				currentFile.child('mode').once('value', function(snap){
+					var value = snap.val().qVal;
+					//console.log(value);
+					document.getElementById("quota-check").checked = true;
+					document.getElementById("qVal").defaultValue = value;
+				});
+				return 'q';
+			} /*else if (snap.val() == 'o') {
+				currentFile.child('offlineAccept').once('value', function(snap){
+					if (snap.exists()){
+						//console.log(snap.val());
+						if (snap.val().count != null) document.getElementById('offline-accept').checked = true;
+						else document.getElementById('offline-accept').checked = false;
+					} else {
+						//default values
+						document.getElementById('offline-accept').checked = false;
+						currentFile.child('offlineAccept').set({'count': null});
+					}
+				});
+				return 'o';
+			} */
+		} else {
+			//if the value does not exist then create it with default value
+            currentFile.child('mode').set({'useRule': 'p', 'pVal': 100, 'qVal': ''});
+            //currentFile.child('offlineAccept').set({'count': null});
+			document.getElementById("percent-check").checked = true;
+			document.getElementById("pVal").defaultValue = 100;
+			return 'p';
 		}
-	
-		currentFile.child('offlineAccept').once('value', function(snap){
-			if (snap.exists()){
-				//console.log(snap.val().bool);
-				if (snap.val().count != null) document.getElementById('offline-accept').checked = true;
-				else document.getElementById('offline-accept').checked = false;
-			} else {
-				document.getElementById('offline-accept').checked = false;
-				currentFile.child('offlineAccept').set({'count': null});
-			}
-		});
 	});
-	
 }
 
 cancelBtn.addEventListener("click", function () {
@@ -104,17 +85,27 @@ cancelBtn.addEventListener("click", function () {
 });
 
 saveSettingsBtn.addEventListener("click", function () {
-	offlineAccept();
-
 	if (percentCheck.checked) {
+		//currentFile.child('offlineAccept').set({'count': null});
 		percentActivated();
 	} else if (quotaCheck.checked) {
+		//currentFile.child('offlineAccept').set({'count': null});
 		quotaActivated();
-	}
+	} /*else if (offlineUsersAccept){
+		var p = percentVal.value;
+		var q = quotaVal.value;
+		currentFile.child('offlineAccept').set({'count': 0});
+		currentFile.child('mode').set({'useRule': 'o', 'pVal': p, 'qVal': q});
+
+		//close Window
+		aSetBtn.classList.toggle("hidden");
+		updateEditAcceptance();
+	}*/
 });
 
 var percentActivated = function(){
 	var p = percentVal.value;
+	var q = quotaVal.value;
 	console.log(p);
 
 	if (p == null || p == undefined) {
@@ -137,7 +128,7 @@ var percentActivated = function(){
     }
 
 	//set mode and value on server
-	currentFile.child('mode').set({'percent': true,'quota': false, 'pVal': p, 'qVal': ''});
+	currentFile.child('mode').set({'useRule': 'p', 'pVal': p, 'qVal': ''});
 
 	//close Window
 	aSetBtn.classList.toggle("hidden");
@@ -149,8 +140,9 @@ var percentActivated = function(){
 
 
 var quotaActivated = function(){
+	var p = percentVal.value;
 	var q = quotaVal.value;
-	//console.log(q);
+
 	if (q == null || q == undefined) {
 		alert('You must enter a value into the selected field');
 		return true;
@@ -163,7 +155,7 @@ var quotaActivated = function(){
 	//round to nearest whole number
 	q = Math.round(q);
 	//set mode and value on server
-	currentFile.child('mode').set({'percent': false,'quota': true, 'pVal': '', 'qVal': q});
+	currentFile.child('mode').set({'useRule': 'q', 'pVal': p, 'qVal': q});
 
 	//close Window
 	aSetBtn.classList.toggle("hidden");
@@ -174,63 +166,55 @@ var quotaActivated = function(){
 
 }
 
-var offlineAccept = function(){
-	var offAcc = offlineUsersAccept.checked;
-	if (offAcc) {
-		currentFile.child('offlineAccept').set({'count': 0});
-	} else {
-		currentFile.child('offlineAccept').set({'count': null});
-	}
-}
-var checkAcceptanceCriteria = function(editID){
-	loadMode(function(mode){
-		var numUsers;
-		
-		//get the number of users
-		firebase.database().ref().child("files").child(currentKey)
-		    		.child('userList').once("value", function(snapshot) {
-		    numUsers = snapshot.numChildren();
 
-		    //set numNeeded according to the setting
-		    var numNeeded;
-		    if (mode == 'p'){
-				currentFile.child('mode').once('value', function(snap){
-					numNeeded = Math.ceil((snap.val().pVal/100)*numUsers);
-					getNumAccept(numNeeded, editID);
-				});
-			} else if (mode == 'q'){
-				currentFile.child('mode').once('value', function(snap){
-					numNeeded = snap.val().qVal;
-					getNumAccept(numNeeded, editID);
-				});
-			}
-		});
-	});
-}
-//for the sake of readability
-//this method is where acceptEdit is called
-var getNumAccept = function(numNeeded, editID){
-	console.log(numNeeded);
-	//count number of user who have accepted the edit
-	currentFile.child('edits').child(editID).child('accepted').once("value", function(snapshot) {
-        var numAccepted = snapshot.numChildren();
-        //check for a offline users count, if so, add # to to numAccepted
-        currentFile.child('offlineAccept').once('value', function(snap){
-        	if (snap.exists()){
-        		console.log('offlineAccept exists');
-        		//does not accept 
-				if (snap.val().count != null && snap.val().count > 0) {
-					numAccepted += snap.val().count;
-					if (numAccepted >= numNeeded) acceptEdit(editID);
-				} else {
-					if (numAccepted >= numNeeded) acceptEdit(editID);
-				}	
-			} else {
-				console.log('offlineAccept does not exist');
-				currentFile.child('offlineAccept').set({'count': null});
-				if (numAccepted >= numNeeded) acceptEdit(editID);
-			}
-			
+var checkAcceptanceCriteria = function(editID){
+	var numUsers;
+	
+	//get the number of users
+	firebase.database().ref().child("files").child(currentKey)
+	    		.child('userList').once("value", function(snapshot) {
+	    numUsers = snapshot.numChildren();
+	    console.log(numUsers);
+	    currentFile.child('edits').child(editID).child('accepted').once("value", function(snapshot) {
+    		var numAccepted = snapshot.numChildren();
+    		currentFile.child('mode').child('useRule').once('value', function(snap){
+    			//set numNeeded according to the setting
+			    var numNeeded;
+			    var mode;
+
+    			if (!snap.exists()){
+    				currentFile.child('mode').set({'useRule': 'p', 'pVal': 100, 'qVal': ''});
+    				mode = 'p';
+
+    			} else {
+    				mode = snap.val();
+    			}
+    			
+			    if (mode == 'p'){
+					currentFile.child('mode').once('value', function(snap){
+						numNeeded = Math.ceil((snap.val().pVal/100)*numUsers);
+						if (numAccepted >= numNeeded) acceptEdit(editID);
+					});
+				} else if (mode == 'q'){
+					currentFile.child('mode').once('value', function(snap){
+						numNeeded = snap.val().qVal;
+						console.log('Quota', numAccepted,' / ', numNeeded);
+						if (numAccepted >= numNeeded) acceptEdit(editID);
+					});
+				}
+				/*else if (mode == 'o'){
+					currentFile.child('mode').once('value', function(snap){
+						numNeeded = numUsers;
+						//check for a offline users count
+				        currentFile.child('offlineAccept').once('value', function(snap){
+			        		var numOffline = snap.val().count;
+							if ( numOffline != null && numOffline < numUsers) {
+								if (numAccepted >= numNeeded) acceptEdit(editID);
+							}	
+						});
+					});
+				}*/
+			});
 		});
 	});
 }

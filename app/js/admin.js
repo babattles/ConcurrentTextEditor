@@ -221,19 +221,4 @@ function deleteUser(userID){
 
     console.log('from deleteUser');
     updateEditAcceptance();
-    /*
-    var numUsers;
-    firebase.database().ref().child("files").child(currentKey)
-        .child('userList').once("value", function(snapshot) {
-            numUsers = snapshot.numChildren();
-        });
-
-    //check for any edit that now has met the quota
-    for (var i = 0; i < edits.length; i++) {
-        firebase.database().ref().child("files").child(currentKey)
-            .child('edits').child(edits[i].id).child('accepted').once("value", function(snapshot) {
-                var numAccepted = snapshot.numChildren();
-                if (numAccepted >= numUsers) acceptEdit(edits[i].id);
-            });
-    }*/
 }

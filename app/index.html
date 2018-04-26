@@ -119,21 +119,29 @@
     </div>
 
     <div id='acceptSettings' class=". hidden">
-        <div class="settings-title">Edit Acceptance Criteria Settings</div>
-        <div class="entry-label">Users who are offline automatically accept:
-        <input type="checkbox" id="offline-accept"></div><br>
-
+        <div class="settings-title">Edit Acceptance Criteria Settings</div><br>
         <div class="entry-label" >Configurable Quota (default 100%):</div><br>
         <div style="text-indent: 2em;">
-            <div class="entry-label">Percent of users required for accept:</div><br>
-            <input class='mutex-check' name="porq" type="radio" id="percent-check">
-            <input type='number' placeholder='Enter 1 - 100' class='form-item-inline' id='pVal'><br>
-            <div class="entry-label">Amount of users required for accept:</div><br>
-            <input class='mutex-check' name="porq" type="radio" id="quota-check">
-            <input type='number' placeholder='Enter any whole #' class='form-item-inline' id='qVal'><br>
+            <!--
+            <input class='mutex-check' type="radio" name="mode" id="offline-accept">
+            <div style="text-indent: 4em;">
+                <div class="entry-label" >Offline users automatically accept edits</div>
+            </div><br>!-->
+            <input class='mutex-check' name="mode" type="radio" id="percent-check">
+            <div style="text-indent: 4em;">
+                <div class="entry-label">Percent of users required for accept:</div>
+                <input type='number' placeholder='Enter 1 - 100' class='form-item-inline' id='pVal'><br>
+            </div><br>
+            <input class='mutex-check' name="mode" type="radio" id="quota-check">
+            <div style="text-indent: 4em;">
+                <div class="entry-label">Amount of users required for accept:</div>
+                <input type='number' placeholder='Enter any whole #' class='form-item-inline' id='qVal'><br>
+            </div>
             <br>
-            <button id="cancelBtn" class="btn-danger">Cancel</button>
-            <button id="saveSettingsBtn" class="btn-success">Save</button>
+            <div style="text-indent: 20em;">
+                <button id="cancelBtn" class="btn-danger">Cancel</button>
+                <button id="saveSettingsBtn" class="btn-success">Save</button>
+            </div>
         </div>
     </div>
 

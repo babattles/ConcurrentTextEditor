@@ -99,18 +99,19 @@ body {
 .entry-label {
     padding-left: 20px;
     text-align: left;
+    padding-bottom: 5px;
     background-color: #424242;
     color: #CCCCCC;
 }
 .mutex-check{
     position: absolute;
     left: 70px;
+    line-height: 10px;
 }
 .form-item-inline {
     position: relative;
     display: inline;
     left: 90px;
-    bottom: 7px;
 }
 
 

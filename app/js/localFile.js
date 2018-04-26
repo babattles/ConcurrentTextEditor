@@ -240,7 +240,8 @@ var closeFile = function() {
     }
 
     //Remove this tab
-    closeTab();
+    // closeTab();
+    editor.session.setValue("");
     fileNum--;
     path = '';
     currentKey = '';

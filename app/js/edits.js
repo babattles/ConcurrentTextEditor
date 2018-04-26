@@ -581,14 +581,15 @@ var acceptEdit = function(editID) {
                 currentFile.update({
                     fileContents: prefix + e.content + suffix
                 });
+                thisEdit.remove();
             } else {
                 suffix = fileContent.substring(e.endIndex, fileContent.length);
                 currentFile.update({
                     fileContents: prefix + suffix
                 });
+                thisEdit.remove();
+                fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
             }
-            thisEdit.remove();
-            fixIndicesAfterRemovalAccept(e.endIndex, e.content.length);
         });
     });
     alertSent = false;

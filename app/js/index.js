@@ -296,7 +296,7 @@ firebase.auth().onAuthStateChanged(function(user) {
                 // listener to delete this file from database
                 deleteBtn.addEventListener('click', function() {
                     global_ignore = true;
-                    closeFile();
+                    clearAfterDelete();
                     database.ref("/users/" + user.uid + "/fileList").child(childSnapshot.key).remove();
                     database.ref("files").child(childSnapshot.key).remove();
                     // disable close menu option
@@ -405,6 +405,8 @@ firebase.auth().onAuthStateChanged(function(user) {
 
                     if (isNewUser){
                         updateUserStatus(snapshot);
+                        loadEdits();
+                        //isNewUser = false;
                     }
                 });
                 onlineUsers.once("value", function(snapshot) {
@@ -423,6 +425,7 @@ firebase.auth().onAuthStateChanged(function(user) {
                         return true;
                     }
                     updateAdminStatus(file, user);
+
                 });
 
                 onlineUsers.on("child_changed", function(snapshot) {

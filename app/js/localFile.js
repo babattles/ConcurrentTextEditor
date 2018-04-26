@@ -100,6 +100,7 @@ var openFile = function() {
                     getEdits();
                     currentKey = currentFile.key;
                     loadEdits();
+                    updateAdminStatus(currentFile, user);
                 });
             }
         });
@@ -189,6 +190,7 @@ var openFileDrag = function(pathDrag) {
                 getEdits();
                 currentKey = currentFile.key;
                 loadEdits();
+                updateAdminStatus(currentFile, user);
             });
         }
     });

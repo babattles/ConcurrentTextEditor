@@ -425,7 +425,7 @@ firebase.auth().onAuthStateChanged(function(user) {
                         return true;
                     }
                     updateAdminStatus(file, user);
-
+                    loadEdits();
                 });
 
                 onlineUsers.on("child_changed", function(snapshot) {

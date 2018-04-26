@@ -15,9 +15,12 @@
         };
     </script>
     <!-- Bootstrap Components -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
     <!-- Firebase Component -->
     <script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
 
@@ -47,7 +50,9 @@
                 <img src='./img/share-post-symbol.png' style=" max-width:100%;height:'auto';">&nbsp;Share File With Others</button>
         </div>
         <input type='text' placeholder='Username...' class='form-item' id='username'>
-        <input id="readOnlyInvite" type="checkbox" name="type" value="readOnly"> <span id="readOnlyInviteText">Read Only</span><br>
+        <input id="readOnlyInvite" type="checkbox" name="type" value="readOnly">
+        <span id="readOnlyInviteText">Read Only</span>
+        <br>
         <div id="collabLabel" style="white-space:pre">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Collaborators&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
         <div id="online-users">
         </div>
@@ -89,33 +94,39 @@
     <div id="editor"></div>
 
     <div id="userSettings" class=". hidden">
-        <span class="form-item form-text">Change Username:</span>
-        <input type="text" class="form-item" placeholder="New Username:" name="username_field" id="change-username-input">
-        <button id="changeUsernameBtn" class="btn form-item">Change Username</button>
-        <span class="form-item form-text">Change Email:</span>
-        <input type="text" class="form-item" placeholder="New Email:" name="email_field" id="change-email-input">
-        <button id="changeEmailBtn" class="btn form-item">Change Email</button>
-        <span class="form-item form-text">Change Password:</span>
-        <input type="password" class="form-item" placeholder="Old Password" name="old_password_input" id="old-password-input">
-        <input type="password" class="form-item" placeholder="New Password" name="new_password_input" id="new-password-input">
-        <input type="password" class="form-item" placeholder="Confirm New Password" name="new_password_input2" id="new-password-input2">
-        <button id="changePasswordBtn" class="btn form-item ">Change Password</button>
+        <center>
+            <span class="form-item form-text">Change Username:</span>
+            <input type="text" class="form-item" placeholder="New Username:" name="username_field" id="change-username-input">
+            <button id="changeUsernameBtn" class="btn form-item">Change Username</button>
+            <span class="form-item form-text">Change Email:</span>
+            <input type="text" class="form-item" placeholder="New Email:" name="email_field" id="change-email-input">
+            <button id="changeEmailBtn" class="btn form-item">Change Email</button>
+            <span class="form-item form-text">Change Password:</span>
+            <input type="password" class="form-item" placeholder="Old Password" name="old_password_input" id="old-password-input">
+            <input type="password" class="form-item" placeholder="New Password" name="new_password_input" id="new-password-input">
+            <input type="password" class="form-item" placeholder="Confirm New Password" name="new_password_input2" id="new-password-input2">
+            <button id="changePasswordBtn" class="btn form-item ">Change Password</button>
+        </center>
     </div>
 
     <div id="searchWindow" class=". hidden">
         <span class="form-item form-text">Search by: </span>
-        <input id="radioEmail" type="radio" name="type" value="email"> Email<br>
-        <input id="radioUsername" type="radio" name="type" value="username"> Username<br>
+        <input id="radioEmail" type="radio" name="type" value="email"> Email
+        <br>
+        <input id="radioUsername" type="radio" name="type" value="username"> Username
+        <br>
         <input type="text" class="form-item" placeholder="Email or Username to search" name="searchInput" id="searchInput">
         <button id="submitSearchBtn" class="btn-success">Search</button>
         <button id="searchCloseBtn" class="btn-danger">Close</button>
     </div>
 
     <div id="Comment" class=". hidden">
-        <span class="form-item form-text">Input Comment:</span>
-        <span class="form-item form-text" id="comment-span">Comment: </span>
-        <input type="text" class="form-item" placeholder="New Comment:" name="comment_field" id="comment-input">
-        <button id="changeCommentBtn" class="btn form-item">Accept Comment</button>
+        <center>
+            <span class="form-item form-text">Input Comment:</span>
+            <span class="form-item form-text" id="comment-span">Comment: </span>
+            <input type="text" class="form-item" placeholder="New Comment:" name="comment_field" id="comment-input">
+            <button id="changeCommentBtn" class="btn-danger form-item">Done</button>
+        </center>
     </div>
 
     <div id='acceptSettings' class=". hidden">
